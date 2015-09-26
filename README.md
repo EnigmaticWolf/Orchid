@@ -224,3 +224,44 @@ $app("Foo")->foo(); // "bar"
 ```
 #### Модули в поставке
  + `Main` - демонстрационный модуль
+## Валидатор
+В поставку включен валидатор для проверки входящих данных:
+```php
+class ValidData extends \Engine\Extra\Validator {
+    // подключение проверяющих функций из поставки
+	use \Engine\Extra\Validate\Base,
+		\Engine\Extra\Validate\Type;
+		
+	// при необходимости можно расширить функционал
+	public function isSupportedCity() {
+		return function ($field) {
+			return in_array($field, ["Moscow", "Lviv"]);
+		};
+	}
+}
+
+// массив данных для примера
+$data = [
+	"username" => "Aleksey",
+	"email"    => "Aleksey@example.com",
+	"city"     => "Moscow",
+];
+
+// создаём объект валидатора
+$valid = new ValidData($data);
+
+// правила проверки полей
+$valid->attr("username")
+	  ->addRule($valid->isNotEmpty(), "Поле не может быть пустым.")
+	  ->addRule($valid->min(6), "Поле не может быть меньше 5 символов длинной.")
+	  ->addRule($valid->max(16), "Поле не может быть больше 16 символов длинной.");
+$valid->attr("email")
+	  ->addRule($valid->isEmail(), "Введённое значение не является валидным E-Mail адресом.");
+$valid->option("city")
+	  ->addRule($valid->isSupportedCity(), "Простите, данный город не поодерживается.");
+
+// проверяем
+$result = $valid->validate();   // в случае успеха результат будет true
+                                // в противном случае будет возвращен массив
+                                // где ключ = поле, значение = причина
+```
