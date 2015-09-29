@@ -10,6 +10,7 @@ $app->bind("/", function(){
 
 $app->run();
 ```
+
 ## Роутинг
 Роутинг запросов происходит по HTTP методу в паре с URL-правилом.  
 Каждое правило должно быть отдельно объявленно вызовом метода:
@@ -40,7 +41,8 @@ $app->bind("#/page/(about|contact)#", function($params) {
     return implode("\n", $params[":capture"]);
 });
 ```
-## Приоритет & Условия
+
+#### Приоритет & Условия
 Приоритет определяет порядок, в котором выполняется применение правил. Правила с более высоким приоритетом выполняются первыми.  
 При необходимости можно задать различные условия, например проверку `user-agent`:
 ```php
@@ -52,6 +54,7 @@ $app->bind("/foo", function() {
     // GET запрос...
 }, "GET", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false);
 ```
+
 ## Шаблоны
 Можно использовать любой шаблон:
 ```php
@@ -76,6 +79,7 @@ $app->bind("/", function() {
 </body>
 </html>
 ```
+
 ## ООП
 Просто подключите класс:
 ```php
@@ -104,6 +108,7 @@ class Page {
 $app->bindClass("Page");
 ```
 Кроме того вы можете восспользоваться классом `Controller`.
+
 ## Хранилище данных
 Воспользуйтесь хранилищем данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
 ```php
@@ -113,6 +118,7 @@ $app["config.foo"] = array("bar" => 123);
 ```php
 $value = $app["config.foo/bar"]; // вернёт 123
 ```
+
 ## Пути
 Используйте короткие ссылки на файлы/каталоги, чтобы получить быстрый доступ к ним:
 ```php
@@ -126,6 +132,7 @@ $view = $app->render("view:detail.php");
 $url  = $app->pathToUrl("folder/file.php");
 $url  = $app->pathToUrl("view:file.php");
 ```
+
 ## Внешние сервисы
 ```php
 $app->service("db", function(){
@@ -137,6 +144,7 @@ $app->service("db", function(){
 
 $app["db"]->query(...);
 ```
+
 ## Задачи
 ```php
 // добавление задачи
@@ -163,6 +171,7 @@ $app->task("after", function() {
     }
 });
 ```
+
 ## Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
@@ -174,6 +183,7 @@ class Foo extends Engine\Extension {
 
 $app("Foo")->bar();
 ```
+
 #### Расширения в поставке
 **Cache**
 ```php
@@ -207,6 +217,7 @@ $app("String")->escape($input);
 $app("String")->unEscape($input);
 $app("String")->translate($input, $back = false);
 ```
+
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
 ```php
@@ -223,15 +234,46 @@ class ModulePage extends Engine\Module {
 
 $app("Foo")->foo(); // "bar"
 ```
+
 #### Модули в поставке
  + `Main` - демонстрационный модуль
-## Валидатор
-В поставку включен валидатор для проверки входящих данных:
+
+## Модели
 ```php
-class ValidData extends \Engine\Extra\Validator {
-    // подключение проверяющих функций из поставки
-	use \Engine\Extra\Validate\Base,
-		\Engine\Extra\Validate\Type;
+class Animal extends Engine\Entity\Model {
+	protected function select() {
+	    // выборка из внешнего хранилища
+	}
+	
+	protected function insert() {
+	    // вставка во внешнее хранилище
+	}
+
+	protected function update() {
+	    // обновление во внешнем хранилище
+	}
+
+	protected function remove() {
+	    // удаление во внешнем хранилище
+	}
+}
+```
+
+## Коллекции
+```php
+class Animals extends Engine\Entity\Collection {
+	public function fetch() {
+	    // выборка из внешнего хранилища
+	}
+}
+```
+
+## Валидатор
+```php
+class ValidData extends Engine\Entity\Validator {
+    // подключение стандартных проверяющих функций
+	use Engine\Entity\Validate\Base,
+		Engine\Entity\Validate\Type;
 		
 	// при необходимости можно расширить функционал
 	public function isSupportedCity() {
