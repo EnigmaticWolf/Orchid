@@ -22,32 +22,28 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extra\Validate;
+namespace Engine\Wrapper;
 
-trait Base {
-	public function min($min) {
-		return function ($field) use ($min) {
-			if (is_string($field)) {
-				return strlen($field) > $min;
-			}
-			if (is_numeric($field)) {
-				return $field > $min;
-			}
+use Memcache;
 
-			return false;
-		};
+class Memory extends Memcache {
+	protected $prefix;
+
+	public function __construct($prefix = ""){
+		$this->prefix = $prefix;
 	}
 
-	public function max($max) {
-		return function ($field) use ($max) {
-			if (is_string($field)) {
-				return strlen($field) < $max;
-			}
-			if (is_numeric($field)) {
-				return $field < $max;
-			}
+	public function add($key, $val, $expire = null, &$flag = null) {
+		return parent::add($this->prefix . ":" . $key, $val, $flag, $expire);
+	}
 
-			return false;
-		};
+	public function set($key, $val, $expire = null, &$flag = null) {
+		return parent::set($this->prefix . ":" . $key, $val, $flag, $expire);
+	}
+
+	public function get($key, $default = false, &$flags = null) {
+		$value = parent::get($this->prefix . ":" . $key, $flags);
+
+		return $value ? $value : $default;
 	}
 }

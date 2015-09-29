@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extra\Validate;
+namespace Engine\Entity\Validate;
 
 trait Type {
 	public function isEmpty() {

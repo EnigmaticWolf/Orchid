@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extra;
+namespace Engine\Entity;
 
 use Closure;
 use Countable;
@@ -31,39 +31,16 @@ use Iterator;
 
 abstract class Collection implements Countable, Iterator {
 	protected $app;
-	protected $type    = null;
-	protected $primary = null;
-	protected $data    = [];
+
+	protected $type    = null;	// модель
+	protected $data    = null;	// данные
 
 	public final function __construct($data = []) {
 		$this->app  = &Orchid::getInstance();
-		$this->addAll($data);
 	}
 
-	/**
-	 * Метод добавляет модель в коллекцию
-	 * @param $model
-	 * @return $this
-	 */
-	public function add($model) {
-		if (get_class($model) == $this->type) {
-			$this->data[] = $model;
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Метод добавляет модели в коллекцию
-	 * @param $models
-	 * @return $this
-	 */
-	public function addAll($models) {
-		foreach ($models as $model) {
-			$this->add($model);
-		}
-
-		return $this;
+	protected final function __destruct() {
+		$this->data = null;
 	}
 
 	/**
@@ -301,27 +278,11 @@ abstract class Collection implements Countable, Iterator {
 	}
 
 	/**
-	 * Метод возвращает первичный ключ
-	 * @return mixed
-	 */
-	public function getPrimary() {
-		return $this->primary;
-	}
-
-	/**
 	 * Метод возвращает модель в виде Массива
 	 * @return array
 	 */
 	public function toArray() {
 		return $this->data;
-	}
-
-	/**
-	 * Метод возвращает модель в виде JSON объекта
-	 * @return string
-	 */
-	public function toJSON() {
-		return json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 	}
 
 	/**

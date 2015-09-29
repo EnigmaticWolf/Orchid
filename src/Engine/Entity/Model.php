@@ -22,25 +22,29 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extra;
+namespace Engine\Entity;
 
 use Engine\Orchid;
 
 abstract class Model {
-	protected $app;
-	protected $default  = [];
-	protected $primary  = null;
-	protected $data     = [];
-	protected $previous = [];
+	protected        $app;
+
+	protected static $default  = [];	// поля модели
+	protected        $data     = [];	// данные модели
+	protected        $previous = [];	// предыдущие значения
 
 	public final function __construct($data = []) {
 		$this->app  = &Orchid::getInstance();
-		$this->data = $this->default;
+		$this->data = static::$default;
 		$this->setAll($data);
 	}
 
+	protected final function __destruct() {
+		$this->data = $this->previous = null;
+	}
+
 	/**
-	 * Метод устанавливает новое значение для ключа
+	 * Устанавливает значение для ключа
 	 * @param $key
 	 * @param $val
 	 * @return $this
@@ -49,7 +53,7 @@ abstract class Model {
 		if (is_array($key)) {
 			return $this->setAll($key);
 		}
-		if (array_key_exists($key, $this->default)) {
+		if (array_key_exists($key, static::$default)) {
 			if ($this->data[$key]) {
 				$this->previous[$key] = $this->data[$key];
 			}
@@ -60,12 +64,12 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод устанавливает значения для всех кд.чей
+	 * Устанавливает значения для всех ключей
 	 * @param array $data
 	 * @return $this
 	 */
 	protected function setAll(array $data) {
-		foreach($data as $key => $val) {
+		foreach ($data as $key => $val) {
 			$this->set($key, $val);
 		}
 
@@ -73,7 +77,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод получает значение по ключу
+	 * Получает значение по ключу
 	 * @param $key
 	 * @return mixed
 	 */
@@ -82,7 +86,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод возвращает склонированный объект текущей модели
+	 * Возвращает склонированный объект текущей модели
 	 * @return mixed
 	 */
 	public function getClone() {
@@ -90,7 +94,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод проверяет наличие ключа
+	 * Проверяет наличие ключа
 	 * @param $key
 	 * @return bool
 	 */
@@ -99,7 +103,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод восстанавливает значение ключа по умолчанию
+	 * Восстанавливает значение ключа по умолчанию
 	 * @param $key
 	 * @return $this
 	 */
@@ -107,13 +111,13 @@ abstract class Model {
 		if ($this->data[$key]) {
 			$this->previous[$key] = $this->data[$key];
 		}
-		$this->data[$key] = $this->default[$key];
+		$this->data[$key] = static::$default[$key];
 
 		return $this;
 	}
 
 	/**
-	 * Метод восстанавливает предыдущее значение ключа или всей модели
+	 * Восстанавливает предыдущее значение ключа или всей модели
 	 * @param null $key
 	 * @return $this
 	 */
@@ -128,25 +132,17 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод восстанавливает значения модели поумолчанию
+	 * Восстанавливает значения модели по умолчанию
 	 * @return $this
 	 */
 	public function clear() {
-		$this->data = $this->default;
+		$this->data = static::$default;
 
 		return $this;
 	}
 
 	/**
-	 * Метод возвращает первичный ключ модели
-	 * @return mixed
-	 */
-	public function getPrimary() {
-		return $this->primary;
-	}
-
-	/**
-	 * Метод возвращает модель в виде Массива
+	 * Возвращает модель в виде Массива
 	 * @return array
 	 */
 	public function toArray() {
@@ -154,15 +150,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод возвращает модель в виде JSON объекта
-	 * @return string
-	 */
-	public function toJSON() {
-		return json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
-	}
-
-	/**
-	 * Метод получает информацию о модели из внешнего хранилища
+	 * Получает информацию о модели из внешнего хранилища
 	 * @return $this
 	 */
 	public function read() {
@@ -170,7 +158,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод обёртка вокруг защищённых методов insert & update
+	 * Обёртка вокруг защищённых методов insert & update
 	 * @return $this
 	 */
 	public function save() {
@@ -178,31 +166,26 @@ abstract class Model {
 	}
 
 	/**
-	 * Метод возвращает массив полей модели
-	 * @return array
+	 * Читает модель во внешнем хранилище
+	 * @return $this
 	 */
-	public function getMask() {
-		return $this->default;
-	}
+	abstract protected function select();
 
 	/**
-	 * Метод создаёт модель во внешнем хранилище
+	 * Создаёт модель во внешнем хранилище
+	 * @return $this
 	 */
 	abstract protected function insert();
 
 	/**
-	 * Метод обновляет модель во внешнем хранилище
+	 * Обновляет модель во внешнем хранилище
+	 * @return $this
 	 */
 	abstract protected function update();
 
 	/**
-	 * Метод удаляет модель во внешнем хранилище
-	 * @return null
+	 * Удаляет модель во внешнем хранилище
+	 * @return $this
 	 */
-	public function remove() {
-		$this->data     = $this->default;
-		$this->previous = $this->default;
-
-		return null;
-	}
+	abstract protected function remove();
 }

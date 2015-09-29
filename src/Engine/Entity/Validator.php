@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extra;
+namespace Engine\Entity;
 
 abstract class Validator {
 	protected $data  = [];
