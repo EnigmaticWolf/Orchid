@@ -111,11 +111,11 @@ class Response {
 
 			http_response_code($this->status);
 
+			if (is_array($this->body)) {
+				$this->mime = "json";
+				$this->body = json_encode($this->body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+			}
 			if (!is_file($this->body)) {
-				if (is_array($this->body)) {
-					$this->mime = "json";
-					$this->body = json_encode($this->body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-				}
 				header("Content-Type: " . $this->mimeTypes[$this->mime] . "; charset=utf-8");
 
 				echo trim($this->body);

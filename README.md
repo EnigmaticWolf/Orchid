@@ -133,18 +133,6 @@ $url  = $app->pathToUrl("folder/file.php");
 $url  = $app->pathToUrl("view:file.php");
 ```
 
-## Внешние сервисы
-```php
-$app->service("db", function(){
-    // объект будет создан в момент первого доступа к $app["db"]
-    $obj = new PDO(...);
-
-    return $obj;
-});
-
-$app["db"]->query(...);
-```
-
 ## Задачи
 ```php
 // добавление задачи
@@ -170,6 +158,18 @@ $app->task("after", function() {
             break;
     }
 });
+```
+
+## Сервисы
+```php
+$app->service("db", function(){
+    // объект будет создан в момент первого доступа к $app["db"]
+    $obj = new PDO(...);
+
+    return $obj;
+});
+
+$app["db"]->query(...);
 ```
 
 ## Расширения
@@ -241,20 +241,12 @@ $app("Foo")->foo(); // "bar"
 ## Модели
 ```php
 class Animal extends Engine\Entity\Model {
-	protected function select() {
-	    // выборка из внешнего хранилища
+	public function read() {
+	    // выборка модели из внешнего хранилища
 	}
 	
-	protected function insert() {
-	    // вставка во внешнее хранилище
-	}
-
-	protected function update() {
-	    // обновление во внешнем хранилище
-	}
-
-	protected function remove() {
-	    // удаление во внешнем хранилище
+	public function save() {
+	    // вставка/обновление модели во внешнее хранилище
 	}
 }
 ```
@@ -262,9 +254,16 @@ class Animal extends Engine\Entity\Model {
 ## Коллекции
 ```php
 class Animals extends Engine\Entity\Collection {
-	public function fetch() {
+	protected static $model = "Animal";
+	
+	public static function fetch(array $data = []) {
 	    // выборка из внешнего хранилища
 	}
+}
+
+$myAnimal = Animals::fetch();
+foreach($myAnimal as $key => $val) {
+    $val->set(...)->save();
 }
 ```
 

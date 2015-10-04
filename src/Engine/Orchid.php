@@ -42,6 +42,8 @@ class Orchid implements ArrayAccess {
 
 	public function __construct(array $param = []) {
 		$this->registry = array_merge([
+			"debug"		=> true,
+
 			"extension" => [],
 			"module"    => [],
 			"path"      => [],

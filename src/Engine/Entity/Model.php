@@ -24,23 +24,21 @@
 
 namespace Engine\Entity;
 
-use Engine\Orchid;
-
 abstract class Model {
-	protected        $app;
+	/**
+	 * Массив описания полей модели
+	 * @var array
+	 */
+	protected static $default = [];
 
-	protected static $default  = [];	// поля модели
-	protected        $data     = [];	// данные модели
-	protected        $previous = [];	// предыдущие значения
+	/**
+	 * Массив данных модели
+	 * @var array
+	 */
+	protected $data = [];
 
 	public final function __construct($data = []) {
-		$this->app  = &Orchid::getInstance();
-		$this->data = static::$default;
-		$this->setAll($data);
-	}
-
-	protected final function __destruct() {
-		$this->data = $this->previous = null;
+		$this->setAll(array_merge(static::$default, $data));
 	}
 
 	/**
@@ -50,13 +48,7 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function set($key, $val = null) {
-		if (is_array($key)) {
-			return $this->setAll($key);
-		}
 		if (array_key_exists($key, static::$default)) {
-			if ($this->data[$key]) {
-				$this->previous[$key] = $this->data[$key];
-			}
 			$this->data[$key] = $val;
 		}
 
@@ -68,7 +60,7 @@ abstract class Model {
 	 * @param array $data
 	 * @return $this
 	 */
-	protected function setAll(array $data) {
+	public function setAll(array $data) {
 		foreach ($data as $key => $val) {
 			$this->set($key, $val);
 		}
@@ -86,14 +78,6 @@ abstract class Model {
 	}
 
 	/**
-	 * Возвращает склонированный объект текущей модели
-	 * @return mixed
-	 */
-	public function getClone() {
-		return new $this($this->data);
-	}
-
-	/**
 	 * Проверяет наличие ключа
 	 * @param $key
 	 * @return bool
@@ -108,25 +92,7 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function delete($key) {
-		if ($this->data[$key]) {
-			$this->previous[$key] = $this->data[$key];
-		}
 		$this->data[$key] = static::$default[$key];
-
-		return $this;
-	}
-
-	/**
-	 * Восстанавливает предыдущее значение ключа или всей модели
-	 * @param null $key
-	 * @return $this
-	 */
-	public function revert($key = null) {
-		if ($key) {
-			$this->data[$key] = $this->previous[$key];
-		} else {
-			$this->data = $this->previous;
-		}
 
 		return $this;
 	}
@@ -150,42 +116,14 @@ abstract class Model {
 	}
 
 	/**
-	 * Получает информацию о модели из внешнего хранилища
+	 * Получает модель из внешнего хранилища
 	 * @return $this
 	 */
-	public function read() {
-		return $this;
-	}
+	abstract public function read();
 
 	/**
-	 * Обёртка вокруг защищённых методов insert & update
+	 * Сохраняет модель во внешнем хранилище
 	 * @return $this
 	 */
-	public function save() {
-		return $this;
-	}
-
-	/**
-	 * Читает модель во внешнем хранилище
-	 * @return $this
-	 */
-	abstract protected function select();
-
-	/**
-	 * Создаёт модель во внешнем хранилище
-	 * @return $this
-	 */
-	abstract protected function insert();
-
-	/**
-	 * Обновляет модель во внешнем хранилище
-	 * @return $this
-	 */
-	abstract protected function update();
-
-	/**
-	 * Удаляет модель во внешнем хранилище
-	 * @return $this
-	 */
-	abstract protected function remove();
+	abstract public function save();
 }

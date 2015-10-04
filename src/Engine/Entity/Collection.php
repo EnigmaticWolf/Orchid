@@ -26,97 +26,72 @@ namespace Engine\Entity;
 
 use Closure;
 use Countable;
-use Engine\Orchid;
 use Iterator;
+use SplFixedArray;
 
 abstract class Collection implements Countable, Iterator {
-	protected $app;
+	/**
+	 * Полный путь класса модели
+	 * @var string|null
+	 */
+	protected static $model;
 
-	protected $type    = null;	// модель
-	protected $data    = null;	// данные
+	/**
+	 * Внутреннее хранилище моделей
+	 * @var SplFixedArray
+	 */
+	protected $data;
 
-	public final function __construct($data = []) {
-		$this->app  = &Orchid::getInstance();
-	}
-
-	protected final function __destruct() {
-		$this->data = null;
+	public final function __construct(array $data = []) {
+		$this->data = SplFixedArray::fromArray($data);
 	}
 
 	/**
-	 * Метод возвращает модель по заданному индексу
+	 * Возвращает элемент которому соответствует указанный индекс
 	 * @param int $index
 	 * @return mixed
 	 */
-	public function &get($index = 0) {
+	public function get($index = 0) {
+		if (static::$model) {
+			return new static::$model($this->data[$index]);
+		}
+
 		return $this->data[$index];
 	}
 
 	/**
-	 * Метод возвращает склонированный объект текущей коллекции
-	 * @return mixed
-	 */
-	public function getClone() {
-		return new $this($this->data);
-	}
-
-	/**
-	 * Метод удаляет модель по заданному индексу или по экземпляру объекта
-	 * @param $val
+	 * Устанавливает значение элементу
+	 * @param $index
+	 * @param $data
 	 * @return $this
 	 */
-	public function remove($val) {
-		if (is_numeric($val) && $this->data[$val]) {
-			unset($this->data[$val]);
-		} elseif (get_class($val) == $this->type && ($key = array_search($val, $this->data))) {
-			unset($this->data[$key]);
+	public function set($index, $data) {
+		if ($data instanceof Model) {
+			$this->data[$index] = $data->toArray();
+		} else {
+			$this->data[$index] = $data;
 		}
 
 		return $this;
 	}
 
 	/**
-	 * Метод проверяет пуста ли коллекция
-	 * @return bool
-	 */
-	public function isEmpty() {
-		return empty($this->data);
-	}
-
-	/**
-	 * Метод возвращает количество моделей в коллекции
-	 * @return int
-	 */
-	public function count() {
-		return count($this->data);
-	}
-
-	/**
-	 * Метод очищает коллекцию
-	 * @return $this
-	 */
-	public function clear() {
-		$this->data = [];
-
-		return $this;
-	}
-
-	/**
-	 * Метод устанавливает новое значение для ключа всех моделей
-	 * @param $field
-	 * @param $val
-	 * @return $this
-	 */
-	public function set($field, $val) {
-		foreach ($this->data as $model) {
-			$model[$field] = $val;
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Метод собирает значения поля из всех моделей в коллекции
+	 * Метод собирает значения и возвращает в виде массива
+	 *
+	 * Собрать значение указанного поля
+	 * @usage $oc->collect('login')
+	 *
+	 * Собрать значения указанных полей
+	 * @usage $oc->collect(['login', 'password'])
+	 *
+	 * Собрать значение указанного поля
+	 * Ключём будет значение поля id
+	 * @usage $oc->collect('id', 'login')
+	 *
+	 * Собрать значения указанных полей
+	 * Ключём будет значение поля id
+	 * @usage $oc->collect('id', ['login', 'password'])
+	 *
 	 * @param      $field
 	 * @param null $val
 	 * @return array
@@ -125,12 +100,10 @@ abstract class Collection implements Countable, Iterator {
 		$data = [];
 
 		// $oc->collect('login')
-		if ($val === null) {
+		if (is_string($field) && is_null($val)) {
 			foreach ($this->data as $model) {
 				$data[] = $model[$field];
 			}
-
-			return $data;
 		}
 
 		// $oc->collect(['login', 'password'])
@@ -142,12 +115,17 @@ abstract class Collection implements Countable, Iterator {
 				}
 				$data[] = $item;
 			}
-
-			return $data;
 		}
 
-		// $oc->collect('key', ['login', 'password'])
-		if (is_array($val)) {
+		// $oc->collect('id', 'login')
+		if (is_string($field) && is_string($val)) {
+			foreach ($this->data as $model) {
+				$data[$model[$field]] = $model[$val];
+			}
+		}
+
+		// $oc->collect('id', ['login', 'password'])
+		if (is_string($field) && is_array($val)) {
 			foreach ($this->data as $model) {
 				$item = [];
 				foreach ($val as $key) {
@@ -155,20 +133,20 @@ abstract class Collection implements Countable, Iterator {
 				}
 				$data[$model[$field]] = $item;
 			}
-
-			return $data;
-		} else {
-			// $oc->collect('key', 'login')
-			foreach ($this->data as $model) {
-				$data[$model[$field]] = $model[$val];
-			}
-
-			return $data;
 		}
+
+		return $data;
 	}
 
 	/**
 	 * Найти все модели, параметр которых удовлетворяют условию
+	 *
+	 * Найти все модели где указанное поле не пустое
+	 * @usage $oc->find('login')
+	 *
+	 * Найти все модели где указанное поле равно указанному значению
+	 * @usage $oc->find('login', 'kotan')
+	 *
 	 * @param      $field
 	 * @param null $val
 	 * @return Collection
@@ -176,28 +154,17 @@ abstract class Collection implements Countable, Iterator {
 	public function find($field, $val = null) {
 		$data = [];
 
-		// $oc->find(function($obj, $key))
-		if (!is_string($field) && is_callable($field)) {
-			foreach ($this->data as $key => $obj) {
-				if ($field($obj, $key)) {
-					$data[] = $obj;
-				}
-			}
-
-			return new $this($data);
-		}
-
 		// $oc->find('Location')
-		if (func_num_args() == 1) {
+		if (is_string($field) && is_null($val)) {
 			foreach ($this->data as $obj) {
-				if (isset($obj[$field])) {
+				if (!empty($obj[$field])) {
 					$data[] = $obj;
 				}
 			}
 		}
 
-		// $oc->find('Location', 'localhost/js')
-		if (func_num_args() > 1) {
+		// $oc->find('Location', 'kotan')
+		if (is_string($field) && is_string($val)) {
 			foreach ($this->data as $obj) {
 				if ($obj[$field] == $val) {
 					$data[] = $obj;
@@ -211,36 +178,48 @@ abstract class Collection implements Countable, Iterator {
 	/**
 	 * Отфильтровать модели используя замыкание
 	 * @param callable $callback
-	 * @return $this|Collection
+	 * @return Collection
 	 */
 	public function filter($callback) {
+		$data = [];
+
 		if (is_callable($callback)) {
-			$data = [];
-			foreach ($this->data as $index => $model) {
-				if ($callback($model, $index)) {
+			foreach ($this->data as $key => $model) {
+				if ($callback($model, $key)) {
 					$data[] = $model;
 				}
 			}
-
-			return new $this($data);
 		}
 
-		return $this;
+		return new $this($data);
 	}
 
 	/**
-	 * Сортирует модели используя замыкание или по указанному полю
-	 * @param callback|string $param int callback ( mixed $a, mixed $b )
+	 * Сортирует модели
+	 *
+	 * Сортирует модели по указанному полю
+	 * @usage $oc->sort('id')
+	 *
+	 * Сортирует модели по указанному полю
+	 * @usage $oc->sort(callback(mixed $a, mixed $b, $args))
+	 *
+	 * @param callback|string $param
 	 * @param mixed           $args
 	 * @return self
 	 */
 	public function sort($param, $args = null) {
+		$success = false;
+		$data = $this->data->toArray(); // получаем все модели
+
 		if (is_string($param)) {
-			usort($this->data, $this->sortProperty($param));
-		} else {
-			if (is_callable($param)) {
-				usort($this->data, $this->sortCallable($param, $args));
-			}
+			$success = usort($data, $this->sortProperty($param));
+		} elseif (is_callable($param)) {
+			$success = usort($data, $this->sortCallable($param, $args));
+		}
+
+		// если успешно отсортировали, создаём новый объект
+		if ($success) {
+			$this->data = SplFixedArray::fromArray($data);
 		}
 
 		return $this;
@@ -253,7 +232,7 @@ abstract class Collection implements Countable, Iterator {
 	 */
 	protected function sortProperty($key = null) {
 		return function ($a, $b) use ($key) {
-			return strnatcmp($a->$key, $b->$key);
+			return strnatcmp($a[$key], $b[$key]);
 		};
 	}
 
@@ -270,53 +249,64 @@ abstract class Collection implements Countable, Iterator {
 	}
 
 	/**
-	 * Метод возвращает тип коллекций
-	 * @return mixed
-	 */
-	public function getType() {
-		return $this->type;
-	}
-
-	/**
-	 * Метод возвращает модель в виде Массива
+	 * Возвращает коллекцию в виде массива
 	 * @return array
 	 */
 	public function toArray() {
-		return $this->data;
+		return $this->data->toArray();
 	}
 
 	/**
-	 * Метод наполняющий коллекцию моделями
+	 * Возвращает текущий элемент массива
+	 * @return mixed
 	 */
-	abstract public function fetch();
-
-	// Iterator
 	public function current() {
-		return current($this->data);
+		if (static::$model) {
+			return new static::$model($this->data->current());
+		}
+
+		return $this->data->current();
 	}
 
-	// Iterator
+	/**
+	 * Перемещение вперед к следующему элементу
+	 */
 	public function next() {
-		return next($this->data);
+		$this->data->next();
+
+		return $this;
 	}
 
-	// Iterator
-	public function prev() {
-		return prev($this->data);
-	}
-
-	// Iterator
+	/**
+	 * Возвращает ключ текущего элемента
+	 * @return mixed
+	 */
 	public function key() {
-		return key($this->data);
+		return $this->data->key();
 	}
 
-	// Iterator
+	/**
+	 * Проверяет текущее положение итератора
+	 * @return boolean
+	 */
 	public function valid() {
-		return key($this->data) !== null && key($this->data) !== false;
+		return $this->data->valid();
 	}
 
-	// Iterator
+	/**
+	 * Устанавливает итератор на первый элемент
+	 */
 	public function rewind() {
-		reset($this->data);
+		$this->data->rewind();
+
+		return $this;
+	}
+
+	/**
+	 * Возвращает количество элементов объекта
+	 * @return int
+	 */
+	public function count() {
+		return $this->data->count();
 	}
 }
