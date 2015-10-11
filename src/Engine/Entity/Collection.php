@@ -118,7 +118,7 @@ abstract class Collection implements Countable, Iterator {
 		}
 
 		// $oc->collect('id', 'login')
-		if (is_string($field) && is_string($val)) {
+		if (is_string($field) && !is_null($val)) {
 			foreach ($this->data as $model) {
 				$data[$model[$field]] = $model[$val];
 			}
@@ -164,7 +164,7 @@ abstract class Collection implements Countable, Iterator {
 		}
 
 		// $oc->find('Location', 'kotan')
-		if (is_string($field) && is_string($val)) {
+		if (is_string($field) && !is_null($val)) {
 			foreach ($this->data as $obj) {
 				if ($obj[$field] == $val) {
 					$data[] = $obj;

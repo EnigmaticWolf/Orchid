@@ -232,7 +232,7 @@ class ModulePage extends Engine\Module {
     }
 }
 
-$app("Foo")->foo(); // "bar"
+$app("ModulePage")->foo(); // "bar"
 ```
 
 #### Модули в поставке
