@@ -200,7 +200,7 @@ abstract class Collection implements Countable, Iterator {
 	 * Сортирует модели по указанному полю
 	 * @usage $oc->sort('id')
 	 *
-	 * Сортирует модели по указанному полю
+	 * Сортирует модели с применением пользовательской функции
 	 * @usage $oc->sort(callback(mixed $a, mixed $b, $args))
 	 *
 	 * @param callback|string $param
