@@ -253,7 +253,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Запускает выполнение задачи с возможностью передачи параметров
 	 * @param  String $name   имя задачи
-	 * @param  Array  $params передаваемые параметры
+	 * @param  array  $params передаваемые параметры
 	 * @return Orchid
 	 */
 	public function trigger($name, $params = []) {
@@ -686,7 +686,7 @@ class Orchid implements ArrayAccess {
 	 * Вызов класса контроллера
 	 * @param  String $class  имя контроллера
 	 * @param  String $action метод
-	 * @param  Array  $params параметры вызова
+	 * @param  array  $params параметры вызова
 	 * @return Mixed
 	 */
 	public function invoke($class, $action = "index", array $params = []) {
@@ -830,26 +830,26 @@ function fetch_from_array(&$array, $index = null, $default = null) {
 	} elseif (isset($array[$index])) {
 		return $array[$index];
 	} elseif (strpos($index, "/")) {
-		$Keys = explode("/", $index);
-		switch (count($Keys)) {
+		$keys = explode("/", $index);
+		switch (count($keys)) {
 			case 1:
-				if (isset($array[$Keys[0]])) {
-					return $array[$Keys[0]];
+				if (isset($array[$keys[0]])) {
+					return $array[$keys[0]];
 				}
 				break;
 			case 2:
-				if (isset($array[$Keys[0]][$Keys[1]])) {
-					return $array[$Keys[0]][$Keys[1]];
+				if (isset($array[$keys[0]][$keys[1]])) {
+					return $array[$keys[0]][$keys[1]];
 				}
 				break;
 			case 3:
-				if (isset($array[$Keys[0]][$Keys[1]][$Keys[2]])) {
-					return $array[$Keys[0]][$Keys[1]][$Keys[2]];
+				if (isset($array[$keys[0]][$keys[1]][$keys[2]])) {
+					return $array[$keys[0]][$keys[1]][$keys[2]];
 				}
 				break;
 			case 4:
-				if (isset($array[$Keys[0]][$Keys[1]][$Keys[2]][$Keys[3]])) {
-					return $array[$Keys[0]][$Keys[1]][$Keys[2]][$Keys[3]];
+				if (isset($array[$keys[0]][$keys[1]][$keys[2]][$keys[3]])) {
+					return $array[$keys[0]][$keys[1]][$keys[2]][$keys[3]];
 				}
 				break;
 		}

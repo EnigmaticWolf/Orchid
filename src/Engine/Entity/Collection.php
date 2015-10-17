@@ -93,14 +93,14 @@ abstract class Collection implements Countable, Iterator {
 	 * @usage $oc->collect('id', ['login', 'password'])
 	 *
 	 * @param      $field
-	 * @param null $val
+	 * @param null $value
 	 * @return array
 	 */
-	public function collect($field, $val = null) {
+	public function collect($field, $value = null) {
 		$data = [];
 
 		// $oc->collect('login')
-		if (is_string($field) && is_null($val)) {
+		if (is_string($field) && is_null($value)) {
 			foreach ($this->data as $model) {
 				$data[] = $model[$field];
 			}
@@ -118,17 +118,17 @@ abstract class Collection implements Countable, Iterator {
 		}
 
 		// $oc->collect('id', 'login')
-		if (is_string($field) && !is_null($val)) {
+		if (is_string($field) && !is_null($value)) {
 			foreach ($this->data as $model) {
-				$data[$model[$field]] = $model[$val];
+				$data[$model[$field]] = $model[$value];
 			}
 		}
 
 		// $oc->collect('id', ['login', 'password'])
-		if (is_string($field) && is_array($val)) {
+		if (is_string($field) && is_array($value)) {
 			foreach ($this->data as $model) {
 				$item = [];
-				foreach ($val as $key) {
+				foreach ($value as $key) {
 					$item[$key] = $model[$key];
 				}
 				$data[$model[$field]] = $item;
@@ -142,20 +142,20 @@ abstract class Collection implements Countable, Iterator {
 	 * Найти все модели, параметр которых удовлетворяют условию
 	 *
 	 * Найти все модели где указанное поле не пустое
-	 * @usage $oc->find('login')
+	 * @usage $oc->find('Location')
 	 *
 	 * Найти все модели где указанное поле равно указанному значению
-	 * @usage $oc->find('login', 'kotan')
+	 * @usage $oc->find('Location', 'Lviv')
 	 *
 	 * @param      $field
-	 * @param null $val
+	 * @param null $value
 	 * @return Collection
 	 */
-	public function find($field, $val = null) {
+	public function find($field, $value = null) {
 		$data = [];
 
 		// $oc->find('Location')
-		if (is_string($field) && is_null($val)) {
+		if (is_string($field) && is_null($value)) {
 			foreach ($this->data as $obj) {
 				if (!empty($obj[$field])) {
 					$data[] = $obj;
@@ -163,10 +163,10 @@ abstract class Collection implements Countable, Iterator {
 			}
 		}
 
-		// $oc->find('Location', 'kotan')
-		if (is_string($field) && !is_null($val)) {
+		// $oc->find('Location', 'Lviv')
+		if (is_string($field) && !is_null($value)) {
 			foreach ($this->data as $obj) {
-				if ($obj[$field] == $val) {
+				if ($obj[$field] == $value) {
 					$data[] = $obj;
 				}
 			}

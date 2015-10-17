@@ -1,6 +1,6 @@
-Orchid Ядро
+Orchid Framework
 ====
-Класс `Orchid` это микро фреймворк для быстрого создания Web-приложений на PHP.
+Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
 $app = new Engine\Orchid();
 
@@ -27,7 +27,7 @@ $app->bind("/", function() {
     return "Это GET или POST запрос...";
 });
 ```
-Правила могут включать в себя переменные, которые в дальнейшем будут доступны как свойства первого аргумента функции:
+Правила могут включать в себя переменные, которые в дальнейшем будут доступны как элементы массива в первом аргументе функции:
 ```php
 $app->get("/news/:date/:id", function($params) {
     return $params["date"]."-".$params["id"];
@@ -47,12 +47,8 @@ $app->bind("#/page/(about|contact)#", function($params) {
 При необходимости можно задать различные условия, например проверку `user-agent`:
 ```php
 $app->bind("/foo", function() {
-    // AJAX запрос...
-}, "AJAX", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false, $priority = 10);
-
-$app->bind("/foo", function() {
-    // GET запрос...
-}, "GET", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false);
+    // обработка запроса...
+}, "GET", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false, $priority = 10);
 ```
 
 ## Шаблоны
@@ -110,7 +106,7 @@ $app->bindClass("Page");
 Кроме того вы можете восспользоваться классом `Controller`.
 
 ## Хранилище данных
-Воспользуйтесь хранилищем данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
+Используйте хранилище данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
 ```php
 $app["config.foo"] = array("bar" => 123);
 ```
@@ -181,13 +177,13 @@ class Foo extends Engine\Extension {
     }
 }
 
-$app("Foo")->bar();
+$app("Foo")->bar(); // Hello!
 ```
 
 #### Расширения в поставке
 **Cache**
 ```php
-$app("Cache")->write($key, $value, $duration = -1);
+$app("Cache")->write($key, $value, $duration=-1);
 $app("Cache")->read($key, $default=null);
 $app("Cache")->delete($key);
 $app("Cache")->clear();
@@ -240,30 +236,54 @@ $app("ModulePage")->foo(); // "bar"
 
 ## Модели
 ```php
-class Animal extends Engine\Entity\Model {
-	public function read() {
+class Car extends Engine\Entity\Model {
+    protected static $default = [
+        "brand" => "",
+        "model" => "",
+        "color" => "",
+    ];
+
+	public static function read(array $data = []) {
 	    // выборка модели из внешнего хранилища
 	}
 	
-	public function save() {
+	public static function save() {
 	    // вставка/обновление модели во внешнее хранилище
 	}
+	
+	/**
+	 * @return String марка и модель машины
+	 */
+	public function getMark() {
+	    return $this->data["brand"] . " " . $this->data["model"];
+	}
 }
+
+$auto = Car::read(["id" => 14]);
+if ($auto->isEmpty()) {
+    $auto->setAll([
+        "brand" => "BMW",
+        "model" => "X1",
+        "color" => "Orange",
+    ]);
+    $auto->save();
+}
+echo $auto->getMark();
 ```
 
 ## Коллекции
 ```php
-class Animals extends Engine\Entity\Collection {
-	protected static $model = "Animal";
+class Cars extends Engine\Entity\Collection {
+	protected static $model = "Car"; // указывает какую модель создать при вызове метода get
 	
 	public static function fetch(array $data = []) {
 	    // выборка из внешнего хранилища
 	}
 }
 
-$myAnimal = Animals::fetch();
-foreach($myAnimal as $key => $val) {
-    $val->set(...)->save();
+$myCars = Cars::fetch()->find('brand', 'bmw');
+foreach($myCars as $key => $val) {
+    echo $val->getMark();
 }
 ```
 
@@ -282,7 +302,7 @@ class ValidData extends Engine\Entity\Validator {
 	}
 }
 
-// массив данных для примера
+// для примера
 $data = [
 	"username" => "Aleksey",
 	"email"    => "Aleksey@example.com",

@@ -44,12 +44,12 @@ abstract class Model {
 	/**
 	 * Устанавливает значение для ключа
 	 * @param $key
-	 * @param $val
+	 * @param $value
 	 * @return $this
 	 */
-	public function set($key, $val = null) {
+	public function set($key, $value = null) {
 		if (array_key_exists($key, static::$default)) {
-			$this->data[$key] = $val;
+			$this->data[$key] = $value;
 		}
 
 		return $this;
@@ -61,8 +61,8 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function setAll(array $data) {
-		foreach ($data as $key => $val) {
-			$this->set($key, $val);
+		foreach ($data as $key => $value) {
+			$this->set($key, $value);
 		}
 
 		return $this;
@@ -84,6 +84,14 @@ abstract class Model {
 	 */
 	public function exist($key) {
 		return isset($this->data[$key]);
+	}
+
+	/**
+	 * Проверяет пустая ли модель
+	 * @return bool
+	 */
+	public function isEmpty() {
+		return static::$default === $this->data;
 	}
 
 	/**
@@ -114,16 +122,4 @@ abstract class Model {
 	public function toArray() {
 		return $this->data;
 	}
-
-	/**
-	 * Получает модель из внешнего хранилища
-	 * @return $this
-	 */
-	abstract public function read();
-
-	/**
-	 * Сохраняет модель во внешнем хранилище
-	 * @return $this
-	 */
-	abstract public function save();
 }
