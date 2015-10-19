@@ -42,11 +42,7 @@ abstract class Validator {
 	 * @return $this
 	 */
 	public function attr($field) {
-		$this->field = null;
-
-		if (isset($this->data[$field])) {
-			$this->field = $field;
-		}
+		$this->field = $field;
 
 		return $this;
 	}
