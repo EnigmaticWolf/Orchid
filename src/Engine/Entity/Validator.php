@@ -24,37 +24,43 @@
 
 namespace Engine\Entity;
 
+use Closure;
+
 abstract class Validator {
 	protected $data  = [];
 	protected $field = null;
 	protected $rule  = [];
 	protected $error = [];
 
-	public function __construct(&$data) {
+	public function __construct(array &$data) {
 		$this->data = &$data;
 	}
 
 	/**
 	 * Выбирает обязательное поле для валидации
-	 * @param $field
+	 * @param string $field
 	 * @return $this
 	 */
 	public function attr($field) {
-		$this->field = $field;
+		$this->field = null;
+
+		if (isset($this->data[$field])) {
+			$this->field = $field;
+		}
 
 		return $this;
 	}
 
 	/**
-	 * Выбирает опциональное поле для валидации
-	 * @param $field
+	 * Выбирает НЕ обязательное поле для валидации
+	 * @param string $field
 	 * @return $this
 	 */
 	public function option($field) {
 		$this->field = null;
 
-		if (!empty($this->data[$field])) {
-			$this->attr($field);
+		if (isset($this->data[$field]) && gettype($this->data[$field]) != 'NULL') {
+			$this->field = $field;
 		}
 
 		return $this;
@@ -62,15 +68,15 @@ abstract class Validator {
 
 	/**
 	 * Добавляет к выбранному полю правило валидации
-	 * @param      $validator
-	 * @param null $reason
+	 * @param Closure $validator
+	 * @param string  $message
 	 * @return $this
 	 */
-	public function addRule($validator, $reason = null) {
-		if (!is_null($this->field)) {
+	public function addRule($validator, $message = '') {
+		if ($this->field) {
 			$this->rule[$this->field][] = [
 				"validator" => $validator,
-				"reason"    => $reason,
+				"message"   => $message,
 			];
 		}
 
@@ -82,14 +88,13 @@ abstract class Validator {
 	 * @return array|bool
 	 */
 	public function validate() {
-		foreach ($this->rule as $key => $val) {
-			foreach ($val as $rule) {
-				if (isset($this->data[$key])) {
-					if (!isset($this->error[$key]) && $rule["validator"]($this->data[$key]) !== true) {
-						$this->error[$key] = $rule["reason"] ? $rule["reason"] : false;
-					}
-				} else {
-					$this->error[$key] = false;
+		$this->error = [];
+
+		foreach ($this->rule as $field => $rules) {
+			foreach ($rules as $rule) {
+				if ($rule["validator"]($this->data[$field]) !== true) {
+					$this->error[$field] = $rule["message"] ? $rule["message"] : false;
+					break;
 				}
 			}
 		}
