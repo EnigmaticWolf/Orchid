@@ -293,7 +293,7 @@ class ValidData extends Engine\Entity\Validator {
     // подключение стандартных проверяющих функций
 	use Engine\Entity\Validate\Base,
 		Engine\Entity\Validate\Type,
-        Engine\Entity\Validate\String;
+		Engine\Entity\Validate\String;
 		
 	// при необходимости можно расширить функционал
 	public function isSupportedCity() {
