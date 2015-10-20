@@ -44,6 +44,10 @@ class Orchid implements ArrayAccess {
 		$this->registry = array_merge([
 			"debug"		=> true,
 
+			"app"		=> "Orchid-App",
+			"secret"    => "Orchid-Secret",
+			"session"   => "Orchid-Session",
+
 			"extension" => [],
 			"module"    => [],
 			"path"      => [],
@@ -57,9 +61,6 @@ class Orchid implements ArrayAccess {
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
-
-			"secret"    => "Orchid-Secret",
-			"session"   => "Orchid-Session",
 		], $param);
 
 		static::$instance = &$this;

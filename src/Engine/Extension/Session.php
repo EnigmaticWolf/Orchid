@@ -30,6 +30,10 @@ class Session extends Extension {
 	protected $initialized = false;
 	public    $name;
 
+	/**
+	 * Создание новой сессии с заданным именем
+	 * @param null $sessionName
+	 */
 	public function create($sessionName = null) {
 		if ($this->initialized) {
 			return;
@@ -46,18 +50,18 @@ class Session extends Extension {
 	}
 
 	/**
-	 * Метод записывает данные в текущую сессию
-	 * @param String $key   ключевое слово
-	 * @param String $value значение для записи
+	 * Запись данных в текущую сессию
+	 * @param string $key ключевое слово
+	 * @param string $value значение для записи
 	 */
 	public function write($key, $value) {
 		$_SESSION[$key] = $value;
 	}
 
 	/**
-	 * Метод читает и возвращает данные из текущей сессии по заданному ключу
-	 * @param String $key     ключевое слово
-	 * @param String $default значение для записи
+	 * Чтение данных из текущей сессии по заданному ключу
+	 * @param string $key ключевое слово
+	 * @param string $default значение для записи
 	 * @return Mixed
 	 */
 	public function read($key, $default = null) {
@@ -65,15 +69,15 @@ class Session extends Extension {
 	}
 
 	/**
-	 * Метод удаляет данные из текущей сессии по заданному ключу
-	 * @param String $key ключевое слово
+	 * Удаление данных из текущей сессии по заданному ключу
+	 * @param string $key ключевое слово
 	 */
 	public function delete($key) {
 		unset($_SESSION[$key]);
 	}
 
 	/**
-	 * Метод уничтожает текущую сессию
+	 * Уничтожение текущей сессии
 	 */
 	public function destroy() {
 		session_destroy();

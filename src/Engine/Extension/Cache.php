@@ -23,6 +23,7 @@
 
 namespace Engine\Extension;
 
+use Closure;
 use Engine\Extension;
 use RecursiveDirectoryIterator;
 
@@ -31,21 +32,20 @@ class Cache extends Extension {
 	protected $cachePath = null;
 
 	public function initialize() {
-		$this->cachePath = ($this->app->path("cache:") ? rtrim($this->app->path("cache:")) . "/" : "/");
-		$this->prefix    = (isset($this->app["app"]) ? $this->app["app"] : "cache");
+		$this->prefix = $this->app["app"];
+		$this->cachePath = ($this->app->path("cache:") ? rtrim($this->app->path("cache:")) : getcwd() . "/cache") . "/";
 	}
 
 	/**
-	 * Метод сериализует и записывает данные в файл
-	 * @param String $key      ключевое слово
-	 * @param String $value    значение для записи
-	 * @param Int    $duration время жизни файла (По умолчанию -1 - вечно)
-	 * @return Int|False количество байт записанных в случае успеха
+	 * Сериализовать и записать данные в временный файл
+	 * @param string $key ключ
+	 * @param string $value значение для записи
+	 * @param int $duration время жизни файла (По умолчанию -1 - вечно)
+	 * @return int|false количество байт записанных в случае успеха
 	 */
 	public function write($key, $value, $duration = -1) {
-		$expire = ($duration == -1) ? -1 : (time() + (is_string($duration) ? strtotime($duration) : $duration));
-		$data   = [
-			"expire" => $expire,
+		$data = [
+			"expire" => ($duration != -1) ? (is_string($duration) ? strtotime($duration) : time() + $duration) : $duration,
 			"value"  => serialize($value),
 		];
 
@@ -53,47 +53,46 @@ class Cache extends Extension {
 	}
 
 	/**
-	 * Метод возвращает десериализованные данные из файла
-	 * @param String $key     ключевое слово
-	 * @param Mixed  $default значение возвращаемое если данных нет
-	 * @return Mixed
+	 * Десериализовать данные из временного файла
+	 * @param string $key ключ
+	 * @param mixed|Closure $default возвращаемое значение, если данных нет
+	 * @return mixed
 	 */
 	public function read($key, $default = null) {
-		$data = @file_get_contents($this->cachePath . md5($this->prefix . ":" . $key) . ".cache");
+		$file = $this->cachePath . md5($this->prefix . ":" . $key) . ".cache";
+		$data = file_exists($file) ? file_get_contents($file) : false;
 
-		if ($data === "") {
-			return $default;
-		} else {
-			$time = time();
+		if ($data !== false) {
 			$data = unserialize($data);
 
-			if (($data["expire"] < $time) && $data["expire"] != -1) {
-				$this->delete($key);
-
-				return is_callable($default) ? call_user_func($default) : $default;
+			if (($data["expire"] > time()) || $data["expire"] == -1) {
+				return unserialize($data["value"]);
 			}
 
-			return unserialize($data["value"]);
+			$this->delete($key);
 		}
+
+		return is_callable($default) ? call_user_func($default, $key) : $default;
 	}
 
 	/**
-	 * Метод удаляет файл кеша с заданным ключем
-	 * @param String $key ключевое слово
-	 * @return Boolean
+	 * Удалить временный файл
+	 * @param string $key ключ
+	 * @return boolean
 	 */
 	public function delete($key) {
 		$file = $this->cachePath . md5($this->prefix . ":" . $key) . ".cache";
 
 		if (file_exists($file)) {
-			return @unlink($file);
+			return unlink($file);
 		}
 
 		return false;
 	}
 
 	/**
-	 * Метод удаляет все файлы кеша
+	 * Удалиьть все временные файлы
+	 * @return $this
 	 */
 	public function clear() {
 		$iterator = new RecursiveDirectoryIterator($this->cachePath);
@@ -101,8 +100,10 @@ class Cache extends Extension {
 		/** @var RecursiveDirectoryIterator $file */
 		foreach ($iterator as $file) {
 			if ($file->isFile() && substr($file, -6) == ".cache") {
-				@unlink($this->cachePath . $file->getFilename());
+				unlink($this->cachePath . $file->getFilename());
 			}
 		}
+
+		return $this;
 	}
 }

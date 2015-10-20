@@ -29,7 +29,7 @@ use Engine\Extension;
 
 class FileSystem extends Extension {
 	/**
-	 * Метод возвращает листинг директории
+	 * Листинг директории
 	 * @param string|null $dirName абсолютный или ссылочный путь
 	 * @return array
 	 */
@@ -48,9 +48,9 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод создаёт новую папку
+	 * Создать новую папку
 	 * @param string $dirName абсолютный или ссылочный путь
-	 * @param int    $mode    уровень доступа для владельца файла
+	 * @param int $mode уровень доступа для владельца файла
 	 * @return bool
 	 */
 	public function mkdir($dirName, $mode = 0755) {
@@ -62,7 +62,7 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод удаляет рекурсивно папку и все файлы
+	 * Удаляет папку и все файлы, рекурсивно
 	 * @param string $dirName абсолютный или ссылочный путь
 	 * @return bool
 	 */
@@ -87,7 +87,7 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод производит чтение файла и возвращает его содержимое
+	 * Прочитать файл
 	 * @param string $file абсолютный или ссылочный путь
 	 * @return bool|string
 	 */
@@ -100,9 +100,9 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод производит запись данных в файл
+	 * Записать данные в файл
 	 * @param string $file абсолютный или ссылочный путь
-	 * @param mixed  $data содержимое для записи в файл
+	 * @param mixed $data содержимое для записи в файл
 	 * @return bool|int
 	 */
 	public function write($file, $data) {
@@ -117,9 +117,9 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод копирует файл в указанное место
+	 * Скопировать файл в указанное место
 	 * @param string $source абсолютный или ссылочный путь
-	 * @param string $destination   абсолютный или ссылочный путь
+	 * @param string $destination абсолютный или ссылочный путь
 	 * @return bool
 	 */
 	public function copy($source, $destination) {
@@ -137,7 +137,7 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод переименовывает файл
+	 * Переименовать файл
 	 * @param string $oldName абсолютный или ссылочный путь
 	 * @param string $newName абсолютный или ссылочный путь
 	 * @return bool
@@ -157,7 +157,7 @@ class FileSystem extends Extension {
 	}
 
 	/**
-	 * Метод удаляет файл
+	 * Удалить файл
 	 * @param string $file абсолютный или ссылочный путь
 	 * @return bool
 	 */
@@ -174,7 +174,7 @@ class FileSystem extends Extension {
 	 * @param string $path абсолютный или ссылочный путь
 	 * @return bool|string
 	 */
-	private function notExistEntry($path) {
+	protected function notExistEntry($path) {
 		if ($this->app->isAbsolutePath($path)) {
 			return $path;
 		}

@@ -47,9 +47,9 @@ class Form extends Extension {
 	];
 
 	/**
-	 * Метод для формирования поля ввода
-	 * @param string $type тип поля ввода
-	 * @param array  $args [name, data]
+	 * Сформировать поле
+	 * @param string $type тип поля
+	 * @param array $args [name, data]
 	 * @return $this|mixed|null|string
 	 */
 	public function __call($type, $args) {
@@ -68,10 +68,10 @@ class Form extends Extension {
 	}
 
 	/**
-	 * Метод формирует поле выбора
-	 * @param string $name   имя поля
-	 * @param array  $option массив значений выбора
-	 * @param array  $data   массив дополнительных атрибутов
+	 * Сформировать поле выбора
+	 * @param string $name имя поля
+	 * @param array $option массив значений выбора
+	 * @param array $data массив дополнительных атрибутов
 	 * @return string
 	 */
 	public function select($name, array $option = [], array $data = []) {
@@ -81,69 +81,56 @@ class Form extends Extension {
 	protected function render(array $data = []) {
 		$default = [
 			"method"      => "post",
-			"id"          => "",
+			"id"          => null,
 			"class"       => [],
 			"error"       => [],
-			"style"       => "",
+			"style"       => null,
 			"type"        => "text",
-			"name"        => "",
-			"placeholder" => "",
-			"tabindex"    => "",
+			"name"        => null,
+			"placeholder" => null,
+			"tabindex"    => null,
 			"readonly"    => false,
 			"disabled"    => false,
 			"required"    => false,
 			"autofocus"   => false,
 		];
-		$data    = array_merge($default, $data);
-		$form    = "";
-
-		if ($data["error"]) {
-			$data["class"][] = "error";
-		}
-
-		if ($data["class"]) {
-			$data["class"] = implode(" ", $data["class"]);
-		}
+		$form = "";
 
 		// определяем тип требуемой формы
 		switch ($data["type"]) {
 			case "textarea": {
-				$default = [
-					"autocomplete" => "",
-					"maxlength"    => 0,
-					"cols"         => 0,
-					"rows"         => 0,
-					"wrap"         => 0,
+				$attr = [
+					"autocomplete" => null,
+					"maxlength"    => null,
+					"cols"         => null,
+					"rows"         => null,
+					"wrap"         => null,
 				];
-				$data    = array_merge($default, $data);
+				$data = array_merge($default, $attr, $data);
 
-				$form .= "<textarea " . $this->getAttr($data) . ">";
+				$form .= "<textarea " . $this->getAttr($data, ["value"]) . ">";
+				$form .= isset($data["value"]) ? $data["value"] : "";
 				$form .= "</textarea>";
 
 				break;
 			}
 			case "select": {
-				$default = [
+				$attr = [
 					"option"   => [],
-					"selected" => "",
+					"selected" => null,
 					"multiple" => false,
 				];
-				$data    = array_merge($default, $data);
+				$data = array_merge($default, $attr, $data);
 
 				$form .= "<select  " . $this->getAttr($data) . ">";
 				foreach ($data["option"] as $key => $val) {
-					$option = false;
-					if (is_array($val)) {
-						list($val, $option) = $val;
-					}
-
 					$form .= "<option";
 					$form .= ' value="' . $key . '"';
-					if ($option) {
-						$form .= $option;
-					} elseif ($data["selected"] == $key) {
+
+					if ($data["selected"] && $data["selected"] == $key) {
 						$form .= " selected";
 					}
+
 					$form .= ">";
 					$form .= $val;
 					$form .= "</option>";
@@ -157,33 +144,30 @@ class Form extends Extension {
 				switch ($data["type"]) {
 					case "radio":
 					case "checkbox": {
-						$default = [
+						$attr = [
 							"checked" => false,
-							"value"   => "",
+							"value"   => null,
 						];
-						$data    = array_merge($default, $data);
 
 						break;
 					}
 					case "file": {
-						$default = [
-							"accept" => "",
-							"value"  => "",
+						$attr = [
+							"accept" => null,
+							"value"  => null,
 						];
-						$data    = array_merge($default, $data);
 
 						break;
 					}
 					default: {
-						$default = [
-							"value" => "",
+						$attr = [
+							"value" => null,
 						];
-						$data    = array_merge($default, $data);
 
 						break;
 					}
 				}
-
+				$data = array_merge($default, $attr, $data);
 				$form .= "<input " . $this->getAttr($data) . " />";
 
 				break;
@@ -194,15 +178,32 @@ class Form extends Extension {
 	}
 
 	/**
-	 * Метод формирующий атрибуты для полей
+	 * Вспомогательный метод для генерации аттрибутов и свойств
 	 * @param array $data
+	 * @param array $exclude
 	 * @return string
 	 */
-	protected function getAttr(array &$data = []) {
+	protected function getAttr(array &$data = [], array $exclude = []) {
 		$attr = "";
+
+		if ($data["error"]) {
+			$data["class"][] = "error";
+		}
+		if ($data["class"]) {
+			$data["class"] = implode(" ", $data["class"]);
+		}
+
+		$exclude = array_merge($exclude, ["method", "option", "selected", "error"]);
+
 		foreach ($data as $key => $val) {
-			if (!empty($val) && !in_array($key, ["method", "option", "selected", "error"]) && !is_array($val)) {
-				$attr .= " " . (is_bool($val) ? $key : $key . "=\"" . $val . "\"");
+			if (in_array($key, $exclude) || is_array($val)) {
+				continue;
+			}
+
+			if (is_bool($val) && $val) {
+				$attr .= " " . $key;
+			} elseif (!is_bool($val) && !is_null($val)) {
+				$attr .= " " . $key . "=\"" . $val . "\"";
 			}
 		}
 

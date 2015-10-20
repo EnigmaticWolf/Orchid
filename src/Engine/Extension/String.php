@@ -28,9 +28,9 @@ use Engine\Extension;
 
 class String extends Extension {
 	/**
-	 * Метод возвращает True если строчка начинается с символа
-	 * @param String $needle   искомый символ
-	 * @param String $haystack строка
+	 * Возвращает true если строчка начинается с указанного символа
+	 * @param string $needle искомый символ
+	 * @param string $haystack строка
 	 * @return Boolean;
 	 */
 	public function start($needle, $haystack) {
@@ -38,9 +38,9 @@ class String extends Extension {
 	}
 
 	/**
-	 * Метод возвращает True если строчка заканчивается символом
-	 * @param String $needle   искомый символ
-	 * @param String $haystack строка
+	 * Возвращает true если строчка заканчивается указанным символом
+	 * @param string $needle искомый символ
+	 * @param string $haystack строка
 	 * @return Boolean;
 	 */
 	public function end($needle, $haystack) {
@@ -53,14 +53,14 @@ class String extends Extension {
 	}
 
 	/**
-	 * Метод безопасно обрезает строку до указанного значения, без потери последнего слова
-	 * @param   String  $string строка
-	 * @param   integer $length необходимая длинна
-	 * @param   String  $append символы в конце строки
-	 * @return  String
+	 * Безопасно обрезать строку до указанного значения, без потери последнего слова
+	 * @param   string $string строка
+	 * @param   int $length необходимая длинна
+	 * @param   string $append символы в конце строки
+	 * @return  string
 	 */
 	public function truncate($string, $length, $append = "...") {
-		$ret        = substr($string, 0, $length);
+		$ret = substr($string, 0, $length);
 		$last_space = strrpos($ret, " ");
 		if ($last_space !== false && $string != $ret) {
 			$ret = substr($ret, 0, $last_space);
@@ -73,29 +73,29 @@ class String extends Extension {
 	}
 
 	/**
-	 * Метод для склонения слов
-	 * @param integer $count  количество
-	 * @param String  $single слово
-	 * @param String  $double слово
-	 * @param String  $triple слово
+	 * Склоненить слово в зависимости от числа
+	 * @param int $count количество
+	 * @param string $one слово
+	 * @param string $two слово
+	 * @param string $five слово
 	 * @return string
 	 */
-	public function eos($count, $single, $double, $triple) {
+	public function eos($count, $one, $two, $five) {
 		if (substr($count, -1, 1) == "1" && substr($count, -2, 2) != "11") {
-			return $single;
+			return $one;
 		} else {
 			if (substr($count, -2, 1) != 1 && substr($count, -1, 1) > 1 && substr($count, -1, 1) < 5) {
-				return $double;
+				return $two;
 			} else {
-				return $triple;
+				return $five;
 			}
 		}
 	}
 
 	/**
-	 * Метод экранирует строку или массив строк
-	 * @param String|Array $input входящая строка
-	 * @return String;
+	 * Заэкранировать строку или массив строк
+	 * @param string|array $input входящая строка
+	 * @return string;
 	 */
 	public function escape($input) {
 		if (is_array($input)) {
@@ -110,9 +110,9 @@ class String extends Extension {
 	}
 
 	/**
-	 * Метод убирает экранирование в строке или массив строк
-	 * @param String|Array $input входящая строка
-	 * @return String;
+	 * Убирать экранирование в строке или массив строк
+	 * @param string|array $input входящая строка
+	 * @return string;
 	 */
 	public function unEscape($input) {
 		if (is_array($input)) {
@@ -127,24 +127,24 @@ class String extends Extension {
 	}
 
 	/**
-	 * Метод транслятор
-	 * @param String $input
-	 * @param bool   $back
+	 * Транслитерировать строку
+	 * @param string $input
+	 * @param bool $back
 	 * @return mixed
 	 */
 	function translate($input, $back = false) {
-		$russian = array(
+		$russian = [
 			"А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф",
 			"Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й",
 			"к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
 			" ",
-		);
-		$latin = array(
+		];
+		$latin = [
 			"A", "B", "V", "G", "D", "E", "E", "Gh", "Z", "I", "Y", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F",
 			"H", "C", "Ch", "Sh", "Sch", "Y", "Y", "Y", "E", "Yu", "Ya", "a", "b", "v", "g", "d", "e", "e", "gh", "z", "i",
 			"y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "sch", "y", "y", "y", "e", "yu",
 			"ya", "-",
-		);
+		];
 
 		return !$back ? str_replace($russian, $latin, $input) : str_replace($latin, $russian, $input);
 	}

@@ -34,33 +34,33 @@ class Crypta extends Extension {
 	}
 
 	/**
-	 * Метод возвращает зашифрованную строку
-	 * @param String $input строка для шифрования
-	 * @return String зашифрованная строка
+	 * Зашифровать строку
+	 * @param string $input строка
+	 * @return string зашифрованная строка
 	 */
 	public function encrypt($input) {
 		return base64_encode($this->crypt($input));
 	}
 
 	/**
-	 * Метод возвращает дешифрованную строку
-	 * @param String $input строка для дешифрации
-	 * @return String расшифрованная строка
+	 * Дешифровать строку
+	 * @param string $input строка
+	 * @return string расшифрованная строка
 	 */
 	public function decrypt($input) {
 		return $this->crypt(base64_decode($input));
 	}
 
 	/**
-	 * Приватный метод возвращает строку
-	 * @param String $input строка
-	 * @return String обработанная строка
+	 * Вспомогательный метод для работы со строкой строку
+	 * @param string $input строка
+	 * @return string обработанная строка
 	 */
 	protected function crypt($input) {
-		$salt  = md5($this->salt);
-		$len   = strlen($input);
+		$salt = md5($this->salt);
+		$len = strlen($input);
 		$gamma = "";
-		$n     = $len > 100 ? 8 : 2;
+		$n = $len > 100 ? 8 : 2;
 		while (strlen($gamma) < $len) {
 			$gamma .= substr(pack("H*", sha1($gamma . $salt)), 0, $n);
 		}
@@ -69,28 +69,28 @@ class Crypta extends Extension {
 	}
 
 	/**
-	 * Метод возвращает хешсумму для строки
-	 * @param String $string строка из которой получить хешсумму
-	 * @return String хешсумма
+	 * Сгенерировать хешсумму для строки
+	 * @param string $string строка из которой получить хешсумму
+	 * @return string хешсумма
 	 */
 	public function hash($string) {
-		$salt    = substr(hash("whirlpool", uniqid(rand() . $this->salt, true)), 0, 12);
-		$hash    = hash("whirlpool", $salt . $string);
+		$salt = substr(hash("whirlpool", uniqid(rand() . $this->salt, true)), 0, 12);
+		$hash = hash("whirlpool", $salt . $string);
 		$saltPos = (strlen($string) >= strlen($hash) ? strlen($hash) : strlen($string));
 
 		return substr($hash, 0, $saltPos) . $salt . substr($hash, $saltPos);
 	}
 
 	/**
-	 * Метод проверяет строку на соответствие хешсумме
-	 * @param String $string     проаеряемая строка
-	 * @param String $hashString хешсумма
+	 * Проверить строку на соответствие хешсумме
+	 * @param string $string проаеряемая строка
+	 * @param string $hashString хешсумма
 	 * @return Boolean
 	 */
 	public function check($string, $hashString) {
 		$saltPos = (strlen($string) >= strlen($hashString) ? strlen($hashString) : strlen($string));
-		$salt    = substr($hashString, $saltPos, 12);
-		$hash    = hash("whirlpool", $salt . $string);
+		$salt = substr($hashString, $saltPos, 12);
+		$hash = hash("whirlpool", $salt . $string);
 
 		return $hashString == substr($hash, 0, $saltPos) . $salt . substr($hash, $saltPos);
 	}
