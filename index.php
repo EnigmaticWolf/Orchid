@@ -23,8 +23,8 @@
  */
 
 define("ORCHID",      __DIR__);
-define("ORCHID_SRC",  ORCHID . DIRECTORY_SEPARATOR . "src");
-define("ORCHID_TEST", ORCHID . DIRECTORY_SEPARATOR . "test");
+define("ORCHID_SRC",  ORCHID . DIRECTORY_SEPARATOR);
+define("ORCHID_TEST", ORCHID . DIRECTORY_SEPARATOR . "Test");
 
 // PSR auto class loader
 spl_autoload_register(function ($class) {

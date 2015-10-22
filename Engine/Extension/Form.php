@@ -108,7 +108,7 @@ class Form extends Extension {
 				];
 				$data = array_merge($default, $attr, $data);
 
-				$form .= "<textarea " . $this->getAttr($data, ["value"]) . ">";
+				$form .= "<textarea " . $this->getAttr($data, ["value", "type"]) . ">";
 				$form .= isset($data["value"]) ? $data["value"] : "";
 				$form .= "</textarea>";
 
@@ -190,11 +190,10 @@ class Form extends Extension {
 			$data["class"][] = "error";
 		}
 		if ($data["class"]) {
-			$data["class"] = implode(" ", $data["class"]);
+			$data["class"] = implode(" ", (is_array($data["class"]) ? $data["class"] : [$data["class"]]));
 		}
 
 		$exclude = array_merge($exclude, ["method", "option", "selected", "error"]);
-
 		foreach ($data as $key => $val) {
 			if (in_array($key, $exclude) || is_array($val)) {
 				continue;
