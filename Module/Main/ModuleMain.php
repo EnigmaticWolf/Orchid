@@ -30,7 +30,6 @@ class ModuleMain extends Module {
 	}
 
 	public function HelloWorld() {
-		var_dump(spl_autoload_extensions ());
 		return "Здравствуй Мир! :)";
 	}
 }
