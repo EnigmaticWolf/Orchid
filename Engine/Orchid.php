@@ -634,6 +634,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Метод указывает загружает модули
 	 * @param array $dirs
+	 * @return $this
 	 */
 	public function loadModule(array $dirs) {
 		foreach ($dirs as &$dir) {
@@ -645,6 +646,8 @@ class Orchid implements ArrayAccess {
 				}
 			}
 		}
+
+		return $this;
 	}
 
 	/**

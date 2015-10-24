@@ -22,15 +22,11 @@
  * THE SOFTWARE.
  */
 
-define("ORCHID",      __DIR__);
-define("ORCHID_SRC",  ORCHID . DIRECTORY_SEPARATOR);
-define("ORCHID_TEST", ORCHID . DIRECTORY_SEPARATOR . "Test");
+define("ORCHID", __DIR__);
 
 // PSR auto class loader
 spl_autoload_register(function ($class) {
-	$class      = str_replace("\\", "/", $class);
-	$class_type = (!strstr($class, "/Test") ? ORCHID_SRC : ORCHID_TEST) . DIRECTORY_SEPARATOR;
-	$class_path = $class_type . $class . ".php";
+	$class_path = ORCHID . DIRECTORY_SEPARATOR . str_replace("\\", "/", $class) . ".php";
 
 	if (file_exists($class_path)) {
 		require_once($class_path);
@@ -39,8 +35,8 @@ spl_autoload_register(function ($class) {
 
 $app = new Engine\Orchid();
 
-$app->loadModule([
-	ORCHID_SRC . "/Module",
-]);
-
-$app->run();
+$app
+	->loadModule([
+		ORCHID . "/Module",
+	])
+	->run();
