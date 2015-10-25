@@ -33,7 +33,7 @@ class Cache extends Extension {
 
 	public function initialize() {
 		$this->prefix = $this->app["app"];
-		$this->cachePath = ($this->app->path("cache:") ? rtrim($this->app->path("cache:")) : getcwd() . "/cache") . "/";
+		$this->cachePath = ($this->app->path("cache:") ? rtrim($this->app->path("cache:")) : $this->app["base_dir"] . "/Cache") . "/";
 	}
 
 	/**

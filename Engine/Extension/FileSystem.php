@@ -35,7 +35,7 @@ class FileSystem extends Extension {
 	 */
 	public function ls($dirName = null) {
 		$list = [];
-		if (($dirName = $this->app->path(($dirName ? $dirName : getcwd()))) != false) {
+		if (($dirName = $this->app->path(($dirName ? $dirName : $this->app["base_dir"]))) != false) {
 			foreach (new DirectoryIterator($dirName) as $iterator) {
 				if ($iterator->isDot()) {
 					continue;

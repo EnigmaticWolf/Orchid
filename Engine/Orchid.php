@@ -59,9 +59,9 @@ class Orchid implements ArrayAccess {
 			"data"      => [],
 			"args"      => [],
 
-			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
-			"base_host" => isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "",
-			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
+			"base_dir"  => !empty($_SERVER["DOCUMENT_ROOT"])	? $_SERVER["DOCUMENT_ROOT"] : dirname($_SERVER["PHP_SELF"]),
+			"base_host" => !empty($_SERVER["SERVER_NAME"])		? $_SERVER["SERVER_NAME"]	: "",
+			"base_port" => (int)(isset($_SERVER["SERVER_PORT"])	? $_SERVER["SERVER_PORT"]	: 80),
 		], $param);
 
 		static::$instance = &$this;
@@ -295,38 +295,38 @@ class Orchid implements ArrayAccess {
 	 * @return Orchid
 	 */
 	public function run() {
-		$self = $this;
-		register_shutdown_function(function () use ($self) {
-			// Если приложение было завершено
-			if ($self->isTerminated()) {
-				return;
-			}
-
-			$error = error_get_last();
-			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
-				ob_end_clean();
-				$self->response->nocache = true;
-				$self->response->status  = "500";
-				$self->response->body    = $self["debug"] ? $error : "Internal Error.";
-			} elseif (!$self->response->body) {
-				$self->response->nocache = true;
-				$self->response->status  = "404";
-				$self->response->body    = "Path not found.";
-			}
-
-			$self->trigger("after");
-			$self->response->flush();
-
-			$self->trigger("shutdown");
-			ob_end_flush();
-		});
-
 		// SLI исполняемый файл
 		if (PHP_SAPI == "cli") {
 			if (($module = $this->module($this["args"][0])) != null) {
 				call_user_func_array([$module, "run"], []);
 			}
 		} else {
+			$self = $this;
+			register_shutdown_function(function () use ($self) {
+				// Если приложение было завершено
+				if ($self->isTerminated()) {
+					return;
+				}
+
+				$error = error_get_last();
+				if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
+					ob_end_clean();
+					$self->response->nocache = true;
+					$self->response->status  = "500";
+					$self->response->body    = $self["debug"] ? $error : "Internal Error.";
+				} elseif (!$self->response->body) {
+					$self->response->nocache = true;
+					$self->response->status  = "404";
+					$self->response->body    = "Path not found.";
+				}
+
+				$self->trigger("after");
+				$self->response->flush();
+
+				$self->trigger("shutdown");
+				ob_end_flush();
+			});
+
 			if (!ob_start("ob_gzhandler")) {
 				ob_start();
 			}
@@ -652,7 +652,7 @@ class Orchid implements ArrayAccess {
 	}
 
 	/**
-	 * Метод указывает загружает модули
+	 * Загружает модули из переданных директорий
 	 * @param array $dirs
 	 * @return $this
 	 */
@@ -668,6 +668,14 @@ class Orchid implements ArrayAccess {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Запускает выполнение демона в фоне
+	 * @param array $args
+	 */
+	public function bootDaemon(...$args) {
+		system("php " . $this["base_dir"] . DIRECTORY_SEPARATOR . "index.php " . implode(" ", $args) . " > /dev/null &");
 	}
 
 	/**
