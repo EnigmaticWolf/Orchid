@@ -24,8 +24,7 @@
 
 namespace Engine\Extension;
 
-use Engine\Extension;
-use function Engine\pre;
+use Engine\Entity\Extension;
 
 class Form extends Extension {
 	/**

@@ -24,7 +24,7 @@
 
 namespace Engine\Extension;
 
-use Engine\Extension;
+use Engine\Entity\Extension;
 
 class Crypta extends Extension {
 	protected $salt = null;

@@ -27,9 +27,6 @@ namespace Engine;
 use ArrayAccess;
 use Closure;
 use DirectoryIterator;
-use Engine\Entity\Daemon;
-use Engine\Entity\Extension;
-use Engine\Entity\Module;
 use InvalidArgumentException;
 use SplPriorityQueue;
 
@@ -620,7 +617,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * @param $name
-	 * @return Daemon|Module|null
+	 * @return object|null
 	 */
 	public function module($name) {
 		$name = strtolower($name);
@@ -698,7 +695,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Метод возвращает объект расширения
 	 * @param string $extension замыкание
-	 * @return Extension
+	 * @return object
 	 */
 	public function extension($extension) {
 		if (!isset($this->registry["extension"][$extension])) {
@@ -883,12 +880,4 @@ function fetch_from_array(&$array, $index = null, $default = null) {
 	}
 
 	return $default;
-}
-
-function pre(...$args) {
-	echo "<pre>";
-	foreach ($args as $key) {
-		var_dump($key);
-	}
-	echo "</pre>";
 }

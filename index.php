@@ -33,6 +33,14 @@ spl_autoload_register(function ($class) {
 	}
 });
 
+function pre(...$args) {
+	echo "<pre>";
+	foreach ($args as $key) {
+		var_dump($key);
+	}
+	echo "</pre>";
+}
+
 $app = new Engine\Orchid();
 
 $app

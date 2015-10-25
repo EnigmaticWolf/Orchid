@@ -25,7 +25,7 @@
 namespace Engine\Extension;
 
 use DirectoryIterator;
-use Engine\Extension;
+use Engine\Entity\Extension;
 
 class FileSystem extends Extension {
 	/**

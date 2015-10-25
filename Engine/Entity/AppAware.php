@@ -32,10 +32,6 @@ abstract class AppAware {
 
 	public function __construct() {
 		$this->app = &Orchid::getInstance();
-		$this->initialize();
-	}
-
-	public function initialize() {
 	}
 
 	public function __call($key, $arguments) {

@@ -23,7 +23,7 @@
 
 namespace Engine\Extension;
 
-use Engine\Extension;
+use Engine\Entity\Extension;
 use function engine\fetch_from_array;
 
 class Session extends Extension {

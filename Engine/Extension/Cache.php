@@ -24,7 +24,7 @@
 namespace Engine\Extension;
 
 use Closure;
-use Engine\Extension;
+use Engine\Entity\Extension;
 use RecursiveDirectoryIterator;
 
 class Cache extends Extension {
