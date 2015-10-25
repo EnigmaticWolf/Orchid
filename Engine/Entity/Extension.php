@@ -22,28 +22,8 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Wrapper;
+namespace Engine\Entity;
 
-use Memcache;
+abstract class Extension extends Module {
 
-class Memory extends Memcache {
-	protected $prefix;
-
-	public function __construct($prefix = ""){
-		$this->prefix = $prefix;
-	}
-
-	public function add($key, $val, $expire = null, &$flag = null) {
-		return parent::add($this->prefix . ":" . $key, $val, $flag, $expire);
-	}
-
-	public function set($key, $val, $expire = null, &$flag = null) {
-		return parent::set($this->prefix . ":" . $key, $val, $flag, $expire);
-	}
-
-	public function get($key, $default = false, &$flags = null) {
-		$value = parent::get($this->prefix . ":" . $key, $flags);
-
-		return $value ? $value : $default;
-	}
 }

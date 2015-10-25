@@ -22,8 +22,35 @@
  * THE SOFTWARE.
  */
 
-namespace Engine;
+namespace Engine\Entity;
 
-abstract class Extension extends Module {
+use Engine\Orchid;
 
+abstract class AppAware {
+	/** @var Orchid */
+	public $app;
+
+	public function __construct() {
+		$this->app = &Orchid::getInstance();
+		$this->initialize();
+	}
+
+	public function initialize() {
+	}
+
+	public function __call($key, $arguments) {
+		if (is_callable([$this->app, $key])) {
+			return call_user_func_array([$this->app, $key], $arguments);
+		}
+
+		return $this;
+	}
+
+	public function __get($key) {
+		return $this->app[$key];
+	}
+
+	public function __set($key, $value) {
+		$this->app[$key] = $value;
+	}
 }

@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011-2016 AEngine
  * 
@@ -22,33 +21,12 @@
  * THE SOFTWARE.
  */
 
-namespace Engine;
+namespace Engine\Entity;
 
-abstract class AppAware {
-	/** @var Orchid */
-	public $app;
+abstract class Daemon extends AppAware {
+	abstract public function run();
 
-	public function __construct() {
-		$this->app = &Orchid::getInstance();
-		$this->initialize();
-	}
-
-	public function initialize() {
-	}
-
-	public function __call($key, $arguments) {
-		if (is_callable([$this->app, $key])) {
-			return call_user_func_array([$this->app, $key], $arguments);
-		}
-
-		return $this;
-	}
-
-	public function __get($key) {
-		return $this->app[$key];
-	}
-
-	public function __set($key, $value) {
-		$this->app[$key] = $value;
+	public function __invoke($extension) {
+		return $this->app->extension($extension);
 	}
 }

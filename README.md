@@ -171,7 +171,7 @@ $app["db"]->query(...);
 ## Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
-class Foo extends Engine\Extension {
+class Foo extends Engine\Entity\Extension {
     public function bar(){
         echo "Hello!";
     }
@@ -217,7 +217,7 @@ $app("String")->translate($input, $back = false);
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
 ```php
-class ModulePage extends Engine\Module { 
+class ModulePage extends Engine\Entity\Module { 
     public function initialize() {
         // зададим правило обработки запросов
 		$this->app->bindClass("Page", "*");
@@ -316,7 +316,7 @@ $valid = new ValidData($data);
 // правила проверки полей
 $valid->attr("username")
 	  ->addRule($valid->isNotEmpty(), "Поле не может быть пустым.")
-	  ->addRule($valid->min(6), "Поле не может быть меньше 5 символов длинной.")
+	  ->addRule($valid->min(5), "Поле не может быть меньше 5 символов длинной.")
 	  ->addRule($valid->max(16), "Поле не может быть больше 16 символов длинной.");
 $valid->attr("email")
 	  ->addRule($valid->isEmail(), "Введённое значение не является валидным E-Mail адресом.");
@@ -328,3 +328,14 @@ $result = $valid->validate();   // в случае успеха результа
                                 // в противном случае будет возвращен массив
                                 // где ключ = поле, значение = причина
 ```
+
+## Демоны
+Позволяют выполнять некую работу в фоне без прямого взаимодействия с пользователем.
+```php
+class MyDaemon extends Daemon {
+	public function run() {
+		// рабочий код демона
+	}
+}
+```
+Затем выполнять по `cron` или запустить фоном: `php index.php [название демона]`

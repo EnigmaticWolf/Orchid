@@ -27,6 +27,9 @@ namespace Engine;
 use ArrayAccess;
 use Closure;
 use DirectoryIterator;
+use Engine\Entity\Daemon;
+use Engine\Entity\Extension;
+use Engine\Entity\Module;
 use InvalidArgumentException;
 use SplPriorityQueue;
 
@@ -57,6 +60,7 @@ class Orchid implements ArrayAccess {
 			"uri"       => [],
 			"param"     => [],
 			"data"      => [],
+			"args"      => [],
 
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "",
@@ -65,8 +69,13 @@ class Orchid implements ArrayAccess {
 
 		static::$instance = &$this;
 
+		// SLI аргументы
+		if (PHP_SAPI == "cli"){
+			$this->registry["args"] = array_slice($_SERVER['argv'], 1);
+		}
+
 		// Заполняем URI
-		foreach (explode("/", parse_url(urldecode($_SERVER["REQUEST_URI"]), PHP_URL_PATH)) as $part) {
+		foreach (explode("/", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_PATH)) as $part) {
 			if ($part) {
 				$this->registry["uri"][] = $part;
 			}
@@ -74,7 +83,7 @@ class Orchid implements ArrayAccess {
 
 		// Переписываем GET
 		$_GET = [];
-		foreach (explode("&", parse_url(urldecode($_SERVER["REQUEST_URI"]), PHP_URL_QUERY)) as $part) {
+		foreach (explode("&", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_QUERY)) as $part) {
 			if ($part) {
 				$data                              = explode("=", $part);
 				$this->registry["param"][$data[0]] = $_GET[$data[0]] = $data[1];
@@ -175,7 +184,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Возвращает IP адрес клиента
-	 * @return String
+	 * @return string
 	 */
 	public function getClientIp() {
 		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
@@ -191,8 +200,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Возвращает язык клиента
-	 * @param String $default по умолчанию русский
-	 * @return String
+	 * @param string $default по умолчанию русский
+	 * @return string
 	 */
 	public function getClientLang($default = "ru") {
 		// todo починить
@@ -206,7 +215,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Возвращает адрес сайта
 	 * @param bool $withPath
-	 * @return String
+	 * @return string
 	 */
 	public function getSiteUrl($withPath = false) {
 		$url = ($this->req_is("ssl") ? "https" : "http") . "://";
@@ -223,7 +232,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Возвращает путь
-	 * @return String
+	 * @return string
 	 */
 	public function getSitePath() {
 		return implode("/", $this["uri"]);
@@ -231,9 +240,9 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Добавляет задачу
-	 * @param  String  $name     имя задачи
-	 * @param  Closure $callback функция
-	 * @param  Integer $priority приоритет задачи
+	 * @param  string	$name     имя задачи
+	 * @param  Closure	$callback функция
+	 * @param  int 		$priority приоритет задачи
 	 * @return Orchid
 	 */
 	public function task($name, $callback, $priority = 0) {
@@ -253,7 +262,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Запускает выполнение задачи с возможностью передачи параметров
-	 * @param  String $name   имя задачи
+	 * @param  string $name   имя задачи
 	 * @param  array  $params передаваемые параметры
 	 * @return Orchid
 	 */
@@ -315,14 +324,21 @@ class Orchid implements ArrayAccess {
 			ob_end_flush();
 		});
 
-		if (!ob_start("ob_gzhandler")) {
-			ob_start();
+		// SLI исполняемый файл
+		if (PHP_SAPI == "cli") {
+			if (($module = $this->module($this["args"][0])) != null) {
+				call_user_func_array([$module, "run"], []);
+			}
+		} else {
+			if (!ob_start("ob_gzhandler")) {
+				ob_start();
+			}
+
+			$this->response = new Response();
+
+			$this->trigger("before");
+			$this->response->body = $this->dispatch();
 		}
-
-		$this->response = new Response();
-
-		$this->trigger("before");
-		$this->response->body = $this->dispatch();
 
 		return $this;
 	}
@@ -341,7 +357,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Приложение завершено? (выключено)
-	 * @return Boolean
+	 * @return bool
 	 */
 	public function isTerminated() {
 		return $this->exit;
@@ -371,9 +387,9 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Метод для объявления роутинга
-	 * @param String  $path
+	 * @param string  $path
 	 * @param Closure $callback
-	 * @param String  $method
+	 * @param string  $method
 	 * @param bool    $condition
 	 * @param int     $priority
 	 * @return $this
@@ -396,7 +412,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Метод для привязки класса контроллера
-	 * @param String $class
+	 * @param string $class
 	 * @param bool   $alias
 	 * @param null   $method
 	 * @param bool   $condition
@@ -512,7 +528,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Перенаправляет на адрес
-	 * @param  String $path
+	 * @param  string $path
 	 * @return void
 	 */
 	public function reroute($path) {
@@ -529,8 +545,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Возвращает ссылку
-	 * @param  String $path
-	 * @return String
+	 * @param  string $path
+	 * @return string
 	 */
 	public function routeUrl($path) {
 		return $this->getSiteUrl(false) . "/" . ltrim($path, "/");
@@ -539,7 +555,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Метод помощник по работе с путями
 	 * @param $args
-	 * @return String
+	 * @return string
 	 */
 	public function path(...$args) {
 		switch (count($args)) {
@@ -564,10 +580,13 @@ class Orchid implements ArrayAccess {
 
 				return false;
 			case 2:
-				if (!isset($this->registry["path"][$args[0]])) {
-					$this->registry["path"][$args[0]] = [];
+				list($name, $path) = $args;
+				if (!isset($this->registry["path"][$name])) {
+					$this->registry["path"][$name] = [];
 				}
-				array_unshift($this->registry["path"][$args[0]], rtrim(str_replace(DIRECTORY_SEPARATOR, "/", $args[1]), "/") . "/");
+				$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
+				array_unshift($this->registry["path"][$name], is_file($path) ? $path : $path . "/");
+
 				break;
 		}
 
@@ -576,8 +595,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Функция помощник по работе с путями
-	 * @param String $path путь до файла
-	 * @return Boolean
+	 * @param string $path путь до файла
+	 * @return bool
 	 */
 	public function isAbsolutePath($path) {
 		return "/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2]));
@@ -585,8 +604,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Метод преобразует путь в ссылку
-	 * @param String $path путь до файла
-	 * @return String
+	 * @param string $path путь до файла
+	 * @return string
 	 */
 	public function pathToUrl($path) {
 		if (($file = $this->path($path)) != false) {
@@ -601,7 +620,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * @param $name
-	 * @return Module|null
+	 * @return Daemon|Module|null
 	 */
 	public function module($name) {
 		$name = strtolower($name);
@@ -618,15 +637,19 @@ class Orchid implements ArrayAccess {
 	public function addModule($name, $dir) {
 		if (!isset($this->registry["module"][strtolower($name)])) {
 			$this->path($name, $dir);
-			$this->registry["module"][strtolower($name)] = $this->bootModule($dir, $name);
+			$this->registry["module"][strtolower($name)] = $this->bootModule($name, $dir);
 		}
 
 		return $this->registry["module"][strtolower($name)];
 	}
 
-	protected function bootModule($dir, $name) {
-		$class = "Module" . $name;
-		require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
+	protected function bootModule($class, $dir) {
+		if (is_file($dir)) {
+			require_once($dir);
+		} else {
+			$class = "Module" . $class;
+			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
+		}
 
 		return new $class();
 	}
@@ -640,8 +663,8 @@ class Orchid implements ArrayAccess {
 		foreach ($dirs as &$dir) {
 			if (is_dir($dir)) {
 				foreach (new DirectoryIterator($dir) as $module) {
-					if ($module->isDir() && !$module->isDot()) {
-						$this->addModule($module->getBasename(), $module->getRealPath());
+					if ($module->isDir() && !$module->isDot() || $module->isFile()) {
+						$this->addModule($module->getBasename(".php"), $module->getRealPath());
 					}
 				}
 			}
@@ -652,9 +675,9 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Создаёт замыкание, доступ по ключу
-	 * @param String  $name     название сервиса
+	 * @param string  $name     название сервиса
 	 * @param Closure $callable замыкание
-	 * @return Object
+	 * @return object
 	 */
 	public function service($name, $callable) {
 		$this[$name] = function ($param = null) use ($callable) {
@@ -674,7 +697,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Метод возвращает объект расширения
-	 * @param String $extension замыкание
+	 * @param string $extension замыкание
 	 * @return Extension
 	 */
 	public function extension($extension) {
@@ -688,10 +711,10 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Вызов класса контроллера
-	 * @param  String $class  имя контроллера
-	 * @param  String $action метод
+	 * @param  string $class  имя контроллера
+	 * @param  string $action метод
 	 * @param  array  $params параметры вызова
-	 * @return Mixed
+	 * @return mixed
 	 */
 	public function invoke($class, $action = "index", array $params = []) {
 		$controller = new $class();
@@ -778,7 +801,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Читает значение из реестра
-	 * @param String $key
+	 * @param string $key
 	 * @return Orchid
 	 */
 	public function __get($key) {
@@ -787,8 +810,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Читает значение из реестра
-	 * @param String $key
-	 * @param null   $default
+	 * @param string $key
+	 * @param mixed  $default
 	 * @return null
 	 */
 	public function retrieve($key, $default = null) {
@@ -797,8 +820,8 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Записывает значение в реестр
-	 * @param String $key   ключ
-	 * @param Mixed  $value значение
+	 * @param string $key   ключ
+	 * @param mixed  $value значение
 	 * @return Orchid
 	 */
 	public function __set($key, $value) {

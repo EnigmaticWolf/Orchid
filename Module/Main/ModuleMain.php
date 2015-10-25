@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-use Engine\Module;
+use Engine\Entity\Module;
 
 class ModuleMain extends Module {
 	public function initialize() {

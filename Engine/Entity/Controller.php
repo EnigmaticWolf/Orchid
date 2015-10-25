@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine;
+namespace Engine\Entity;
 
 abstract class Controller extends AppAware {
 	public function __invoke($module) {

@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine;
+namespace Engine\Entity;
 
 abstract class Module extends AppAware {
 	public function __invoke($extension) {

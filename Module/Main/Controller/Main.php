@@ -24,7 +24,7 @@
 
 namespace Module\Main\Controller;
 
-use Engine\Controller;
+use Engine\Entity\Controller;
 
 class Main extends Controller {
 	public function index() {
