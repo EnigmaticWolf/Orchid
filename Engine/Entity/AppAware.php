@@ -34,6 +34,10 @@ abstract class AppAware {
 		$this->app = &Orchid::getInstance();
 	}
 
+	public function __invoke($extension) {
+		return $this->app->extension($extension);
+	}
+
 	public function __call($key, $arguments) {
 		if (is_callable([$this->app, $key])) {
 			return call_user_func_array([$this->app, $key], $arguments);

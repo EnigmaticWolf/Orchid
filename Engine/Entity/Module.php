@@ -30,8 +30,4 @@ abstract class Module extends AppAware {
 	}
 
 	public function initialize() {}
-
-	public function __invoke($extension) {
-		return $this->app->extension($extension);
-	}
 }

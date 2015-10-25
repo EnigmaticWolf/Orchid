@@ -25,8 +25,4 @@ namespace Engine\Entity;
 
 abstract class Daemon extends AppAware {
 	abstract public function run();
-
-	public function __invoke($extension) {
-		return $this->app->extension($extension);
-	}
 }
