@@ -24,5 +24,68 @@
 namespace Engine\Entity;
 
 abstract class Daemon extends AppAware {
+	protected $pid      = null;
+	protected $pid_file = null;
+
+	public final function __construct() {
+		parent::__construct();
+
+		if (!pcntl_fork()) {
+			posix_setsid();
+			$this->pid      = getmypid();
+			$this->pid_file = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . ".pid";
+
+			if (!file_exists($this->pid_file)) {
+				$this->initialize();
+
+				file_put_contents($this->pid_file, $this->pid);
+
+				$this->run();
+			} else {
+				echo "Daemon already running!" . PHP_EOL;
+				exit(SIG_ERR);
+			}
+		} else {
+			exit(SIG_DFL);
+		}
+	}
+
+	/**
+	 * Инициализация демона
+	 * @return void
+	 */
+	protected function initialize() {
+		// обработка сигналов
+		pcntl_signal(SIGTERM, [$this, "sigHandler"]);
+		pcntl_signal_dispatch();
+	}
+
+	/**
+	 * Обработчик сигналов
+	 * @param $signo
+	 * @return void
+	 */
+	public function sigHandler($signo) {
+		switch ($signo) {
+			case SIGTERM: {
+				exit(SIGTERM);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Рабочий код демона
+	 * @return void
+	 */
 	abstract public function run();
+
+	/**
+	 * Обработка завершения работы демона
+	 */
+	public final function __destruct() {
+		if (file_exists($this->pid_file) && file_get_contents($this->pid_file) == getmypid()) {
+			unlink($this->pid_file);
+		}
+	}
 }

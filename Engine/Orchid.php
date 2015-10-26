@@ -297,7 +297,7 @@ class Orchid implements ArrayAccess {
 	 * @return Orchid
 	 */
 	public function run() {
-		if (PHP_SAPI == "cli") {
+		if (PHP_SAPI == "cli" && isset($this["args"][0])) {
 			$this->bootDaemon(); // запускаем демона
 		} else {
 			$self = $this;
