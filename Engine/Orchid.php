@@ -27,6 +27,8 @@ namespace Engine;
 use ArrayAccess;
 use Closure;
 use DirectoryIterator;
+use Engine\Entity\Module;
+use Engine\Entity\Extension;
 use InvalidArgumentException;
 use SplPriorityQueue;
 
@@ -295,11 +297,8 @@ class Orchid implements ArrayAccess {
 	 * @return Orchid
 	 */
 	public function run() {
-		// SLI исполняемый файл
 		if (PHP_SAPI == "cli") {
-			if (($module = $this->module($this["args"][0])) != null) {
-				call_user_func_array([$module, "run"], []);
-			}
+			$this->bootDaemon(); // запускаем демона
 		} else {
 			$self = $this;
 			register_shutdown_function(function () use ($self) {
@@ -366,9 +365,10 @@ class Orchid implements ArrayAccess {
 	 * @param      $callback
 	 * @param bool $condition
 	 * @param int  $priority
+	 * @return Orchid
 	 */
 	public function get($path, $callback, $condition = true, $priority = 0) {
-		$this->bind($path, $callback, "GET", $condition, $priority);
+		return $this->bind($path, $callback, "GET", $condition, $priority);
 	}
 
 	/**
@@ -377,9 +377,10 @@ class Orchid implements ArrayAccess {
 	 * @param      $callback
 	 * @param bool $condition
 	 * @param int  $priority
+	 * @return Orchid
 	 */
 	public function post($path, $callback, $condition = true, $priority = 0) {
-		$this->bind($path, $callback, "POST", $condition, $priority);
+		return $this->bind($path, $callback, "POST", $condition, $priority);
 	}
 
 	/**
@@ -389,7 +390,7 @@ class Orchid implements ArrayAccess {
 	 * @param string  $method
 	 * @param bool    $condition
 	 * @param int     $priority
-	 * @return $this
+	 * @return Orchid
 	 */
 	public function bind($path, $callback, $method = null, $condition = true, $priority = 0) {
 		if ((is_null($method) || $this->req_is($method)) && $condition) {
@@ -414,7 +415,7 @@ class Orchid implements ArrayAccess {
 	 * @param null   $method
 	 * @param bool   $condition
 	 * @param int    $priority
-	 * @return $this
+	 * @return Orchid
 	 */
 	public function bindClass($class, $alias = false, $method = null, $condition = true, $priority = 0) {
 		$self  = $this;
@@ -602,7 +603,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Метод преобразует путь в ссылку
 	 * @param string $path путь до файла
-	 * @return string
+	 * @return string|bool
 	 */
 	public function pathToUrl($path) {
 		if (($file = $this->path($path)) != false) {
@@ -616,45 +617,9 @@ class Orchid implements ArrayAccess {
 	}
 
 	/**
-	 * @param $name
-	 * @return object|null
-	 */
-	public function module($name) {
-		$name = strtolower($name);
-
-		return isset($this->registry["module"][$name]) ? $this->registry["module"][$name] : null;
-	}
-
-	/**
-	 * Метод добавляет модуль в реестр и загружает
-	 * @param $name
-	 * @param $dir
-	 * @return mixed
-	 */
-	public function addModule($name, $dir) {
-		if (!isset($this->registry["module"][strtolower($name)])) {
-			$this->path($name, $dir);
-			$this->registry["module"][strtolower($name)] = $this->bootModule($name, $dir);
-		}
-
-		return $this->registry["module"][strtolower($name)];
-	}
-
-	protected function bootModule($class, $dir) {
-		if (is_file($dir)) {
-			require_once($dir);
-		} else {
-			$class = "Module" . $class;
-			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
-		}
-
-		return new $class();
-	}
-
-	/**
 	 * Загружает модули из переданных директорий
 	 * @param array $dirs
-	 * @return $this
+	 * @return Orchid
 	 */
 	public function loadModule(array $dirs) {
 		foreach ($dirs as &$dir) {
@@ -671,10 +636,63 @@ class Orchid implements ArrayAccess {
 	}
 
 	/**
-	 * Запускает выполнение демона в фоне
-	 * @param array $args
+	 * Метод добавляет модуль в реестр и загружает
+	 * @param $name
+	 * @param $dir
+	 * @return Module
 	 */
-	public function bootDaemon(...$args) {
+	public function addModule($name, $dir) {
+		if (!isset($this->registry["module"][strtolower($name)])) {
+			$this->path($name, $dir);
+			$this->registry["module"][strtolower($name)] = $this->bootModule($name, $dir);
+		}
+
+		return $this->registry["module"][strtolower($name)];
+	}
+
+	/**
+	 * Подгружает файл модуля
+	 * @param $class
+	 * @param $dir
+	 * @return Module
+	 */
+	protected function bootModule($class, $dir) {
+		if (is_file($dir)) {
+			require_once($dir);
+		} else {
+			$class = "Module" . $class;
+			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
+		}
+
+		return new $class();
+	}
+
+	/**
+	 * @param $name
+	 * @return Module|null
+	 */
+	public function module($name) {
+		$name = strtolower($name);
+
+		return isset($this->registry["module"][$name]) ? $this->registry["module"][$name] : null;
+	}
+
+	/**
+	 * Исполняет демона
+	 * @return void
+	 */
+	protected function bootDaemon() {
+		$class = "Engine\\Daemon\\" . $this["args"][0];
+
+		call_user_func([new $class(), "run"], []);
+	}
+
+	/**
+	 * Запускает выполнение демона в фоне
+	 * @param array $args первый аргумент - имя класса демона
+	 * @return void
+	 */
+	public function runDaemon(...$args) {
 		system("php " . $this["base_dir"] . DIRECTORY_SEPARATOR . "index.php " . implode(" ", $args) . " > /dev/null &");
 	}
 
@@ -703,7 +721,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Метод возвращает объект расширения
 	 * @param string $extension замыкание
-	 * @return object
+	 * @return Extension
 	 */
 	public function extension($extension) {
 		if (!isset($this->registry["extension"][$extension])) {
@@ -733,7 +751,7 @@ class Orchid implements ArrayAccess {
 	 *                          "->"    указывает что шаблон слева необходимо поместить в шаблон справа
 	 *                          ";"     разделитель шаблонов в левой части
 	 * @param array  $_vars массив с переменными
-	 * @return bool|string
+	 * @return bool|mixed
 	 */
 	public function render($_template, array $_vars = []) {
 		$content = [];
@@ -798,7 +816,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Для доступа к расширениям
 	 * @param $extension
-	 * @return mixed
+	 * @return Extension
 	 */
 	public function __invoke($extension) {
 		return $this->extension($extension);
@@ -807,7 +825,7 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Читает значение из реестра
 	 * @param string $key
-	 * @return Orchid
+	 * @return mixed
 	 */
 	public function __get($key) {
 		return $this->retrieve($key);
@@ -817,7 +835,7 @@ class Orchid implements ArrayAccess {
 	 * Читает значение из реестра
 	 * @param string $key
 	 * @param mixed  $default
-	 * @return null
+	 * @return mixed
 	 */
 	public function retrieve($key, $default = null) {
 		return fetch_from_array($this->registry, $key, $default);

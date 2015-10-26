@@ -148,4 +148,15 @@ class String extends Extension {
 
 		return !$back ? str_replace($russian, $latin, $input) : str_replace($latin, $russian, $input);
 	}
+
+	/**
+	 * Возвращает строковое представление размера данных
+	 * @param int $size
+	 * @return string
+	 */
+	function convertSize($size) {
+		$unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
+
+		return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+	}
 }
