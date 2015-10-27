@@ -684,7 +684,7 @@ class Orchid implements ArrayAccess {
 	protected function bootDaemon() {
 		$class = "Engine\\Daemon\\" . $this["args"][0];
 
-		call_user_func([new $class(), "run"], []);
+		new $class();
 	}
 
 	/**

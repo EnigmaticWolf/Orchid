@@ -24,11 +24,28 @@
 namespace Engine\Entity;
 
 abstract class Daemon extends AppAware {
-	protected $pid      = null;
-	protected $pid_file = null;
+	protected $is_daemon = true; // флаг переключающий режимы daemon/bin
+
+	protected $pid       = null;
+	protected $pid_file  = null;
+	protected $log       = null;
+	protected $log_err   = null;
 
 	public final function __construct() {
 		parent::__construct();
+
+		// если демон, то переопределяем вывод в файл
+		if ($this->is_daemon) {
+			fclose(STDIN);
+			fclose(STDOUT);
+			fclose(STDERR);
+
+			$this->log     = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . '.log';
+			$this->log_err = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . "-error.log";
+
+			$STDOUT = fopen($this->log, 'ab');
+			$STDERR = fopen($this->log_err, 'ab');
+		}
 
 		if (!pcntl_fork()) {
 			posix_setsid();
@@ -36,9 +53,10 @@ abstract class Daemon extends AppAware {
 			$this->pid_file = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . ".pid";
 
 			if (!file_exists($this->pid_file)) {
-				$this->initialize();
-
-				file_put_contents($this->pid_file, $this->pid);
+				// если демон, то выполняем функцию инициализации
+				if ($this->is_daemon) {
+					$this->initialize();
+				}
 
 				$this->run();
 			} else {
@@ -55,6 +73,9 @@ abstract class Daemon extends AppAware {
 	 * @return void
 	 */
 	protected function initialize() {
+		// запись pid в файл
+		file_put_contents($this->pid_file, $this->pid);
+
 		// обработка сигналов
 		pcntl_signal(SIGTERM, [$this, "sigHandler"]);
 		pcntl_signal_dispatch();
