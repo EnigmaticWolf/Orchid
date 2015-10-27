@@ -40,9 +40,10 @@ abstract class Daemon extends AppAware {
 			fclose(STDOUT);
 			fclose(STDERR);
 
-			$this->log     = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . '.log';
+			$this->log     = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . ".log";
 			$this->log_err = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . "-error.log";
 
+			$STDIN	= fopen("/dev/null", "r");
 			$STDOUT = fopen($this->log, 'ab');
 			$STDERR = fopen($this->log_err, 'ab');
 		}
