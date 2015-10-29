@@ -143,6 +143,7 @@ $app->trigger("custometask", $params=array());
  + `before` - выполняется до Роутинга;
  + `after`  - выполняется после Роутинга;
  + `shutdown` - выполняется перед завершением работы;
+ 
 ```php
 $app->task("after", function() {
     switch($this->response->status){
