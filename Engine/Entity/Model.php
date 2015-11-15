@@ -37,7 +37,7 @@ abstract class Model {
 	 */
 	protected $data = [];
 
-	public final function __construct($data = []) {
+	public final function __construct(array $data = []) {
 		$this->setAll(array_merge(static::$default, $data));
 	}
 
