@@ -350,6 +350,7 @@ class Orchid implements ArrayAccess {
 	public function terminate($data = false) {
 		$this->exit = true;
 		if ($data !== false) {
+			ob_clean();
 			echo $data;
 		}
 		exit;
