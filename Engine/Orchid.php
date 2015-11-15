@@ -748,7 +748,7 @@ class Orchid implements ArrayAccess {
 	public function invoke($class, $action = "index", array $params = []) {
 		$controller = new $class();
 
-		return call_user_func_array([$controller, $action], $params);
+		return method_exists($controller, $action) ? call_user_func_array([$controller, $action], $params) : false;
 	}
 
 	/**
