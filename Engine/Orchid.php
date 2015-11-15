@@ -46,9 +46,9 @@ class Orchid implements ArrayAccess {
 		$this->registry = array_merge([
 			"debug"		=> true,
 
-			"app"		=> "Orchid-App",
-			"secret"    => "Orchid-Secret",
-			"session"   => "Orchid-Session",
+			"app"		=> "public",
+			"secret"    => "secret",
+			"session"   => "session",
 
 			"extension" => [],
 			"module"    => [],
@@ -62,7 +62,7 @@ class Orchid implements ArrayAccess {
 			"args"      => [],
 
 			"base_dir"  => !empty($_SERVER["DOCUMENT_ROOT"])	? $_SERVER["DOCUMENT_ROOT"] : dirname($_SERVER["PHP_SELF"]),
-			"base_host" => !empty($_SERVER["SERVER_NAME"])		? $_SERVER["SERVER_NAME"]	: "",
+			"base_host" => !empty($_SERVER["HTTP_HOST"])		? $_SERVER["HTTP_HOST"]		: "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"])	? $_SERVER["SERVER_PORT"]	: 80),
 		], $param);
 
@@ -213,17 +213,21 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Возвращает адрес сайта
-	 * @param bool $withPath
+	 * @param bool		$withPath
+	 * @param string	$app
 	 * @return string
 	 */
-	public function getSiteUrl($withPath = false) {
+	public function getSiteUrl($withPath = false, $app = "") {
 		$url = ($this->req_is("ssl") ? "https" : "http") . "://";
+		if ($app = (empty($app) && $this->registry["app"] != "public") ? $this->registry["app"] : $app) {
+			$url .= $app . ".";
+		}
 		$url .= $this->registry["base_host"];
 		if ($this->registry["base_port"] != "80") {
 			$url .= ":" . $this->registry["base_port"];
 		}
 		if ($withPath) {
-			$url .= $this->getSitePath();;
+			$url .= $this->getSitePath();
 		}
 
 		return rtrim($url, "/");
@@ -527,14 +531,15 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Перенаправляет на адрес
 	 * @param  string $path
+	 * @param  string $app
 	 * @return void
 	 */
-	public function reroute($path) {
+	public function reroute($path, $app = "") {
 		if (strpos($path, "://") === false) {
 			if (substr($path, 0, 1) != "/") {
 				$path = "/" . $path;
 			}
-			$path = $this->routeUrl($path);
+			$path = $this->routeUrl($path, $app);
 		}
 
 		header("Location: " . $path);
@@ -544,10 +549,11 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Возвращает ссылку
 	 * @param  string $path
+	 * @param  string $app
 	 * @return string
 	 */
-	public function routeUrl($path) {
-		return $this->getSiteUrl(false) . "/" . ltrim($path, "/");
+	public function routeUrl($path, $app = "") {
+		return $this->getSiteUrl(false, $app) . "/" . ltrim($path, "/");
 	}
 
 	/**
