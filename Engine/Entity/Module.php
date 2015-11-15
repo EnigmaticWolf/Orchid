@@ -29,5 +29,5 @@ abstract class Module extends AppAware {
 		$this->initialize();
 	}
 
-	public function initialize() {}
+	protected function initialize() {}
 }

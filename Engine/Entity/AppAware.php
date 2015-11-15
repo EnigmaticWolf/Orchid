@@ -28,29 +28,29 @@ use Engine\Orchid;
 
 abstract class AppAware {
 	/** @var Orchid */
-	public $app;
+	protected $app;
 
 	public function __construct() {
 		$this->app = &Orchid::getInstance();
 	}
 
-	public function __invoke($extension) {
+	protected function __invoke($extension) {
 		return $this->app->extension($extension);
 	}
 
-	public function __call($key, $arguments) {
-		if (is_callable([$this->app, $key])) {
+	protected function __call($key, $arguments) {
+		if (method_exists($this->app, $key)) {
 			return call_user_func_array([$this->app, $key], $arguments);
 		}
 
 		return $this;
 	}
 
-	public function __get($key) {
+	protected function __get($key) {
 		return $this->app[$key];
 	}
 
-	public function __set($key, $value) {
+	protected function __set($key, $value) {
 		$this->app[$key] = $value;
 	}
 }

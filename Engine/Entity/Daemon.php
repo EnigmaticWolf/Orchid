@@ -84,11 +84,11 @@ abstract class Daemon extends AppAware {
 
 	/**
 	 * Обработчик сигналов
-	 * @param $signo
+	 * @param $sigNo
 	 * @return void
 	 */
-	public function sigHandler($signo) {
-		switch ($signo) {
+	public function sigHandler($sigNo) {
+		switch ($sigNo) {
 			case SIGTERM: {
 				exit(SIGTERM);
 				break;
