@@ -48,14 +48,14 @@ abstract class Validator {
 	}
 
 	/**
-	 * Выбирает НЕ обязательное поле для валидации
+	 * Выбирает НЕобязательное поле для валидации
 	 * @param string $field
 	 * @return $this
 	 */
 	public function option($field) {
 		$this->field = null;
 
-		if (isset($this->data[$field]) && gettype($this->data[$field]) != 'NULL') {
+		if (!empty($this->data[$field])) {
 			$this->field = $field;
 		}
 
