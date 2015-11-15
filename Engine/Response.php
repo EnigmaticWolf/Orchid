@@ -94,6 +94,10 @@ class Response {
 		"none"   => "text/plain",
 	);
 
+	public function __construct() {
+		ob_start();
+	}
+
 	public function flush() {
 		if (!headers_sent()) {
 			if ($this->nocache || !empty($_SERVER["HTTPS"])) {

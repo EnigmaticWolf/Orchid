@@ -330,10 +330,6 @@ class Orchid implements ArrayAccess {
 				ob_end_flush();
 			});
 
-			if (!ob_start("ob_gzhandler")) {
-				ob_start();
-			}
-
 			$this->response = new Response();
 
 			$this->trigger("before");
