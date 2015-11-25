@@ -34,23 +34,16 @@ abstract class AppAware {
 		$this->app = &Orchid::getInstance();
 	}
 
-	protected function __invoke($extension) {
-		return $this->app->extension($extension);
-	}
-
-	protected function __call($key, $arguments) {
-		if (method_exists($this->app, $key)) {
-			return call_user_func_array([$this->app, $key], $arguments);
+	/**
+	 * Возвращает модуль или расширение по имени его класса
+	 * @param $name
+	 * @return Extension|Module|null
+	 */
+	public function __invoke($name) {
+		if ($module = $this->app->module($name)) {
+			return $module;
 		}
 
-		return $this;
-	}
-
-	protected function __get($key) {
-		return $this->app[$key];
-	}
-
-	protected function __set($key, $value) {
-		$this->app[$key] = $value;
+		return $this->app->extension($name);
 	}
 }

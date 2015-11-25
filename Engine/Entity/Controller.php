@@ -25,10 +25,6 @@
 namespace Engine\Entity;
 
 abstract class Controller extends AppAware {
-	protected function __invoke($module) {
-		return $this->app->module($module);
-	}
-
 	protected function render($template, array $data = []) {
 		return $this->app->render($template, $data);
 	}
