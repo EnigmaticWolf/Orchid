@@ -85,7 +85,7 @@ class Orchid implements ArrayAccess {
 		foreach (explode("&", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_QUERY)) as $part) {
 			if ($part) {
 				$data                              = explode("=", $part);
-				$this->registry["param"][$data[0]] = $_GET[$data[0]] = $data[1];
+				$this->registry["param"][$data[0]] = $_GET[$data[0]] = isset($data[1]) ? $data[1] : "";
 			}
 		}
 
