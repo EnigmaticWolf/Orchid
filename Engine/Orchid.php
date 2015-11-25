@@ -817,12 +817,16 @@ class Orchid implements ArrayAccess {
 	}
 
 	/**
-	 * Для доступа к расширениям
-	 * @param $extension
+	 * Для доступа к модулям или расширениям
+	 * @param $name
 	 * @return Extension
 	 */
-	public function __invoke($extension) {
-		return $this->extension($extension);
+	public function __invoke($name) {
+		if ($module = $this->module($name)) {
+			return $module;
+		}
+
+		return $this->extension($name);
 	}
 
 	/**
