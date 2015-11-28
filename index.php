@@ -23,7 +23,6 @@
  */
 
 define("ORCHID", __DIR__ . DIRECTORY_SEPARATOR);
-define("CLASSES", ORCHID . "vendor" . DIRECTORY_SEPARATOR);
 
 // PSR auto class loader
 spl_autoload_register(function ($class) {
@@ -47,6 +46,6 @@ $app = new Orchid\App();
 
 $app
 	->loadModule([
-		ORCHID . 'modules',  # core
+		ORCHID . 'modules',
 	])
 	->run();
