@@ -600,7 +600,7 @@ class Orchid implements ArrayAccess {
 	 * @return bool
 	 */
 	public function isAbsolutePath($path) {
-		return "/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2]));
+		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
 	}
 
 	/**
@@ -645,12 +645,12 @@ class Orchid implements ArrayAccess {
 	 * @return Module
 	 */
 	public function addModule($name, $dir) {
-		if (!isset($this->registry["module"][strtolower($name)])) {
+		if (!isset($this->registry["module"][$name])) {
 			$this->path($name, $dir);
-			$this->registry["module"][strtolower($name)] = $this->bootModule($name, $dir);
+			$this->registry["module"][$name] = $this->bootModule($name, $dir);
 		}
 
-		return $this->registry["module"][strtolower($name)];
+		return $this->registry["module"][$name];
 	}
 
 	/**
@@ -675,8 +675,6 @@ class Orchid implements ArrayAccess {
 	 * @return Module|null
 	 */
 	public function module($name) {
-		$name = strtolower($name);
-
 		return isset($this->registry["module"][$name]) ? $this->registry["module"][$name] : null;
 	}
 
