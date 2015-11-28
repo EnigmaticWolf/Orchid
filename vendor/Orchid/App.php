@@ -73,7 +73,7 @@ class App implements ArrayAccess {
 		// Дополнительный загрузшик
 		spl_autoload_register(function ($class) {
 			foreach (App::$instance->retrieve("autoload", []) as $dir) {
-				$class_file = $dir . '/' . str_replace('\\', '/', $class) . '.php';
+				$class_file = $dir . "/" . str_replace("\\", "/", $class) . ".php";
 
 				if (file_exists($class_file)) {
 					include_once($class_file);
