@@ -22,28 +22,16 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity\Validate;
+namespace Main\Controller;
 
-use Closure;
+use Orchid\Entity\Controller;
 
-trait String {
-	/**
-	 * Проверяемое значение это E-Mail адрес
-	 * @return Closure
-	 */
-	public function isEmail() {
-		return function ($field) {
-			return !!filter_var($field, FILTER_VALIDATE_EMAIL);
-		};
-	}
+class Main extends Controller {
+	public function index() {
+		$data = [
+			"hello" => $this("Main")->HelloWorld(),
+		];
 
-	/**
-	 * Проверяемое значение это IP адрес
-	 * @return Closure
-	 */
-	public function isIp() {
-		return function ($field) {
-			return !!filter_var($field, FILTER_VALIDATE_IP);
-		};
+		return $this->render("Main:View/Main.php", $data);
 	}
 }

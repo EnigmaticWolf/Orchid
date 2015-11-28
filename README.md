@@ -2,7 +2,7 @@ Orchid Framework
 ====
 Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
-$app = new Engine\Orchid();
+$app = new Orchid\App();
 
 $app->bind("/", function(){
 	return "Здравствуй Мир! :)";
@@ -172,7 +172,7 @@ $app["db"]->query(...);
 ## Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
-class Foo extends Engine\Entity\Extension {
+class Foo extends Orchid\Entity\Extension {
     public function bar(){
         echo "Hello!";
     }
@@ -218,7 +218,7 @@ $app("String")->translate($input, $back = false);
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
 ```php
-class ModulePage extends Engine\Entity\Module { 
+class ModulePage extends Orchid\Entity\Module { 
     public function initialize() {
         // зададим правило обработки запросов
 		$this->app->bindClass("Page", "*");
@@ -237,7 +237,7 @@ $app("ModulePage")->foo(); // "bar"
 
 ## Модели
 ```php
-class Car extends Engine\Entity\Model {
+class Car extends Orchid\Entity\Model {
     protected static $default = [
         "brand" => "",
         "model" => "",
@@ -274,7 +274,7 @@ echo $auto->getMark();
 
 ## Коллекции
 ```php
-class Cars extends Engine\Entity\Collection {
+class Cars extends Orchid\Entity\Collection {
 	protected static $model = "Car"; // указывает какую модель создать при вызове метода get
 	
 	public static function fetch(array $data = []) {
@@ -290,11 +290,11 @@ foreach($myCars as $key => $val) {
 
 ## Валидатор
 ```php
-class ValidData extends Engine\Entity\Validator {
+class ValidData extends Orchid\Entity\Validator {
     // подключение стандартных проверяющих функций
-	use Engine\Entity\Validate\Base,
-		Engine\Entity\Validate\Type,
-		Engine\Entity\Validate\String;
+	use Orchid\Entity\Validate\Base,
+		Orchid\Entity\Validate\Type,
+		Orchid\Entity\Validate\String;
 		
 	// при необходимости можно расширить функционал
 	public function isSupportedCity() {

@@ -23,13 +23,15 @@
  */
 
 define("ORCHID", __DIR__ . DIRECTORY_SEPARATOR);
+define("CLASSES", ORCHID . "vendor" . DIRECTORY_SEPARATOR);
 
 // PSR auto class loader
 spl_autoload_register(function ($class) {
-	$class_path = ORCHID . str_replace("\\", "/", $class) . ".php";
-
+	$class_path = ORCHID . "vendor/" . str_replace("\\", "/", $class) . ".php";
 	if (file_exists($class_path)) {
-		require_once($class_path);
+		include_once($class_path);
+
+		return;
 	}
 });
 
@@ -41,10 +43,10 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-$app = new Engine\Orchid();
+$app = new Orchid\App();
 
 $app
 	->loadModule([
-		ORCHID . "Module",
+		ORCHID . 'modules',  # core
 	])
 	->run();

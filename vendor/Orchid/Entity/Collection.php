@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity;
+namespace Orchid\Entity;
 
 use Closure;
 use Countable;

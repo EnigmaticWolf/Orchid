@@ -22,16 +22,8 @@
  * THE SOFTWARE.
  */
 
-namespace Module\Main\Controller;
+namespace Orchid\Entity;
 
-use Engine\Entity\Controller;
+abstract class Extension extends Module {
 
-class Main extends Controller {
-	public function index() {
-		$data = [
-			"hello" => $this("Main")->HelloWorld(),
-		];
-
-		return $this->render("Main:View/Main.php", $data);
-	}
 }

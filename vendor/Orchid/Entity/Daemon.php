@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity;
+namespace Orchid\Entity;
 
 abstract class Daemon extends AppAware {
 	protected $is_daemon = true; // флаг переключающий режимы daemon/bin

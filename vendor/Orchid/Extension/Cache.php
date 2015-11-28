@@ -21,10 +21,10 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extension;
+namespace Orchid\Extension;
 
 use Closure;
-use Engine\Entity\Extension;
+use Orchid\Entity\Extension;
 use RecursiveDirectoryIterator;
 
 class Cache extends Extension {

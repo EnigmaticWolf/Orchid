@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity;
+namespace Orchid\Entity;
 
 abstract class Controller extends AppAware {
 	protected function render($template, array $data = []) {

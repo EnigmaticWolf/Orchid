@@ -22,8 +22,28 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity;
+namespace Orchid\Entity\Validate;
 
-abstract class Extension extends Module {
+use Closure;
 
+trait String {
+	/**
+	 * Проверяемое значение это E-Mail адрес
+	 * @return Closure
+	 */
+	public function isEmail() {
+		return function ($field) {
+			return !!filter_var($field, FILTER_VALIDATE_EMAIL);
+		};
+	}
+
+	/**
+	 * Проверяемое значение это IP адрес
+	 * @return Closure
+	 */
+	public function isIp() {
+		return function ($field) {
+			return !!filter_var($field, FILTER_VALIDATE_IP);
+		};
+	}
 }

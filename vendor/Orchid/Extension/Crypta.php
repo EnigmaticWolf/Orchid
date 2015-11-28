@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extension;
+namespace Orchid\Extension;
 
-use Engine\Entity\Extension;
+use Orchid\Entity\Extension;
 
 class Crypta extends Extension {
 	protected $salt = null;

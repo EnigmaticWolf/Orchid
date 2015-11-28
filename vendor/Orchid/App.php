@@ -2,17 +2,17 @@
 
 /*
  * Copyright (c) 2011-2016 AEngine
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is furnished
  * to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,18 +22,19 @@
  * THE SOFTWARE.
  */
 
-namespace Engine;
+namespace Orchid;
 
 use ArrayAccess;
+use ArrayObject;
 use Closure;
 use DirectoryIterator;
-use Engine\Entity\Module;
-use Engine\Entity\Extension;
+use Orchid\Entity\Module;
+use Orchid\Entity\Extension;
 use InvalidArgumentException;
 use SplPriorityQueue;
 
-class Orchid implements ArrayAccess {
-	/** @var Orchid $instance */
+class App implements ArrayAccess {
+	/** @var App $instance */
 	public static $instance = null;
 
 	protected $registry = [];
@@ -50,6 +51,7 @@ class Orchid implements ArrayAccess {
 			"secret"    => "secret",
 			"session"   => "session",
 
+			"autoload"  => new ArrayObject([]),
 			"extension" => [],
 			"module"    => [],
 			"path"      => [],
@@ -67,6 +69,19 @@ class Orchid implements ArrayAccess {
 		], $param);
 
 		static::$instance = &$this;
+
+		// Дополнительный загрузшик
+		spl_autoload_register(function ($class) {
+			foreach (App::$instance->retrieve("autoload", []) as $dir) {
+				$class_file = $dir . '/' . str_replace('\\', '/', $class) . '.php';
+
+				if (file_exists($class_file)) {
+					include_once($class_file);
+
+					return;
+				}
+			}
+		});
 
 		// SLI аргументы
 		if (PHP_SAPI == "cli"){
@@ -110,7 +125,7 @@ class Orchid implements ArrayAccess {
 	}
 
 	/**
-	 * @return Orchid
+	 * @return App
 	 */
 	public static function &getInstance() {
 		return static::$instance;
@@ -246,7 +261,7 @@ class Orchid implements ArrayAccess {
 	 * @param  string	$name     имя задачи
 	 * @param  Closure	$callback функция
 	 * @param  int 		$priority приоритет задачи
-	 * @return Orchid
+	 * @return App
 	 */
 	public function task($name, $callback, $priority = 0) {
 		$name = strtolower($name);
@@ -267,7 +282,7 @@ class Orchid implements ArrayAccess {
 	 * Запускает выполнение задачи с возможностью передачи параметров
 	 * @param  string $name   имя задачи
 	 * @param  array  $params передаваемые параметры
-	 * @return Orchid
+	 * @return App
 	 */
 	public function trigger($name, $params = []) {
 		if (!isset($this->registry["task"][$name])) {
@@ -298,7 +313,7 @@ class Orchid implements ArrayAccess {
 
 	/**
 	 * Запуск приложения
-	 * @return Orchid
+	 * @return App
 	 */
 	public function run() {
 		if (PHP_SAPI == "cli" && isset($this["args"][0])) {
@@ -366,7 +381,7 @@ class Orchid implements ArrayAccess {
 	 * @param      $callback
 	 * @param bool $condition
 	 * @param int  $priority
-	 * @return Orchid
+	 * @return App
 	 */
 	public function get($path, $callback, $condition = true, $priority = 0) {
 		return $this->bind($path, $callback, "GET", $condition, $priority);
@@ -378,7 +393,7 @@ class Orchid implements ArrayAccess {
 	 * @param      $callback
 	 * @param bool $condition
 	 * @param int  $priority
-	 * @return Orchid
+	 * @return App
 	 */
 	public function post($path, $callback, $condition = true, $priority = 0) {
 		return $this->bind($path, $callback, "POST", $condition, $priority);
@@ -391,7 +406,7 @@ class Orchid implements ArrayAccess {
 	 * @param string  $method
 	 * @param bool    $condition
 	 * @param int     $priority
-	 * @return Orchid
+	 * @return App
 	 */
 	public function bind($path, $callback, $method = null, $condition = true, $priority = 0) {
 		if ((is_null($method) || $this->req_is($method)) && $condition) {
@@ -416,7 +431,7 @@ class Orchid implements ArrayAccess {
 	 * @param null   $method
 	 * @param bool   $condition
 	 * @param int    $priority
-	 * @return Orchid
+	 * @return App
 	 */
 	public function bindClass($class, $alias = false, $method = null, $condition = true, $priority = 0) {
 		$self  = $this;
@@ -622,16 +637,18 @@ class Orchid implements ArrayAccess {
 	/**
 	 * Загружает модули из переданных директорий
 	 * @param array $dirs
-	 * @return Orchid
+	 * @return App
 	 */
 	public function loadModule(array $dirs) {
 		foreach ($dirs as &$dir) {
 			if (is_dir($dir)) {
 				foreach (new DirectoryIterator($dir) as $module) {
-					if ($module->isDir() && !$module->isDot() || $module->isFile()) {
+					if ($module->isDir() && !$module->isDot() || $module->isFile() && $module->getExtension() == "php") {
 						$this->addModule($module->getBasename(".php"), $module->getRealPath());
 					}
 				}
+
+				$this["autoload"]->append($dir);
 			}
 		}
 
@@ -683,7 +700,7 @@ class Orchid implements ArrayAccess {
 	 * @return void
 	 */
 	protected function bootDaemon() {
-		$class = "Engine\\Daemon\\" . $this["args"][0];
+		$class = "Orchid\\Daemon\\" . $this["args"][0];
 
 		new $class();
 	}
@@ -726,7 +743,7 @@ class Orchid implements ArrayAccess {
 	 */
 	public function extension($extension) {
 		if (!isset($this->registry["extension"][$extension])) {
-			$class                                   = "Engine\\Extension\\" . $extension;
+			$class                                   = "Orchid\\Extension\\" . $extension;
 			$this->registry["extension"][$extension] = new $class();
 		}
 
@@ -850,7 +867,7 @@ class Orchid implements ArrayAccess {
 	 * Записывает значение в реестр
 	 * @param string $key   ключ
 	 * @param mixed  $value значение
-	 * @return Orchid
+	 * @return App
 	 */
 	public function __set($key, $value) {
 		$keys = explode("/", $key);

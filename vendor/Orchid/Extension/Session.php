@@ -21,10 +21,10 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extension;
+namespace Orchid\Extension;
 
-use Engine\Entity\Extension;
-use function engine\fetch_from_array;
+use Orchid\Entity\Extension;
+use function Orchid\fetch_from_array;
 
 class Session extends Extension {
 	protected $initialized = false;

@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Extension;
+namespace Orchid\Extension;
 
 use DirectoryIterator;
-use Engine\Entity\Extension;
+use Orchid\Entity\Extension;
 
 class FileSystem extends Extension {
 	/**

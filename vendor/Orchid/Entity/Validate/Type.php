@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-namespace Engine\Entity\Validate;
+namespace Orchid\Entity\Validate;
 
 use Closure;
 
