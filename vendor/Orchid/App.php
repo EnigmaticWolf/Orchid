@@ -671,17 +671,17 @@ class App implements ArrayAccess {
 
 	/**
 	 * Подгружает файл модуля
-	 * @param $name
+	 * @param $class
 	 * @param $dir
 	 * @return Module
 	 */
-	protected function bootModule($name, $dir) {
+	protected function bootModule($class, $dir) {
 		if (is_file($dir)) {
 			require_once($dir);
 		} else {
-			$this->path($name, $dir);
+			$this->path($class, $dir);
 
-			$class = "Module" . $name;
+			$class = "Module" . $class;
 			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
 		}
 
