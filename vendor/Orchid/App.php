@@ -663,7 +663,6 @@ class App implements ArrayAccess {
 	 */
 	public function addModule($name, $dir) {
 		if (!isset($this->registry["module"][$name])) {
-			$this->path($name, $dir);
 			$this->registry["module"][$name] = $this->bootModule($name, $dir);
 		}
 
@@ -672,15 +671,17 @@ class App implements ArrayAccess {
 
 	/**
 	 * Подгружает файл модуля
-	 * @param $class
+	 * @param $name
 	 * @param $dir
 	 * @return Module
 	 */
-	protected function bootModule($class, $dir) {
+	protected function bootModule($name, $dir) {
 		if (is_file($dir)) {
 			require_once($dir);
 		} else {
-			$class = "Module" . $class;
+			$this->path($name, $dir);
+
+			$class = "Module" . $name;
 			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
 		}
 
