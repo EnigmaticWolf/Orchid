@@ -258,9 +258,9 @@ class App implements ArrayAccess {
 
 	/**
 	 * Добавляет задачу
-	 * @param  string	$name     имя задачи
-	 * @param  Closure	$callback функция
-	 * @param  int 		$priority приоритет задачи
+	 * @param  string        $name     имя задачи
+	 * @param  Closure|array $callback функция или массив указывающий на метод
+	 * @param  int           $priority приоритет задачи
 	 * @return App
 	 */
 	public function task($name, $callback, $priority = 0) {
@@ -301,9 +301,7 @@ class App implements ArrayAccess {
 		while ($queue->valid()) {
 			$index = $queue->current();
 			if (is_callable($this->registry["task"][$name][$index]["callback"])) {
-				if (call_user_func_array($this->registry["task"][$name][$index]["callback"], $params) === false) {
-					break; //остановить
-				}
+				call_user_func_array($this->registry["task"][$name][$index]["callback"], $params);
 			}
 			$queue->next();
 		}
