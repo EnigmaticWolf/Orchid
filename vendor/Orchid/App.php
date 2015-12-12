@@ -47,6 +47,9 @@ class App implements ArrayAccess {
 		$this->registry = array_merge([
 			"debug"		=> true,
 
+			"locale"	=> ["ru"],
+
+			"instance"	=> [],
 			"app"		=> "public",
 			"secret"    => "secret",
 			"session"   => "session",
