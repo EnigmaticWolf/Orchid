@@ -103,7 +103,7 @@ class Asset extends Extension {
 			if (!$item->isDot()) {
 				if ($item->isDir()) {
 					$this->templateIterator($this->app->path($path . $item->getBasename()));
-				} elseif ($item->isFile()) {
+				} elseif ($item->isFile() && pathinfo($item->getBasename())["extension"] == "tpl") {
 					$file = str_replace("//", "/", $path . "/" . $item->getBasename());
 					$this->tpl[] = str_replace(
 						["{name}", "{template}"],
