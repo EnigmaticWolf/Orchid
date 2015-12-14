@@ -107,7 +107,7 @@ class Asset extends Extension {
 					$file = str_replace("//", "/", $path . "/" . $item->getBasename());
 					$this->tpl[] = str_replace(
 						["{name}", "{template}"],
-						[str_replace(["/", ".tpl"], ["-", ""], explode("template", $file)[1]), "\n\r" . file_get_contents($file) . "\n\r"],
+						[str_replace(["/", ".tpl"], ["-", ""], explode("template", $file)[1]), file_get_contents($file)],
 						$this->template
 					);
 				}
