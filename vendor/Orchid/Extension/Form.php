@@ -51,7 +51,7 @@ class Form extends Extension {
 	 * @param array $args [name, data]
 	 * @return $this|mixed|null|string
 	 */
-	public static function __call($type, $args) {
+	public static function __callStatic($type, $args) {
 		if (in_array($type, static::$type)) {
 			if (count($args) == 2) {
 				list($name, $data) = $args;
