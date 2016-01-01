@@ -61,7 +61,7 @@ final class App {
 				$class_file = $dir . "/" . str_replace("\\", "/", $class) . ".php";
 
 				if (file_exists($class_file)) {
-					include_once($class_file);
+					require_once($class_file);
 
 					return;
 				}

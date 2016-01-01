@@ -28,7 +28,7 @@ define("ORCHID", __DIR__);
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace("\\", "/", $class) . ".php";
 	if (file_exists($class_path)) {
-		include_once($class_path);
+		require_once($class_path);
 
 		return;
 	}
