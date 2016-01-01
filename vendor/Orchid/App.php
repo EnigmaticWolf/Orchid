@@ -292,43 +292,61 @@ final class App {
 	}
 
 	/**
+	 * Исполняет демона
+	 */
+	protected static function bootDaemon() {
+		if (!empty(static::$registry["args"][0])) {
+			$class = "Orchid\\Daemon\\" . static::$registry["args"][0];
+
+			new $class();
+		}
+	}
+
+	/**
+	 * Запускает выполнение демона в фоне
+	 * @param array $args первый аргумент - имя класса демона
+	 */
+	public static function runDaemon(...$args) {
+		system("php " . static::$registry["base_dir"] . DIRECTORY_SEPARATOR . "index.php " . implode(" ", $args) . " > /dev/null &");
+	}
+
+	/**
 	 * Запуск приложения
 	 */
 	public static function run() {
-		// todo восстановить поддержку демонов
-		/*if (PHP_SAPI == "cli" && isset($this["args"][0])) {
-			//$this->bootDaemon(); // запускаем демона
-		} else {*/
-		register_shutdown_function(function () {
-			// Если приложение было завершено
-			if (App::isTerminated()) {
-				return;
-			}
+		if (PHP_SAPI == "cli") {
+			static::bootDaemon(); // запускаем демона
+		} else {
+			register_shutdown_function(function () {
+				// Если приложение было завершено
+				if (App::isTerminated()) {
+					return;
+				}
 
-			$error = error_get_last();
-			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
-				ob_end_clean();
-				Response::$nocache = true;
-				Response::$status  = "500";
-				Response::$body    = App::retrieve("debug", false) ? $error : "Internal Error.";
-			} elseif (!Response::$body) {
-				Response::$nocache = true;
-				Response::$status  = "404";
-				Response::$body    = "Path not found.";
-			}
+				$error = error_get_last();
+				if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
+					ob_end_clean();
+					Response::$nocache = true;
+					Response::$status  = "500";
+					Response::$body    = App::retrieve("debug", false) ? $error : "Internal Error.";
+				} elseif (!Response::$body) {
+					Response::$nocache = true;
+					Response::$status  = "404";
+					Response::$body    = "Path not found.";
+				}
 
-			Task::trigger("after");
-			Response::flush();
+				Task::trigger("after");
+				Response::flush();
 
-			Task::trigger("shutdown");
-			ob_end_flush();
-		});
+				Task::trigger("shutdown");
+				ob_end_flush();
+			});
 
-		ob_start();
+			ob_start();
 
-		Task::trigger("before");
-		Response::$body = Router::dispatch();
-		//}
+			Task::trigger("before");
+			Response::$body = Router::dispatch();
+		}
 	}
 
 	/**

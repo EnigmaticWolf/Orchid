@@ -51,7 +51,7 @@ abstract class Daemon extends AppAware {
 		if (!pcntl_fork()) {
 			posix_setsid();
 			$this->pid      = getmypid();
-			$this->pid_file = App::get("base_dir") . "/Cache/" . App::retrieve("args/0", "daemon") . ".pid";
+			$this->pid_file = App::get("base_dir") . "/cache/" . App::retrieve("args/0", "daemon") . ".pid";
 
 			if (!file_exists($this->pid_file)) {
 				// если демон, то выполняем функцию инициализации
