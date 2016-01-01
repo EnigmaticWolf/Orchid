@@ -26,6 +26,18 @@ namespace Orchid\Extension;
 
 use Orchid\Entity\Extension;
 
+/**
+ * @method static text(string $name, array $options)
+ * @method static password(string $name, array $options)
+ * @method static textarea(string $name, array $options)
+ * @method static checkbox(string $name, array $options)
+ * @method static radio(string $name, array $options)
+ * @method static file(string $name, array $options)
+ * @method static submit(string $name, array $options)
+ * @method static reset(string $name, array $options)
+ * @method static button(string $name, array $options)
+ * @method static hidden(string $name, array $options)
+ */
 class Form extends Extension {
 	/**
 	 * Массив поддерживаемых типов
@@ -48,7 +60,7 @@ class Form extends Extension {
 	/**
 	 * Сформировать поле
 	 * @param string $type тип поля
-	 * @param array $args [name, data]
+	 * @param array  $args [name, data]
 	 * @return $this|mixed|null|string
 	 */
 	public static function __callStatic($type, $args) {
@@ -68,9 +80,9 @@ class Form extends Extension {
 
 	/**
 	 * Сформировать поле выбора
-	 * @param string $name имя поля
-	 * @param array $option массив значений выбора
-	 * @param array $data массив дополнительных атрибутов
+	 * @param string $name   имя поля
+	 * @param array  $option массив значений выбора
+	 * @param array  $data   массив дополнительных атрибутов
 	 * @return string
 	 */
 	public static function select($name, array $option = [], array $data = []) {
@@ -93,7 +105,7 @@ class Form extends Extension {
 			"required"    => false,
 			"autofocus"   => false,
 		];
-		$form = "";
+		$form    = "";
 
 		// определяем тип требуемой формы
 		switch ($data["type"]) {
