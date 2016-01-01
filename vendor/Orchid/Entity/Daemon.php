@@ -23,6 +23,8 @@
 
 namespace Orchid\Entity;
 
+use Orchid\App;
+
 abstract class Daemon extends AppAware {
 	protected $is_daemon = true; // флаг переключающий режимы daemon/bin
 
@@ -32,16 +34,14 @@ abstract class Daemon extends AppAware {
 	protected $log_err   = null;
 
 	public final function __construct() {
-		parent::__construct();
-
 		// если демон, то переопределяем вывод в файл
 		if ($this->is_daemon) {
 			fclose(STDIN);
 			fclose(STDOUT);
 			fclose(STDERR);
 
-			$this->log     = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . ".log";
-			$this->log_err = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . "-error.log";
+			$this->log     = App::get("base_dir") . "/cache/" . App::retrieve("args/0", "daemon") . ".log";
+			$this->log_err = App::get("base_dir") . "/cache/" . App::retrieve("args/0", "daemon") . "-error.log";
 
 			$STDIN	= fopen("/dev/null", "r");
 			$STDOUT = fopen($this->log, 'ab');
@@ -51,7 +51,7 @@ abstract class Daemon extends AppAware {
 		if (!pcntl_fork()) {
 			posix_setsid();
 			$this->pid      = getmypid();
-			$this->pid_file = $this->app["base_dir"] . "/Cache/" . $this->app["args"][0] . ".pid";
+			$this->pid_file = App::get("base_dir") . "/Cache/" . App::retrieve("args/0", "daemon") . ".pid";
 
 			if (!file_exists($this->pid_file)) {
 				// если демон, то выполняем функцию инициализации

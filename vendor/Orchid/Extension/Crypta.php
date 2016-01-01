@@ -24,22 +24,17 @@
 
 namespace Orchid\Extension;
 
+use Orchid\App;
 use Orchid\Entity\Extension;
 
 class Crypta extends Extension {
-	protected $salt = null;
-
-	public function initialize() {
-		$this->salt = $this->app["secret"];
-	}
-
 	/**
 	 * Зашифровать строку
 	 * @param string $input строка
 	 * @return string зашифрованная строка
 	 */
-	public function encrypt($input) {
-		return base64_encode($this->crypt($input));
+	public static function encrypt($input) {
+		return base64_encode(static::crypt($input));
 	}
 
 	/**
@@ -47,8 +42,8 @@ class Crypta extends Extension {
 	 * @param string $input строка
 	 * @return string расшифрованная строка
 	 */
-	public function decrypt($input) {
-		return $this->crypt(base64_decode($input));
+	public static function decrypt($input) {
+		return static::crypt(base64_decode($input));
 	}
 
 	/**
@@ -56,8 +51,8 @@ class Crypta extends Extension {
 	 * @param string $input строка
 	 * @return string обработанная строка
 	 */
-	protected function crypt($input) {
-		$salt = md5($this->salt);
+	protected static function crypt($input) {
+		$salt = md5(App::get("secret"));
 		$len = strlen($input);
 		$gamma = "";
 		$n = $len > 100 ? 8 : 2;
@@ -73,8 +68,8 @@ class Crypta extends Extension {
 	 * @param string $string строка из которой получить хешсумму
 	 * @return string хешсумма
 	 */
-	public function hash($string) {
-		$salt = substr(hash("whirlpool", uniqid(rand() . $this->salt, true)), 0, 12);
+	public static function hash($string) {
+		$salt = substr(hash("whirlpool", uniqid(rand() . App::get("secret"), true)), 0, 12);
 		$hash = hash("whirlpool", $salt . $string);
 		$saltPos = (strlen($string) >= strlen($hash) ? strlen($hash) : strlen($string));
 
@@ -87,7 +82,7 @@ class Crypta extends Extension {
 	 * @param string $hashString хешсумма
 	 * @return Boolean
 	 */
-	public function check($string, $hashString) {
+	public static function check($string, $hashString) {
 		$saltPos = (strlen($string) >= strlen($hashString) ? strlen($hashString) : strlen($string));
 		$salt = substr($hashString, $saltPos, 12);
 		$hash = hash("whirlpool", $salt . $string);

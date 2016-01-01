@@ -24,26 +24,6 @@
 
 namespace Orchid\Entity;
 
-use Orchid\App;
-
 abstract class AppAware {
-	/** @var App */
-	protected $app;
 
-	public function __construct() {
-		$this->app = &App::getInstance();
-	}
-
-	/**
-	 * Возвращает модуль или расширение по имени его класса
-	 * @param $name
-	 * @return Extension|Module|null
-	 */
-	public function __invoke($name) {
-		if ($module = $this->app->module($name)) {
-			return $module;
-		}
-
-		return $this->app->extension($name);
-	}
 }

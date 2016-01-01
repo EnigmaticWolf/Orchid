@@ -24,14 +24,14 @@
 
 namespace Orchid;
 
-class Response {
-	public $body    = "";
-	public $status  = 200;
-	public $mime    = "html";
-	public $nocache = false;
-	public $headers = [];
+final class Response {
+	public static $body    = "";
+	public static $status  = 200;
+	public static $mime    = "html";
+	public static $nocache = false;
+	public static $headers = [];
 
-	protected $mimeTypes = array(
+	protected static $mimeTypes = array(
 		//Texts
 		"txt"    => "text/plain",
 		"ini"    => "text/ini",
@@ -94,13 +94,9 @@ class Response {
 		"none"   => "text/plain",
 	);
 
-	public function __construct() {
-		ob_start();
-	}
-
-	public function flush() {
+	public static function flush() {
 		if (!headers_sent()) {
-			if ($this->nocache || !empty($_SERVER["HTTPS"])) {
+			if (static::$nocache || !empty($_SERVER["HTTPS"])) {
 				header("Cache-Control: no-cache, must-revalidate");
 				header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 				header("Pragma: no-cache");
@@ -109,32 +105,30 @@ class Response {
 				header("Expires: " . gmdate("D, d M Y H:i:s", (time() + (60 * 60 * 24))) . " GMT");
 			}
 
-			foreach ($this->headers as $key => $val) {
+			foreach (static::$headers as $key => $val) {
 				header($key . ": " . $val);
 			}
 
-			http_response_code($this->status);
+			http_response_code(static::$status);
 
-			if (is_array($this->body)) {
-				$this->mime = "json";
-				$this->body = json_encode($this->body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+			if (is_array(static::$body)) {
+				static::$mime = "json";
+				static::$body = json_encode(static::$body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 			}
-			if (!is_file($this->body)) {
-				header("Content-Type: " . $this->mimeTypes[$this->mime] . "; charset=utf-8");
+			if (!is_file(static::$body)) {
+				header("Content-Type: " . static::$mimeTypes[static::$mime] . "; charset=utf-8");
 
-				echo trim($this->body);
+				echo trim(static::$body);
 			} else {
-				header("Content-Type: " . $this->mimeTypes[@end(explode(".", basename($this->body)))] . "; charset=utf-8");
-				header("Content-Disposition: inline; filename='" . basename($this->body) . "'");
+				header("Content-Type: " . static::$mimeTypes[@end(explode(".", basename(static::$body)))] . "; charset=utf-8");
+				header("Content-Disposition: inline; filename='" . basename(static::$body) . "'");
 
 				if (strpos($_SERVER['SERVER_SOFTWARE'], "nginx") !== false) {
-					header("X-Accel-Redirect: " . str_replace(ORCHID, "", $this->body));
-				}
-				elseif (strpos($_SERVER['SERVER_SOFTWARE'], "Apache") !== false) {
-					header("X-SendFile: " . str_replace(ORCHID, "", $this->body));
-				}
-				else {
-					readfile($this->body);
+					header("X-Accel-Redirect: " . str_replace(ORCHID, "", static::$body));
+				} elseif (strpos($_SERVER['SERVER_SOFTWARE'], "Apache") !== false) {
+					header("X-SendFile: " . str_replace(ORCHID, "", static::$body));
+				} else {
+					readfile(static::$body);
 				}
 			}
 		}

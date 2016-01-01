@@ -42,10 +42,10 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-$app = new Orchid\App();
+use Orchid\App;
 
-$app
-	->loadModule([
-		ORCHID . "/modules",
-	])
-	->run();
+App::initialize();
+App::loadModule([
+	ORCHID . "/modules",
+]);
+App::run();

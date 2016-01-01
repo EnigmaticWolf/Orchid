@@ -25,6 +25,7 @@
 namespace Orchid\Extension;
 
 use DirectoryIterator;
+use Orchid\App;
 use Orchid\Entity\Extension;
 
 class FileSystem extends Extension {
@@ -33,9 +34,9 @@ class FileSystem extends Extension {
 	 * @param string|null $dirName абсолютный или ссылочный путь
 	 * @return array
 	 */
-	public function ls($dirName = null) {
+	public static function ls($dirName = null) {
 		$list = [];
-		if (($dirName = $this->app->path(($dirName ? $dirName : $this->app["base_dir"]))) != false) {
+		if (($dirName = App::path(($dirName ? $dirName : App::get("base_dir")))) != false) {
 			foreach (new DirectoryIterator($dirName) as $iterator) {
 				if ($iterator->isDot()) {
 					continue;
@@ -50,12 +51,12 @@ class FileSystem extends Extension {
 	/**
 	 * Создать новую папку
 	 * @param string $dirName абсолютный или ссылочный путь
-	 * @param int $mode уровень доступа для владельца файла
+	 * @param int    $mode    уровень доступа для владельца файла
 	 * @return bool
 	 */
-	public function mkdir($dirName, $mode = 0755) {
-		if (!$this->app->path($dirName)) {
-			return mkdir($this->notExistEntry($dirName), $mode);
+	public static function mkdir($dirName, $mode = 0755) {
+		if (!App::path($dirName)) {
+			return mkdir(static::notExistEntry($dirName), $mode);
 		}
 
 		return false;
@@ -66,16 +67,16 @@ class FileSystem extends Extension {
 	 * @param string $dirName абсолютный или ссылочный путь
 	 * @return bool
 	 */
-	public function rmdir($dirName) {
-		if ($dirName = $this->app->path($dirName)) {
-			if ($ls = $this->ls($dirName)) {
+	public static function rmdir($dirName) {
+		if ($dirName = App::path($dirName)) {
+			if ($ls = static::ls($dirName)) {
 				foreach ($ls as $key => $val) {
 					$path = $dirName . DIRECTORY_SEPARATOR . $val;
 
 					if (is_dir($path) || is_link($path)) {
-						$this->rmdir($path);
+						static::rmdir($path);
 					} elseif (is_file($path)) {
-						$this->delete($path);
+						static::delete($path);
 					}
 				}
 			}
@@ -91,8 +92,8 @@ class FileSystem extends Extension {
 	 * @param string $file абсолютный или ссылочный путь
 	 * @return bool|string
 	 */
-	public function read($file) {
-		if ($file = $this->app->path($file)) {
+	public static function read($file) {
+		if ($file = App::path($file)) {
 			return file_get_contents($file);
 		}
 
@@ -102,13 +103,13 @@ class FileSystem extends Extension {
 	/**
 	 * Записать данные в файл
 	 * @param string $file абсолютный или ссылочный путь
-	 * @param mixed $data содержимое для записи в файл
+	 * @param mixed  $data содержимое для записи в файл
 	 * @return bool|int
 	 */
-	public function write($file, $data) {
+	public static function write($file, $data) {
 		if (
-			($path = $this->app->path($file)) ||
-			($path = $this->notExistEntry($file))
+			($path = App::path($file)) ||
+			($path = static::notExistEntry($file))
 		) {
 			return file_put_contents($path, $data);
 		}
@@ -118,16 +119,16 @@ class FileSystem extends Extension {
 
 	/**
 	 * Скопировать файл в указанное место
-	 * @param string $source абсолютный или ссылочный путь
+	 * @param string $source      абсолютный или ссылочный путь
 	 * @param string $destination абсолютный или ссылочный путь
 	 * @return bool
 	 */
-	public function copy($source, $destination) {
+	public static function copy($source, $destination) {
 		if (
-			($source = $this->app->path($source)) &&
+			($source = App::path($source)) &&
 			(
-				($new = $this->app->path($destination)) ||
-				($new = $this->notExistEntry($destination))
+				($new = App::path($destination)) ||
+				($new = static::notExistEntry($destination))
 			)
 		) {
 			return copy($source, $new);
@@ -142,12 +143,12 @@ class FileSystem extends Extension {
 	 * @param string $newName абсолютный или ссылочный путь
 	 * @return bool
 	 */
-	public function rename($oldName, $newName) {
+	public static function rename($oldName, $newName) {
 		if (
-			($old = $this->app->path($oldName)) &&
+			($old = App::path($oldName)) &&
 			(
-				($new = $this->app->path($newName)) ||
-				($new = $this->notExistEntry($newName))
+				($new = App::path($newName)) ||
+				($new = static::notExistEntry($newName))
 			)
 		) {
 			return rename($old, $new);
@@ -161,8 +162,8 @@ class FileSystem extends Extension {
 	 * @param string $file абсолютный или ссылочный путь
 	 * @return bool
 	 */
-	public function delete($file) {
-		if ($file = $this->app->path($file)) {
+	public static function delete($file) {
+		if ($file = App::path($file)) {
 			return unlink($file);
 		}
 
@@ -174,12 +175,12 @@ class FileSystem extends Extension {
 	 * @param string $path абсолютный или ссылочный путь
 	 * @return bool|string
 	 */
-	protected function notExistEntry($path) {
-		if ($this->app->isAbsolutePath($path)) {
+	protected static function notExistEntry($path) {
+		if (App::isAbsolutePath($path)) {
 			return $path;
 		}
 		if (($file = explode(":", $path)) && count($file) == 2) {
-			return $this->app->path($file[0] . ":") . $file[1];
+			return App::path($file[0] . ":") . $file[1];
 		}
 
 		return false;

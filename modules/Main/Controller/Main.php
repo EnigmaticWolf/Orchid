@@ -24,14 +24,15 @@
 
 namespace Main\Controller;
 
+use ModuleMain;
 use Orchid\Entity\Controller;
 
 class Main extends Controller {
-	public function index() {
+	public static function index() {
 		$data = [
-			"hello" => $this("Main")->HelloWorld(),
+			"hello" => ModuleMain::HelloWorld(),
 		];
 
-		return $this->render("Main:View/Main.php", $data);
+		return static::render("Main:View/Main.php", $data);
 	}
 }

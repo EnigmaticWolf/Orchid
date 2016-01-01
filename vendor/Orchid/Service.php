@@ -22,15 +22,31 @@
  * THE SOFTWARE.
  */
 
-use Orchid\Entity\Module;
-use Orchid\Router;
+namespace Orchid;
 
-class ModuleMain extends Module {
-	public static function initialize() {
-		Router::bindClass("Main\\Controller\\Main", "*");
-	}
+use Closure;
 
-	public static function HelloWorld() {
-		return "Здравствуй Мир! :) \n\r";
+final class Service {
+	/**
+	 * Хранилище объявленных сервисов
+	 * @var array
+	 */
+	public static $service = [];
+
+	/**
+	 * Создаёт замыкание, доступ по ключу
+	 * @param string  $name     название сервиса
+	 * @param Closure $callable замыкание
+	 */
+	public static function add($name, $callable) {
+		static::$service[$name] = function ($param = null) use ($callable) {
+			static $object;
+
+			if ($object === null) {
+				$object = $callable($param);
+			}
+
+			return $object;
+		};
 	}
 }

@@ -2,42 +2,42 @@ Orchid Framework
 ====
 Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
-$app = new Orchid\App();
+App::init();
 
-$app->bind("/", function(){
+Router::bind("/", function(){
 	return "Здравствуй Мир! :)";
 });
 
-$app->run();
+App::run();
 ```
 
 ## Роутинг
 Роутинг запросов происходит по HTTP методу в паре с URL-правилом.  
 Каждое правило должно быть отдельно объявленно вызовом метода:
 ```php
-$app->get("/", function() {
+Router::get("/", function() {
     return "Это GET запрос...";
 });
 
-$app->post("/", function() {
+Router::post("/", function() {
     return "Это POST запрос...";
 });
 
-$app->bind("/", function() {
+Router::bind("/", function() {
     return "Это GET или POST запрос...";
 });
 ```
 Правила могут включать в себя переменные, которые в дальнейшем будут доступны как элементы массива в первом аргументе функции:
 ```php
-$app->get("/news/:date/:id", function($params) {
+Router::get("/news/:date/:id", function($params) {
     return $params["date"]."-".$params["id"];
 });
 
-$app->post("/file/*", function($params) {
+Router::post("/file/*", function($params) {
     return $params[":arg"];
 });
 
-$app->bind("#/page/(about|contact)#", function($params) {
+Router::bind("#/page/(about|contact)#", function($params) {
     return implode("\n", $params[":capture"]);
 });
 ```
@@ -46,7 +46,7 @@ $app->bind("#/page/(about|contact)#", function($params) {
 Приоритет определяет порядок, в котором выполняется применение правил. Правила с более высоким приоритетом выполняются первыми.  
 При необходимости можно задать различные условия, например проверку `user-agent`:
 ```php
-$app->bind("/foo", function() {
+Router::bind("/foo", function() {
     // обработка запроса...
 }, "GET", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false, $priority = 10);
 ```
@@ -54,12 +54,12 @@ $app->bind("/foo", function() {
 ## Шаблоны
 Можно использовать любой шаблон:
 ```php
-$app->bind("/", function() {
+Router::bind("/", function() {
         $data = [
             "title" => "Orchid | Demo",
             "body"  => "Здравствуй Мир! :)",
         ];
-        return $this->render("view/layout.php", $data);
+        return App::render("view/layout.php", $data);
 });
 ```
 `view/layout.php`:
@@ -80,64 +80,59 @@ $app->bind("/", function() {
 Просто подключите класс:
 ```php
 class Page {
-    protected $app;
-    public function __construct($app){
-        $this->app = $app;
-    }
-
     /* /page или /page/index */
     public function index() {
-        return $this->app->render("page/index.php");
+        return App::render("page/index.php");
     }
 
     /* /page/contact */
     public function contact() {
-        return $this->app->render("page/contact.php");
+        return App::render("page/contact.php");
     }
 
     /* /page/welcome/foo */
     public function welcome($name) {
-        return $this->app->render("page/welcome.php", array("name"=>$name));
+        return App::render("page/welcome.php", ["name" => $name]);
     }
 }
 
-$app->bindClass("Page");
+Router::bindClass("Page");
 ```
 Кроме того вы можете восспользоваться классом `Controller`.
 
 ## Хранилище данных
 Используйте хранилище данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
 ```php
-$app["config.foo"] = array("bar" => 123);
+App::set("config.foo", ["bar" => 123]);
 ```
 Простой доступ к элементам массива с помощью разделителя `/`.
 ```php
-$value = $app["config.foo/bar"]; // вернёт 123
+$value = App::get("config.foo/bar"); // 123
 ```
 
 ## Пути
 Используйте короткие ссылки на файлы/каталоги, чтобы получить быстрый доступ к ним:
 ```php
-$app->path("view", __DIR__."/view");
+App::path("view", __DIR__."/view");
 
-$view = $app->path("view:detail.php");
-$view = $app->render("view:detail.php");
+$view = App::path("view:detail.php");
+$view = App::render("view:detail.php");
 ```
 Получить URL для файла:
 ```php
-$url  = $app->pathToUrl("folder/file.php");
-$url  = $app->pathToUrl("view:file.php");
+$url  = App::pathToUrl("folder/file.php");
+$url  = App::pathToUrl("view:file.php");
 ```
 
 ## Задачи
 ```php
 // добавление задачи
-$app->task("custometask", function(){
+Task::add("custometask", function(){
     // код выполняемый здесь
 }, $priority = 0);
 
 // вызов задачи
-$app->trigger("custometask", $params=array());
+Task::trigger("custometask", $params=array());
 ```
 Кроме того, можно использовать три системных имени задач:
  + `before` - выполняется до Роутинга;
@@ -145,13 +140,13 @@ $app->trigger("custometask", $params=array());
  + `shutdown` - выполняется перед завершением работы;
  
 ```php
-$app->task("after", function() {
-    switch($this->response->status){
+Task::task("after", function() {
+    switch(Response::$status){
         case "404":
-            $this->response->body = $this->render("view/404.php");
+            Response::$body = App::render("view/404.php");
             break;
         case "500":
-            $this->response->body = $this->render("view/500.php");
+            Response::$body = App::render("view/500.php");
             break;
     }
 });
@@ -159,77 +154,77 @@ $app->task("after", function() {
 
 ## Сервисы
 ```php
-$app->service("db", function(){
-    // объект будет создан в момент первого доступа к $app["db"]
+Service::add("db", function(){
+    // объект будет создан в момент первого доступа
     $obj = new PDO(...);
 
     return $obj;
 });
 
-$app["db"]->query(...);
+Service::$db->query(...);
 ```
 
 ## Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
 class Foo extends Orchid\Entity\Extension {
-    public function bar(){
-        echo "Hello!";
+    public static function bar(){
+        return "Hello!";
     }
 }
 
-$app("Foo")->bar(); // Hello!
+Foo::bar(); // Hello!
 ```
 
 #### Расширения в поставке
 **Cache**
 ```php
-$app("Cache")->write($key, $value, $duration=-1);
-$app("Cache")->read($key, $default=null);
-$app("Cache")->delete($key);
-$app("Cache")->clear();
+write($key, $value, $duration=-1);
+read($key, $default=null);
+delete($key);
+clear();
 ```
 **Crypta**
 ```php
-$app("Crypta")->encrypt($input);
-$app("Crypta")->decrypt($input);
-$app("Crypta")->hash($string);
-$app("Crypta")->check($string, $hashString);
+encrypt($input);
+decrypt($input);
+hash($string);
+check($string, $hashString);
 ```
 **Session**
 ```php
-$app("Session")->create($sessionName=null);
-$app("Session")->write($key, $value);
-$app("Session")->read($key, $default=null);
-$app("Session")->delete($key);
-$app("Session")->destroy();
+create($sessionName=null);
+write($key, $value);
+read($key, $default=null);
+delete($key);
+destroy();
 ```
 **String**
 ```php
-$app("String")->start($needle, $haystack);
-$app("String")->end($needle, $haystack);
-$app("String")->truncate($string, $length, $append="...");
-$app("String")->eos($count, $single, $double, $triple);
-$app("String")->escape($input);
-$app("String")->unEscape($input);
-$app("String")->translate($input, $back = false);
+start($needle, $haystack);
+end($needle, $haystack);
+truncate($string, $length, $append="...");
+eos($count, $single, $double, $triple);
+escape($input);
+unEscape($input);
+translate($input, $back = false);
 ```
 
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
 ```php
 class ModulePage extends Orchid\Entity\Module { 
-    public function initialize() {
+    public static function initialize() {
         // зададим правило обработки запросов
-		$this->app->bindClass("Page", "*");
+		Router::bindClass("Page", "*");
 	}
 
-    public function foo(){
+    public static function foo(){
         echo "bar";
     }
 }
 
-$app("ModulePage")->foo(); // "bar"
+ModulePage::foo(); // "bar"
 ```
 
 #### Модули в поставке
@@ -244,11 +239,11 @@ class Car extends Orchid\Entity\Model {
         "color" => "",
     ];
 
-	public static function read(array $data = []) {
+	public function read(array $data = []) {
 	    // выборка модели из внешнего хранилища
 	}
 	
-	public static function save() {
+	public function save() {
 	    // вставка/обновление модели во внешнее хранилище
 	}
 	

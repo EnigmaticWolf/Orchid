@@ -23,30 +23,22 @@
 
 namespace Orchid\Extension;
 
+use Orchid\App;
 use Orchid\Entity\Extension;
 use function Orchid\fetch_from_array;
 
 class Session extends Extension {
-	protected $initialized = false;
-	public    $name;
-
 	/**
 	 * Создание новой сессии с заданным именем
 	 * @param null $sessionName
 	 */
-	public function create($sessionName = null) {
-		if ($this->initialized) {
-			return;
-		}
+	public static function create($sessionName = null) {
 		if (!strlen(session_id())) {
-			$this->name = $sessionName ? $sessionName : $this->app["session"];
+			$name = $sessionName ? $sessionName : App::get("session");
 
-			session_name($this->name);
+			session_name($name);
 			session_start();
-		} else {
-			$this->name = session_name();
 		}
-		$this->initialized = true;
 	}
 
 	/**
@@ -54,7 +46,7 @@ class Session extends Extension {
 	 * @param string $key ключевое слово
 	 * @param string $value значение для записи
 	 */
-	public function write($key, $value) {
+	public static function write($key, $value) {
 		$_SESSION[$key] = $value;
 	}
 
@@ -64,7 +56,7 @@ class Session extends Extension {
 	 * @param string $default значение для записи
 	 * @return Mixed
 	 */
-	public function read($key, $default = null) {
+	public static function read($key, $default = null) {
 		return fetch_from_array($_SESSION, $key, $default);
 	}
 
@@ -72,14 +64,14 @@ class Session extends Extension {
 	 * Удаление данных из текущей сессии по заданному ключу
 	 * @param string $key ключевое слово
 	 */
-	public function delete($key) {
+	public static function delete($key) {
 		unset($_SESSION[$key]);
 	}
 
 	/**
 	 * Уничтожение текущей сессии
 	 */
-	public function destroy() {
+	public static function destroy() {
 		session_destroy();
 	}
 }

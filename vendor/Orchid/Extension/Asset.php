@@ -24,20 +24,21 @@
 namespace Orchid\Extension;
 
 use DirectoryIterator;
+use Orchid\App;
 use Orchid\Entity\Extension;
 
 class Asset extends Extension {
-	protected $include  = [];
-	protected $template = '<script id="tpl{name}" type="text/template">{template}</script>';
-	protected $tpl      = [];
+	protected static $include  = [];
+	protected static $template = '<script id="tpl{name}" type="text/template">{template}</script>';
+	protected static $tpl      = [];
 
 	/**
 	 * Генерирует подключения Asset для js, css, less
 	 * @param string $path прямой или ссылочный путь до файла карты
 	 * @return null|string
 	 */
-	public function render($path = "app:config.php") {
-		if (($file = $this->app->path($path)) !== false) {
+	public static function render($path = "app:config.php") {
+		if (($file = App::path($path)) !== false) {
 			/*
 			 * Подключение карты файлов, пример массива:
 			 *	[
@@ -49,48 +50,48 @@ class Asset extends Extension {
 			foreach ($config as $file => $address) {
 				if (is_numeric($file)) {
 					$file    = $address;
-					$address = $this->app->pathToUrl($file);
+					$address = App::pathToUrl($file);
 				}
 
 				switch (pathinfo($file)["extension"]) {
 					case "js": {
-						$this->include[] = '<script type="text/javascript" src="' . $address . '"></script>';
+						static::$include[] = '<script type="text/javascript" src="' . $address . '"></script>';
 						break;
 					}
 					case "css": {
-						$this->include[] = '<link rel="stylesheet" type="text/css" href="' . $address . '" />';
+						static::$include[] = '<link rel="stylesheet" type="text/css" href="' . $address . '" />';
 						break;
 					}
 					case "less": {
-						$this->include[] = '<link rel="stylesheet/less" type="text/css" href="' . $address . '" />';
+						static::$include[] = '<link rel="stylesheet/less" type="text/css" href="' . $address . '" />';
 						break;
 					}
 				}
 			}
 		}
 
-		return $this->include ? "\n" . implode("\n", $this->include) . "\n" : null;
+		return static::$include ? "\n" . implode("\n", static::$include) . "\n" : null;
 	}
 
 	/**
 	 * Собирает все шаблоны из папки приложения и из всех подключенных модулей
 	 * @return string
 	 */
-	public function template() {
+	public static function template() {
 		// папка приложения
-		if ($path = $this->app->path("template:")) {
-			$this->templateIterator($path);
+		if ($path = App::path("template:")) {
+			static::templateIterator($path);
 		}
 
 		// папки модулей
-		$modules = array_keys($this->app->retrieve("module", []));
+		$modules = array_keys(App::retrieve("module", []));
 		foreach ($modules as $module) {
-			if ($path = $this->app->path($module . ":template")) {
-				$this->templateIterator($path);
+			if ($path = App::path($module . ":template")) {
+				static::templateIterator($path);
 			}
 		}
 
-		return $this->tpl ? "\n" . implode("\n", $this->tpl) . "\n" : null;
+		return static::$tpl ? "\n" . implode("\n", static::$tpl) . "\n" : null;
 	}
 
 	/**
@@ -98,17 +99,17 @@ class Asset extends Extension {
 	 * @param $path
 	 * @return string
 	 */
-	protected function templateIterator($path) {
+	protected static function templateIterator($path) {
 		foreach (new DirectoryIterator($path) as $item) {
 			if (!$item->isDot()) {
 				if ($item->isDir()) {
-					$this->templateIterator($this->app->path($path . $item->getBasename()));
+					static::templateIterator(App::path($path . $item->getBasename()));
 				} elseif ($item->isFile()) {
 					$file = str_replace("//", "/", $path . "/" . $item->getBasename());
-					$this->tpl[] = str_replace(
+					static::$tpl[] = str_replace(
 						["{name}", "{template}"],
 						[str_replace(["/", ".tpl"], ["-", ""], explode("template", $file)[1]), "\n\r" . file_get_contents($file) . "\n\r"],
-						$this->template
+						static::$template
 					);
 				}
 			}

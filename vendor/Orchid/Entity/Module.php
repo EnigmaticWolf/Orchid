@@ -24,10 +24,5 @@
 namespace Orchid\Entity;
 
 abstract class Module extends AppAware {
-	public function __construct() {
-		parent::__construct();
-		$this->initialize();
-	}
-
-	protected function initialize() {}
+	public static function initialize() {}
 }
