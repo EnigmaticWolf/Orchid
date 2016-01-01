@@ -43,9 +43,16 @@ function pre(...$args) {
 }
 
 use Orchid\App;
+use Orchid\Task;
 
 App::initialize();
 App::loadModule([
 	ORCHID . "/modules",
 ]);
+Task::add("shutdown", function () {
+	if (App::retrieve("debug", false)) {
+		header("X-Time: " . round(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 7) . "ms");
+		header("X-Memory: " . round(memory_get_usage() / 1024 / 1024, 7) . "mb");
+	}
+});
 App::run();

@@ -24,29 +24,6 @@
 
 namespace Orchid;
 
-use Closure;
-
 final class Service {
-	/**
-	 * Хранилище объявленных сервисов
-	 * @var array
-	 */
-	public static $service = [];
-
-	/**
-	 * Создаёт замыкание, доступ по ключу
-	 * @param string  $name     название сервиса
-	 * @param Closure $callable замыкание
-	 */
-	public static function add($name, $callable) {
-		static::$service[$name] = function ($param = null) use ($callable) {
-			static $object;
-
-			if ($object === null) {
-				$object = $callable($param);
-			}
-
-			return $object;
-		};
-	}
+	// todo подумать над этим
 }

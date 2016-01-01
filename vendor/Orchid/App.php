@@ -70,7 +70,7 @@ final class App {
 
 		// SLI аргументы
 		if (PHP_SAPI == "cli") {
-			static::$registry["args"] = array_slice($_SERVER['argv'], 1);
+			static::$registry["args"] = array_slice($_SERVER["argv"], 1);
 		}
 
 		// Заполняем URI
