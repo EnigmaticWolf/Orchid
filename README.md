@@ -2,10 +2,10 @@ Orchid Framework
 ====
 Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
-App::init();
+App::initialize();
 
 Router::bind("/", function(){
-	return "Здравствуй Мир! :)";
+    return "Здравствуй Мир! :)";
 });
 
 App::run();
@@ -27,6 +27,7 @@ Router::bind("/", function() {
     return "Это GET или POST запрос...";
 });
 ```
+
 Правила могут включать в себя переменные, которые в дальнейшем будут доступны как элементы массива в первом аргументе функции:
 ```php
 Router::get("/news/:date/:id", function($params) {
@@ -42,7 +43,7 @@ Router::bind("#/page/(about|contact)#", function($params) {
 });
 ```
 
-#### Приоритет & Условия
+##### Приоритет & Условия
 Приоритет определяет порядок, в котором выполняется применение правил. Правила с более высоким приоритетом выполняются первыми.  
 При необходимости можно задать различные условия, например проверку `user-agent`:
 ```php
@@ -55,11 +56,12 @@ Router::bind("/foo", function() {
 Можно использовать любой шаблон:
 ```php
 Router::bind("/", function() {
-        $data = [
-            "title" => "Orchid | Demo",
-            "body"  => "Здравствуй Мир! :)",
-        ];
-        return App::render("view/layout.php", $data);
+    $data = [
+        "title" => "Orchid | Demo",
+        "body"  => "Здравствуй Мир! :)",
+    ];
+
+    return App::render("view/layout.php", $data);
 });
 ```
 `view/layout.php`:
@@ -67,8 +69,8 @@ Router::bind("/", function() {
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<meta charset="UTF-8">
-	<title><?= $title ?></title>
+    <meta charset="UTF-8">
+    <title><?= $title ?></title>
 </head>
 <body>
     <?= $body ?>
@@ -110,6 +112,18 @@ App::set("config.foo", ["bar" => 123]);
 $value = App::get("config.foo/bar"); // 123
 ```
 
+## Сервисы
+```php
+App::addService("db", function(){
+    // объект будет создан в момент первого доступа
+    $obj = new PDO(...);
+
+    return $obj;
+});
+
+App::get("db")->query(...);
+```
+
 ## Пути
 Используйте короткие ссылки на файлы/каталоги, чтобы получить быстрый доступ к ним:
 ```php
@@ -122,6 +136,67 @@ $view = App::render("view:detail.php");
 ```php
 $url  = App::pathToUrl("folder/file.php");
 $url  = App::pathToUrl("view:file.php");
+```
+
+## База данных
+Объект `Database` реализует подключение к одному или нескольким серверам баз данных:
+```
+Database::initialize([
+    [
+        "dsn"      => "mysql:dbname=base;host=localhost",
+        "user"     => "...",
+        "password" => "...",
+    ]
+]);
+```
+`Database` позволяет инициализировать соединение с несколькими базами данных, например работающими в режиме репликации.
+
+Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по умолчанию `master`):
+```
+Database::initialize([
+    [
+        "dsn"      => "mysql:dbname=base;host=localhost",
+        "user"     => "...",
+        "password" => "...",
+        "role"     => "slave",
+    ]
+]);
+```
+
+Кроме того можно задать опции инициализации `PDO`:
+```
+Database::initialize([
+    [
+        "dsn"      => "mysql:dbname=base;host=localhost",
+        "user"     => "...",
+        "password" => "...",
+        "option"   => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'",
+        ],
+    ]
+]);
+```
+
+##### Получение соединения
+После инициализации, в любой момент можно получить объект соединения:
+```
+$pdo = Database::getConnection($use_master = false);
+```
+
+##### Выполнение запросов
+Для выполнения запроса необходимо передать его в метод `Database::prepare`:
+```
+$sth = Database::query("
+    SELECT
+        `name`, `colour`, `calories`
+    FROM
+        `fruit`
+    WHERE
+        `calories`  < :calories AND
+        `colour`    = :colour
+", [":calories" => 150, ":colour" => "red"], $use_master = false);
+
+$array = $sth->fetchAll(PDO::FETCH_ASSOC);
 ```
 
 ## Задачи
@@ -167,35 +242,35 @@ Foo::bar(); // Hello!
 #### Расширения в поставке
 **Cache**
 ```php
-write($key, $value, $duration=-1);
-read($key, $default=null);
-delete($key);
-clear();
+Cache::write($key, $value, $duration=-1);
+Cache::read($key, $default=null);
+Cache::delete($key);
+Cache::clear();
 ```
 **Crypta**
 ```php
-encrypt($input);
-decrypt($input);
-hash($string);
-check($string, $hashString);
+Crypta::encrypt($input);
+Crypta::decrypt($input);
+Crypta::hash($string);
+Crypta::check($string, $hashString);
 ```
 **Session**
 ```php
-create($sessionName=null);
-write($key, $value);
-read($key, $default=null);
-delete($key);
-destroy();
+Session::create($sessionName=null);
+Session::write($key, $value);
+Session::read($key, $default=null);
+Session::delete($key);
+Session::destroy();
 ```
 **String**
 ```php
-start($needle, $haystack);
-end($needle, $haystack);
-truncate($string, $length, $append="...");
-eos($count, $single, $double, $triple);
-escape($input);
-unEscape($input);
-translate($input, $back = false);
+String::start($needle, $haystack);
+String::end($needle, $haystack);
+String::truncate($string, $length, $append="...");
+String::eos($count, $single, $double, $triple);
+String::escape($input);
+String::unEscape($input);
+String::translate($input, $back = false);
 ```
 
 ## Модули
@@ -204,8 +279,8 @@ translate($input, $back = false);
 class ModulePage extends Orchid\Entity\Module { 
     public static function initialize() {
         // зададим правило обработки запросов
-		Router::bindClass("Page", "*");
-	}
+        Router::bindClass("Page", "*");
+    }
 
     public static function foo(){
         echo "bar";
@@ -227,42 +302,45 @@ class Car extends Orchid\Entity\Model {
         "color" => "",
     ];
 
-	public function read(array $data = []) {
-	    // выборка модели из внешнего хранилища
-	}
-	
-	public function save() {
-	    // вставка/обновление модели во внешнее хранилище
-	}
-	
-	/**
-	 * @return String марка и модель машины
-	 */
-	public function getMark() {
-	    return $this->data["brand"] . " " . $this->data["model"];
-	}
+    public function read(array $data = []) {
+        // выборка модели из внешнего хранилища
+    }
+
+    public function save() {
+        // вставка/обновление модели во внешнее хранилище
+    }
+
+    /**
+     * @return String марка и модель машины
+     */
+    public function getMark() {
+        return $this->data["brand"] . " " . $this->data["model"];
+    }
 }
 
 $auto = Car::read(["id" => 14]);
+
 if ($auto->isEmpty()) {
     $auto->setAll([
         "brand" => "BMW",
         "model" => "X1",
         "color" => "Orange",
     ]);
+
     $auto->save();
 }
+
 echo $auto->getMark();
 ```
 
 ## Коллекции
 ```php
 class Cars extends Orchid\Entity\Collection {
-	protected static $model = "Car"; // указывает какую модель создать при вызове метода get
-	
-	public static function fetch(array $data = []) {
-	    // выборка из внешнего хранилища
-	}
+    protected static $model = "Car"; // указывает какую модель создать при вызове метода get
+
+    public static function fetch(array $data = []) {
+        // выборка из внешнего хранилища
+    }
 }
 
 $myCars = Cars::fetch()->find('brand', 'bmw');
@@ -275,23 +353,23 @@ foreach($myCars as $key => $val) {
 ```php
 class ValidData extends Orchid\Entity\Validator {
     // подключение стандартных проверяющих функций
-	use Orchid\Entity\Validate\Base,
-		Orchid\Entity\Validate\Type,
-		Orchid\Entity\Validate\String;
+    use Orchid\Entity\Validate\Base,
+        Orchid\Entity\Validate\Type,
+        Orchid\Entity\Validate\String;
 		
-	// при необходимости можно расширить функционал
-	public function isSupportedCity() {
-		return function ($field) {
-			return in_array($field, ["Moscow", "Lviv"]);
-		};
-	}
+    // при необходимости можно расширить функционал
+    public function isSupportedCity() {
+        return function ($field) {
+            return in_array($field, ["Moscow", "Lviv"]);
+        };
+    }
 }
 
 // для примера
 $data = [
-	"username" => "Aleksey",
-	"email"    => "Aleksey@example.com",
-	"city"     => "Moscow",
+    "username" => "Aleksey",
+    "email"    => "Aleksey@example.com",
+    "city"     => "Moscow",
 ];
 
 // создаём объект валидатора
@@ -299,13 +377,13 @@ $valid = new ValidData($data);
 
 // правила проверки полей
 $valid->attr("username")
-	  ->addRule($valid->isNotEmpty(), "Поле не может быть пустым.")
-	  ->addRule($valid->min(5), "Поле не может быть меньше 5 символов длинной.")
-	  ->addRule($valid->max(16), "Поле не может быть больше 16 символов длинной.");
+      ->addRule($valid->isNotEmpty(), "Поле не может быть пустым.")
+      ->addRule($valid->min(5), "Поле не может быть меньше 5 символов длинной.")
+      ->addRule($valid->max(16), "Поле не может быть больше 16 символов длинной.");
 $valid->attr("email")
-	  ->addRule($valid->isEmail(), "Введённое значение не является валидным E-Mail адресом.");
+      ->addRule($valid->isEmail(), "Введённое значение не является валидным E-Mail адресом.");
 $valid->option("city")
-	  ->addRule($valid->isSupportedCity(), "Простите, данный город не поодерживается.");
+      ->addRule($valid->isSupportedCity(), "Простите, данный город не поодерживается.");
 
 // проверяем
 $result = $valid->validate();   // в случае успеха результат будет true
@@ -317,9 +395,9 @@ $result = $valid->validate();   // в случае успеха результа
 Позволяют выполнять некую работу в фоне без прямого взаимодействия с пользователем.
 ```php
 class MyDaemon extends Daemon {
-	public function run() {
-		// рабочий код демона
-	}
+    public function run() {
+        // рабочий код демона
+    }
 }
 ```
 Затем выполнять по `cron` или запустить фоном: `php index.php [название демона]`
