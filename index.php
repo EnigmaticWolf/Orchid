@@ -47,25 +47,6 @@ use Orchid\Database;
 use Orchid\Task;
 
 App::initialize();
-Database::initialize([
-	[
-		"dsn"      => "mysql:dbname=omnisite;host=localhost",
-		"user"     => "root",
-		"password" => "53563256",
-	],
-	[
-		"dsn"      => "mysql:dbname=omnisite;host=localhost",
-		"user"     => "root",
-		"password" => "53563256",
-		"role"     => "slave",
-	],
-	[
-		"dsn"      => "mysql:dbname=omnisite;host=localhost",
-		"user"     => "root",
-		"password" => "53563256",
-		"role"     => "slave",
-	],
-]);
 App::loadModule([
 	ORCHID . "/modules",
 ]);
@@ -76,8 +57,3 @@ Task::add("shutdown", function () {
 	}
 });
 App::run();
-
-$stm = Database::query("SELECT * FROM `page` WHERE `url` = :url", [":url" => "test/test"]);
-$result = $stm->fetchAll(PDO::FETCH_ASSOC);
-
-pre($result);
