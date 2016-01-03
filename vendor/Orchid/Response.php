@@ -24,7 +24,7 @@
 
 namespace Orchid;
 
-final class Response {
+class Response {
 	public static $body    = "";
 	public static $status  = 200;
 	public static $mime    = "html";

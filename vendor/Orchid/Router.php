@@ -27,12 +27,12 @@ namespace Orchid;
 use Closure;
 use SplPriorityQueue;
 
-final class Router {
+class Router {
 	/**
 	 * Хранилище объявленных роутов
 	 * @var array
 	 */
-	private static $route = [];
+	protected static $route = [];
 
 	/**
 	 * Метод ссылка для метода bind объявляет Get роутинг

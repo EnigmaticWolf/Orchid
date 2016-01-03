@@ -27,7 +27,7 @@ namespace Orchid;
 use ArrayObject;
 use DirectoryIterator;
 
-final class App {
+class App {
 	public static $registry = [];
 	public static $exit     = false;
 

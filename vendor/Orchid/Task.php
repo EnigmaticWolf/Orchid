@@ -27,12 +27,12 @@ namespace Orchid;
 use Closure;
 use SplPriorityQueue;
 
-final class Task {
+class Task {
 	/**
 	 * Хранилище созданных задач
 	 * @var array
 	 */
-	private static $task = [];
+	protected static $task = [];
 
 	/**
 	 * Добавляет задачу
