@@ -25,6 +25,7 @@
 namespace Orchid;
 
 use ArrayObject;
+use Closure;
 use DirectoryIterator;
 
 class App {
@@ -474,22 +475,21 @@ class App {
 	}
 
 	/**
-	 * Читает значение из реестра
-	 * @param string $key
-	 * @return mixed
+	 * Создаёт замыкание
+	 * @param string  $name     название сервиса
+	 * @param Closure $callable замыкание
+	 * @return bool
 	 */
-	public static function get($key) {
-		return static::retrieve($key);
-	}
+	public static function addService($name, $callable) {
+		return static::set($name, function ($param = null) use ($callable) {
+			static $object;
 
-	/**
-	 * Читает значение из реестра
-	 * @param string $key
-	 * @param mixed  $default
-	 * @return mixed
-	 */
-	public static function retrieve($key, $default = null) {
-		return fetch_from_array(static::$registry, $key, $default);
+			if ($object === null) {
+				$object = $callable($param);
+			}
+
+			return $object;
+		});
 	}
 
 	/**
@@ -522,6 +522,27 @@ class App {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Читает значение из реестра
+	 * @param string $key
+	 * @return mixed
+	 */
+	public static function get($key) {
+		return static::retrieve($key);
+	}
+
+	/**
+	 * Читает значение из реестра
+	 * @param string $key
+	 * @param mixed  $default
+	 * @return mixed
+	 */
+	public static function retrieve($key, $default = null) {
+		$value = fetch_from_array(static::$registry, $key, $default);
+
+		return $value instanceof Closure ? $value() : $value;
 	}
 }
 
