@@ -27,16 +27,16 @@ namespace Orchid\Extension;
 use Orchid\Entity\Extension;
 
 /**
- * @method static text(string $name, array $options)
- * @method static password(string $name, array $options)
- * @method static textarea(string $name, array $options)
- * @method static checkbox(string $name, array $options)
- * @method static radio(string $name, array $options)
- * @method static file(string $name, array $options)
- * @method static submit(string $name, array $options)
- * @method static reset(string $name, array $options)
- * @method static button(string $name, array $options)
- * @method static hidden(string $name, array $options)
+ * @method static string text(string $name, array $options = [])
+ * @method static string password(string $name, array $options = [])
+ * @method static string textarea(string $name, array $options = [])
+ * @method static string checkbox(string $name, array $options = [])
+ * @method static string radio(string $name, array $options = [])
+ * @method static string file(string $name, array $options = [])
+ * @method static string submit(string $name, array $options = [])
+ * @method static string reset(string $name, array $options = [])
+ * @method static string button(string $name, array $options = [])
+ * @method static string hidden(string $name, array $options = [])
  */
 class Form extends Extension {
 	/**
