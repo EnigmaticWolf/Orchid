@@ -440,7 +440,7 @@ class App {
 	 * @return mixed
 	 */
 	public static function invoke($controller, $action = "index", array $params = []) {
-		return method_exists($controller, $action) ? call_user_func([$controller, $action], $params) : false;
+		return method_exists($controller, $action) ? call_user_func_array([$controller, $action], $params) : false;
 	}
 
 	/**
