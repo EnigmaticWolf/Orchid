@@ -213,17 +213,29 @@ class App {
 	}
 
 	/**
-	 * Возвращает язык клиента
+	 * Возвращает наиболее подходящий язык клиента из заданных в locale
 	 * @param string $default по умолчанию русский
 	 * @return string
 	 */
 	public static function getClientLang($default = "ru") {
-		// todo починить
-		if (!isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
-			return $default;
+		if (($list = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']))) {
+			if (preg_match_all('/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/', $list, $list)) {
+				$language = [];
+
+				foreach (array_combine($list[1], $list[2]) as $lang => $priority) {
+					$language[$lang] = (float)($priority ? $priority : 1);
+				}
+				arsort($language, SORT_NUMERIC);
+
+				foreach($language as $lang => $priority) {
+					if (in_array($lang, static::$registry["locale"])) {
+						return $lang;
+					}
+				}
+			}
 		}
 
-		return strtolower(substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2));
+		return $default;
 	}
 
 	/**
