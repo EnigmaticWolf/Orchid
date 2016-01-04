@@ -24,8 +24,10 @@
 
 namespace Orchid\Entity;
 
+use Orchid\App;
+
 abstract class Controller extends AppAware {
-	protected function render($template, array $data = []) {
-		return $this->app->render($template, $data);
+	protected static function render($template, array $data = []) {
+		return App::render($template, $data);
 	}
 }

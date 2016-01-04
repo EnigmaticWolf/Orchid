@@ -24,42 +24,37 @@
 namespace Orchid\Extension;
 
 use Closure;
+use Orchid\App;
 use Orchid\Entity\Extension;
 use RecursiveDirectoryIterator;
 
 class Cache extends Extension {
-	public    $prefix    = null;
 	protected $cachePath = null;
-
-	public function initialize() {
-		$this->prefix = $this->app["app"];
-		$this->cachePath = ($this->app->path("cache:") ? rtrim($this->app->path("cache:")) : $this->app["base_dir"] . "/Cache") . "/";
-	}
 
 	/**
 	 * Сериализовать и записать данные в временный файл
-	 * @param string $key ключ
-	 * @param string $value значение для записи
-	 * @param int $duration время жизни файла (По умолчанию -1 - вечно)
+	 * @param string $key      ключ
+	 * @param string $value    значение для записи
+	 * @param int    $duration время жизни файла (По умолчанию -1 - вечно)
 	 * @return int|false количество байт записанных в случае успеха
 	 */
-	public function write($key, $value, $duration = -1) {
+	public static function write($key, $value, $duration = -1) {
 		$data = [
 			"expire" => ($duration != -1) ? (is_string($duration) ? strtotime($duration) : time() + $duration) : $duration,
 			"value"  => serialize($value),
 		];
 
-		return file_put_contents($this->cachePath . md5($this->prefix . ":" . $key) . ".cache", serialize($data));
+		return file_put_contents(App::retrieve("path/cache/0", App::get("base_dir") . "/cache") . "/" . md5(App::get("app") . ":" . $key) . ".cache", serialize($data));
 	}
 
 	/**
 	 * Десериализовать данные из временного файла
-	 * @param string $key ключ
+	 * @param string        $key     ключ
 	 * @param mixed|Closure $default возвращаемое значение, если данных нет
 	 * @return mixed
 	 */
-	public function read($key, $default = null) {
-		$file = $this->cachePath . md5($this->prefix . ":" . $key) . ".cache";
+	public static function read($key, $default = null) {
+		$file = App::retrieve("path/cache/0", App::get("base_dir") . "/cache") . "/" . md5(App::get("app") . ":" . $key) . ".cache";
 		$data = file_exists($file) ? file_get_contents($file) : false;
 
 		if ($data !== false) {
@@ -69,7 +64,7 @@ class Cache extends Extension {
 				return unserialize($data["value"]);
 			}
 
-			$this->delete($key);
+			static::delete($key);
 		}
 
 		return is_callable($default) ? call_user_func($default, $key) : $default;
@@ -80,8 +75,8 @@ class Cache extends Extension {
 	 * @param string $key ключ
 	 * @return boolean
 	 */
-	public function delete($key) {
-		$file = $this->cachePath . md5($this->prefix . ":" . $key) . ".cache";
+	public static function delete($key) {
+		$file = App::retrieve("path/cache/0", App::get("base_dir") . "/cache") . "/" . md5(App::get("app") . ":" . $key) . ".cache";
 
 		if (file_exists($file)) {
 			return unlink($file);
@@ -91,19 +86,16 @@ class Cache extends Extension {
 	}
 
 	/**
-	 * Удалиьть все временные файлы
-	 * @return $this
+	 * Удалить все временные файлы
 	 */
-	public function clear() {
-		$iterator = new RecursiveDirectoryIterator($this->cachePath);
+	public static function clear() {
+		$iterator = new RecursiveDirectoryIterator(App::retrieve("path/cache/0", App::get("base_dir") . "/cache") . "/");
 
 		/** @var RecursiveDirectoryIterator $file */
 		foreach ($iterator as $file) {
 			if ($file->isFile() && substr($file, -6) == ".cache") {
-				unlink($this->cachePath . $file->getFilename());
+				unlink(App::retrieve("path/cache/0", App::get("base_dir") . "/cache") . "/" . $file->getFilename());
 			}
 		}
-
-		return $this;
 	}
 }

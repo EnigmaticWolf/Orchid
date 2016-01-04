@@ -28,6 +28,22 @@ use Closure;
 
 trait String {
 	/**
+	 * Экранирует строку
+	 * @return Closure
+	 */
+	public function escape() {
+		return function (&$field) {
+			$field = str_replace(
+				["'", '"', ">", "<", "`", "\\"],
+				["&#039;", "&#34;", "&#62;", "&#60;", "&#96;", "&#92;"],
+				$field
+			);
+
+			return true;
+		};
+	}
+
+	/**
 	 * Проверяемое значение это E-Mail адрес
 	 * @return Closure
 	 */

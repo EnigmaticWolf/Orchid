@@ -28,7 +28,7 @@ define("ORCHID", __DIR__);
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace("\\", "/", $class) . ".php";
 	if (file_exists($class_path)) {
-		include_once($class_path);
+		require_once($class_path);
 
 		return;
 	}
@@ -42,10 +42,18 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-$app = new Orchid\App();
+use Orchid\App;
+use Orchid\Database;
+use Orchid\Task;
 
-$app
-	->loadModule([
-		ORCHID . "/modules",
-	])
-	->run();
+App::initialize();
+App::loadModule([
+	ORCHID . "/modules",
+]);
+Task::add("shutdown", function () {
+	if (App::retrieve("debug", false)) {
+		header("X-Time: " . round(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 7) . "ms");
+		header("X-Memory: " . round(memory_get_usage() / 1024 / 1024, 7) . "mb");
+	}
+});
+App::run();

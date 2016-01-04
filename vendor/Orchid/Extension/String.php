@@ -33,7 +33,7 @@ class String extends Extension {
 	 * @param string $haystack строка
 	 * @return Boolean;
 	 */
-	public function start($needle, $haystack) {
+	public static function start($needle, $haystack) {
 		return !strncmp($haystack, $needle, strlen($needle));
 	}
 
@@ -43,7 +43,7 @@ class String extends Extension {
 	 * @param string $haystack строка
 	 * @return Boolean;
 	 */
-	public function end($needle, $haystack) {
+	public static function end($needle, $haystack) {
 		$length = strlen($needle);
 		if ($length == 0) {
 			return true;
@@ -59,7 +59,7 @@ class String extends Extension {
 	 * @param   string $append символы в конце строки
 	 * @return  string
 	 */
-	public function truncate($string, $length, $append = "...") {
+	public static function truncate($string, $length, $append = "...") {
 		$ret = substr($string, 0, $length);
 		$last_space = strrpos($ret, " ");
 		if ($last_space !== false && $string != $ret) {
@@ -80,7 +80,7 @@ class String extends Extension {
 	 * @param string $five слово
 	 * @return string
 	 */
-	public function eos($count, $one, $two, $five) {
+	public static function eos($count, $one, $two, $five) {
 		if (substr($count, -1, 1) == "1" && substr($count, -2, 2) != "11") {
 			return $one;
 		} else {
@@ -97,10 +97,10 @@ class String extends Extension {
 	 * @param string|array $input входящая строка
 	 * @return string;
 	 */
-	public function escape($input) {
+	public static function escape($input) {
 		if (is_array($input)) {
 			foreach ($input as $key => $value) {
-				$input[$key] = $this->escape($value);
+				$input[$key] = static::escape($value);
 			}
 		} else {
 			$input = htmlspecialchars($input, ENT_QUOTES);
@@ -114,10 +114,10 @@ class String extends Extension {
 	 * @param string|array $input входящая строка
 	 * @return string;
 	 */
-	public function unEscape($input) {
+	public static function unEscape($input) {
 		if (is_array($input)) {
 			foreach ($input as $key => $value) {
-				$input[$key] = $this->unEscape($value);
+				$input[$key] = static::unEscape($value);
 			}
 		} else {
 			$input = htmlspecialchars_decode($input, ENT_QUOTES);
@@ -132,7 +132,7 @@ class String extends Extension {
 	 * @param bool $back
 	 * @return mixed
 	 */
-	function translate($input, $back = false) {
+	public static function translate($input, $back = false) {
 		$russian = [
 			"А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф",
 			"Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й",
@@ -154,7 +154,7 @@ class String extends Extension {
 	 * @param int $size
 	 * @return string
 	 */
-	function convertSize($size) {
+	public static function convertSize($size) {
 		$unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
 
 		return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];

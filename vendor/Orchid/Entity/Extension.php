@@ -24,6 +24,6 @@
 
 namespace Orchid\Entity;
 
-abstract class Extension extends Module {
+abstract class Extension extends AppAware {
 
 }

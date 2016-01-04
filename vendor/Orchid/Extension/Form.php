@@ -26,12 +26,24 @@ namespace Orchid\Extension;
 
 use Orchid\Entity\Extension;
 
+/**
+ * @method static string text(string $name, array $options = [])
+ * @method static string password(string $name, array $options = [])
+ * @method static string textarea(string $name, array $options = [])
+ * @method static string checkbox(string $name, array $options = [])
+ * @method static string radio(string $name, array $options = [])
+ * @method static string file(string $name, array $options = [])
+ * @method static string submit(string $name, array $options = [])
+ * @method static string reset(string $name, array $options = [])
+ * @method static string button(string $name, array $options = [])
+ * @method static string hidden(string $name, array $options = [])
+ */
 class Form extends Extension {
 	/**
 	 * Массив поддерживаемых типов
 	 * @var array
 	 */
-	protected $type = [
+	protected static $type = [
 		"text",
 		"password",
 		"textarea",
@@ -48,11 +60,11 @@ class Form extends Extension {
 	/**
 	 * Сформировать поле
 	 * @param string $type тип поля
-	 * @param array $args [name, data]
+	 * @param array  $args [name, data]
 	 * @return $this|mixed|null|string
 	 */
-	public function __call($type, $args) {
-		if (in_array($type, $this->type)) {
+	public static function __callStatic($type, $args) {
+		if (in_array($type, static::$type)) {
 			if (count($args) == 2) {
 				list($name, $data) = $args;
 			} else {
@@ -60,7 +72,7 @@ class Form extends Extension {
 				$data = [];
 			}
 
-			return $this->render(array_merge($data, ["name" => $name, "type" => $type]));
+			return static::render(array_merge($data, ["name" => $name, "type" => $type]));
 		}
 
 		return null;
@@ -68,16 +80,16 @@ class Form extends Extension {
 
 	/**
 	 * Сформировать поле выбора
-	 * @param string $name имя поля
-	 * @param array $option массив значений выбора
-	 * @param array $data массив дополнительных атрибутов
+	 * @param string $name   имя поля
+	 * @param array  $option массив значений выбора
+	 * @param array  $data   массив дополнительных атрибутов
 	 * @return string
 	 */
-	public function select($name, array $option = [], array $data = []) {
-		return $this->render(array_merge($data, ["name" => $name, "type" => "select", "option" => $option]));
+	public static function select($name, array $option = [], array $data = []) {
+		return static::render(array_merge($data, ["name" => $name, "type" => "select", "option" => $option]));
 	}
 
-	protected function render(array $data = []) {
+	protected static function render(array $data = []) {
 		$default = [
 			"method"      => "post",
 			"id"          => null,
@@ -93,7 +105,7 @@ class Form extends Extension {
 			"required"    => false,
 			"autofocus"   => false,
 		];
-		$form = "";
+		$form    = "";
 
 		// определяем тип требуемой формы
 		switch ($data["type"]) {
@@ -107,7 +119,7 @@ class Form extends Extension {
 				];
 				$data = array_merge($default, $attr, $data);
 
-				$form .= "<textarea " . $this->getAttr($data, ["value", "type"]) . ">";
+				$form .= "<textarea " . static::getAttr($data, ["value", "type"]) . ">";
 				$form .= isset($data["value"]) ? $data["value"] : "";
 				$form .= "</textarea>";
 
@@ -121,7 +133,7 @@ class Form extends Extension {
 				];
 				$data = array_merge($default, $attr, $data);
 
-				$form .= "<select  " . $this->getAttr($data) . ">";
+				$form .= "<select  " . static::getAttr($data) . ">";
 				foreach ($data["option"] as $key => $val) {
 					$form .= "<option";
 					$form .= ' value="' . $key . '"';
@@ -167,7 +179,7 @@ class Form extends Extension {
 					}
 				}
 				$data = array_merge($default, $attr, $data);
-				$form .= "<input " . $this->getAttr($data) . " />";
+				$form .= "<input " . static::getAttr($data) . " />";
 
 				break;
 			}
@@ -182,7 +194,7 @@ class Form extends Extension {
 	 * @param array $exclude
 	 * @return string
 	 */
-	protected function getAttr(array &$data = [], array $exclude = []) {
+	protected static function getAttr(array &$data = [], array $exclude = []) {
 		$attr = "";
 
 		if ($data["error"]) {
