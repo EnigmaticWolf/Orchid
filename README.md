@@ -144,7 +144,7 @@ $url  = App::pathToUrl("view:file.php");
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
-        "user"     => "...",
+        "username" => "...",
         "password" => "...",
     ]
 ]);
@@ -156,7 +156,7 @@ Database::initialize([
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
-        "user"     => "...",
+        "username" => "...",
         "password" => "...",
         "role"     => "slave",
     ]
@@ -168,7 +168,7 @@ Database::initialize([
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
-        "user"     => "...",
+        "username" => "...",
         "password" => "...",
         "option"   => [
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'",

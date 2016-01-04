@@ -35,13 +35,18 @@ class Database {
 	];
 
 	/**
+	 * @var PDO
+	 */
+	protected static $lastConnect = null;
+
+	/**
 	 * Инициализиует подключения
 	 * @param array  $configs
 	 */
 	public static function initialize(array $configs) {
 		$default = [
 			"dsn"      => "",
-			"user"     => "",
+			"username" => "",
 			"password" => "",
 			"option"   => [],
 			"role"     => "master",
@@ -55,7 +60,7 @@ class Database {
 				try {
 					return new PDO(
 						$config["dsn"],
-						$config["user"],
+						$config["username"],
 						$config["password"],
 						$config["option"]
 					);
@@ -113,11 +118,19 @@ class Database {
 	 */
 	public static function query($query, array $params = [], $use_master = false) {
 		// достаём соединение
-		$pdo = static::getConnection(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
+		static::$lastConnect = static::getConnection(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
 
-		$stm = $pdo->prepare($query);
+		$stm = static::$lastConnect->prepare($query);
 		$stm->execute($params);
 
 		return $stm;
+	}
+
+	/**
+	 * Возвращает ID последней вставленной строки
+	 * @return string
+	 */
+	public static function lastInsertId() {
+		return static::$lastConnect->lastInsertId();
 	}
 }
