@@ -27,6 +27,7 @@ namespace Orchid;
 use ArrayObject;
 use Closure;
 use DirectoryIterator;
+use Orchid\Entity\Module;
 
 class App {
 	public static $registry = [];
@@ -227,7 +228,7 @@ class App {
 				}
 				arsort($language, SORT_NUMERIC);
 
-				foreach($language as $lang => $priority) {
+				foreach ($language as $lang => $priority) {
 					if (in_array($lang, static::$registry["locale"])) {
 						return $lang;
 					}
@@ -292,6 +293,9 @@ class App {
 	 * @param $dir
 	 */
 	protected static function bootModule($class, $dir) {
+		// регистрируем модуль
+		Module::$list[] = $class;
+
 		if (is_file($dir)) {
 			require_once($dir);
 		} else {

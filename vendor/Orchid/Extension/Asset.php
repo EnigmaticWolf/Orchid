@@ -26,11 +26,11 @@ namespace Orchid\Extension;
 use DirectoryIterator;
 use Orchid\App;
 use Orchid\Entity\Extension;
+use Orchid\Entity\Module;
 
 class Asset extends Extension {
 	protected static $include  = [];
-	protected static $template = '<script id="tpl{name}" type="text/template">{template}</script>';
-	protected static $tpl      = [];
+	protected static $template = [];
 
 	/**
 	 * Генерирует подключения Asset для js, css, less
@@ -84,14 +84,13 @@ class Asset extends Extension {
 		}
 
 		// папки модулей
-		$modules = array_keys(App::retrieve("module", []));
-		foreach ($modules as $module) {
+		foreach (Module::$list as $module) {
 			if ($path = App::path($module . ":template")) {
 				static::templateIterator($path);
 			}
 		}
 
-		return static::$tpl ? "\n" . implode("\n", static::$tpl) . "\n" : null;
+		return static::$template ? "\n" . implode("\n", static::$template) . "\n" : null;
 	}
 
 	/**
@@ -103,14 +102,16 @@ class Asset extends Extension {
 		foreach (new DirectoryIterator($path) as $item) {
 			if (!$item->isDot()) {
 				if ($item->isDir()) {
-					static::templateIterator(App::path($path . $item->getBasename()));
-				} elseif ($item->isFile()) {
+					static::templateIterator(App::path($path . "/" . $item->getBasename()));
+				} else {
 					$file = str_replace("//", "/", $path . "/" . $item->getBasename());
-					static::$tpl[] = str_replace(
-						["{name}", "{template}"],
-						[str_replace(["/", ".tpl"], ["-", ""], explode("template", $file)[1]), "\n\r" . file_get_contents($file) . "\n\r"],
-						static::$template
-					);
+
+					if ($item->isFile() && in_array(pathinfo($file)["extension"], ["tpl", "ejs"])) {
+						$name    = str_replace(["/", ".tpl", ".ejs"], ["-", "", ""], explode("template", $file)[1]);
+						$content = file_get_contents($file);
+
+						static::$template[] = '<script id="tpl' . $name . '" type="text/template">' . $content . '</script>';
+					}
 				}
 			}
 		}
