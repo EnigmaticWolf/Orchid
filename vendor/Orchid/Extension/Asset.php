@@ -37,7 +37,7 @@ class Asset extends Extension {
 	 * @param string $path прямой или ссылочный путь до файла карты
 	 * @return null|string
 	 */
-	public static function render($path = "app:config.php") {
+	public static function render($path = "app:configuration.php") {
 		if (($file = App::path($path)) !== false) {
 			/*
 			 * Подключение карты файлов, пример массива:
