@@ -25,13 +25,14 @@ class App {
 			"autoload"  => new ArrayObject([]),
 			"path"      => [],
 
+			"method"    => isset($SERVER["REQUEST_METHOD"]) ? $SERVER["REQUEST_METHOD"] : "",
 			"uri"       => [],
 			"param"     => [],
 			"data"      => [],
-			"args"      => [],
+			"args"      => PHP_SAPI == "cli" ? array_slice($_SERVER["argv"], 1) : [],
 
-			"base_dir"  => !empty($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : dirname($_SERVER["PHP_SELF"]),
-			"base_host" => !empty($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
+			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : dirname($_SERVER["PHP_SELF"]),
+			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
 		], $param);
 
@@ -47,11 +48,6 @@ class App {
 				}
 			}
 		});
-
-		// SLI аргументы
-		if (PHP_SAPI == "cli") {
-			static::$registry["args"] = array_slice($_SERVER["argv"], 1);
-		}
 
 		// Заполняем URI
 		foreach (explode("/", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_PATH)) as $part) {
@@ -74,8 +70,7 @@ class App {
 			(
 				isset($_SERVER["CONTENT_TYPE"]) &&
 				stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false
-			) ||
-			(
+			) || (
 				isset($_SERVER["HTTP_CONTENT_TYPE"]) &&
 				stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false
 			)
@@ -144,27 +139,27 @@ class App {
 			}
 
 			case "head": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "head");
+				return (strtolower(static::$registry["method"]) == "head");
 			}
 
 			case "put": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "put");
+				return (strtolower(static::$registry["method"]) == "put");
 			}
 
 			case "post": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "post");
+				return (strtolower(static::$registry["method"]) == "post");
 			}
 
 			case "get": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "get");
+				return (strtolower(static::$registry["method"]) == "get");
 			}
 
 			case "delete": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "delete");
+				return (strtolower(static::$registry["method"]) == "delete");
 			}
 
 			case "options": {
-				return (strtolower($_SERVER["REQUEST_METHOD"]) == "options");
+				return (strtolower(static::$registry["method"]) == "options");
 			}
 
 			case "ssl": {
