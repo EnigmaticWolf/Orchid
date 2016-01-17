@@ -140,7 +140,7 @@ $url  = App::pathToUrl("view:file.php");
 
 ## База данных
 Объект `Database` реализует подключение к одному или нескольким серверам баз данных:
-```
+```php
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
@@ -152,7 +152,7 @@ Database::initialize([
 `Database` позволяет инициализировать соединение с несколькими базами данных, например работающими в режиме репликации.
 
 Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по умолчанию `master`):
-```
+```php
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
@@ -164,7 +164,7 @@ Database::initialize([
 ```
 
 Кроме того можно задать опции инициализации `PDO`:
-```
+```php
 Database::initialize([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
@@ -179,13 +179,13 @@ Database::initialize([
 
 ##### Получение соединения
 После инициализации, в любой момент можно получить объект соединения:
-```
+```php
 $pdo = Database::getConnection($use_master = false);
 ```
 
 ##### Выполнение запросов
 Для выполнения запроса необходимо передать его в метод `Database::prepare`:
-```
+```php
 $sth = Database::query("
     SELECT
         `name`, `colour`, `calories`
@@ -264,13 +264,13 @@ Session::destroy();
 ```
 **String**
 ```php
-String::start($needle, $haystack);
-String::end($needle, $haystack);
-String::truncate($string, $length, $append="...");
-String::eos($count, $single, $double, $triple);
-String::escape($input);
-String::unEscape($input);
-String::translate($input, $back = false);
+Str::start($needle, $haystack);
+Str::end($needle, $haystack);
+Str::truncate($string, $length, $append="...");
+Str::eos($count, $single, $double, $triple);
+Str::escape($input);
+Str::unEscape($input);
+Str::translate($input, $back = false);
 ```
 
 ## Модули

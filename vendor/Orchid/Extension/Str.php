@@ -26,7 +26,7 @@ namespace Orchid\Extension;
 
 use Orchid\Entity\Extension;
 
-class String extends Extension {
+class Str extends Extension {
 	/**
 	 * Возвращает true если строчка начинается с указанного символа
 	 * @param string $needle искомый символ
