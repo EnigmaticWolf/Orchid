@@ -15,11 +15,11 @@ class Database {
 	/**
 	 * @var PDO
 	 */
-	protected static $lastConnect = null;
+	protected static $lastConnection = null;
 
 	/**
 	 * Инициализиует подключения
-	 * @param array  $configs
+	 * @param array $configs
 	 */
 	public static function initialize(array $configs) {
 		$default = [
@@ -32,7 +32,7 @@ class Database {
 
 		foreach ($configs as $index => $config) {
 			$config = array_merge($default, $config);
-			$key    = "db:" . $index;
+			$key    = "database:" . $index;
 
 			App::addService($key, function () use ($config) {
 				try {
@@ -57,12 +57,11 @@ class Database {
 
 	/**
 	 * Возвращает объект PDO
-	 * @param bool   $use_master
+	 * @param bool $use_master
 	 * @return null|PDO
 	 */
 	public static function getConnection($use_master = false) {
 		$pool = [];
-
 		$role = $use_master ? "master" : "slave";
 
 		switch (true) {
@@ -72,15 +71,19 @@ class Database {
 			}
 			case !empty(static::$connection["master"]): {
 				$pool = static::$connection["master"];
+				$role = "master";
 				break;
 			}
 			case !empty(static::$connection["slave"]): {
 				$pool = static::$connection["slave"];
+				$role = "slave";
 				break;
 			}
 		}
 
 		if ($pool && $key = $pool[array_rand($pool)]) {
+			static::$connection[$role] = [$key];
+
 			return App::get($key);
 		}
 
@@ -96,9 +99,9 @@ class Database {
 	 */
 	public static function query($query, array $params = [], $use_master = false) {
 		// достаём соединение
-		static::$lastConnect = static::getConnection(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
+		static::$lastConnection = static::getConnection(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
 
-		$stm = static::$lastConnect->prepare($query);
+		$stm = static::$lastConnection->prepare($query);
 		$stm->execute($params);
 
 		return $stm;
@@ -109,6 +112,6 @@ class Database {
 	 * @return string
 	 */
 	public static function lastInsertId() {
-		return static::$lastConnect->lastInsertId();
+		return static::$lastConnection->lastInsertId();
 	}
 }
