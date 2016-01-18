@@ -25,7 +25,8 @@ class App {
 			"autoload"  => new ArrayObject([]),
 			"path"      => [],
 
-			"method"    => isset($SERVER["REQUEST_METHOD"]) ? $SERVER["REQUEST_METHOD"] : "",
+			"host"      => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
+			"method"    => isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : "",
 			"uri"       => [],
 			"param"     => [],
 			"data"      => [],
