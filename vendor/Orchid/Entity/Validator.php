@@ -46,7 +46,7 @@ abstract class Validator {
 	 * @param string  $message
 	 * @return $this
 	 */
-	public function addRule($validator, $message = '') {
+	public function addRule($validator, $message = "") {
 		if ($this->field) {
 			$this->rule[$this->field][] = [
 				"validator" => $validator,

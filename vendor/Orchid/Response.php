@@ -101,9 +101,9 @@ class Response {
 				header("Content-Type: " . static::$mimeTypes[@end(explode(".", basename(static::$body)))] . "; charset=utf-8");
 				header("Content-Disposition: inline; filename='" . basename(static::$body) . "'");
 
-				if (strpos($_SERVER['SERVER_SOFTWARE'], "nginx") !== false) {
+				if (strpos($_SERVER["SERVER_SOFTWARE"], "nginx") !== false) {
 					header("X-Accel-Redirect: " . str_replace(ORCHID, "", static::$body));
-				} elseif (strpos($_SERVER['SERVER_SOFTWARE'], "Apache") !== false) {
+				} elseif (strpos($_SERVER["SERVER_SOFTWARE"], "Apache") !== false) {
 					header("X-SendFile: " . str_replace(ORCHID, "", static::$body));
 				} else {
 					readfile(static::$body);

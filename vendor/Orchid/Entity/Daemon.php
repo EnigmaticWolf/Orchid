@@ -5,16 +5,18 @@ namespace Orchid\Entity;
 use Orchid\App;
 
 abstract class Daemon extends AppAware {
-	protected $is_daemon = true; // флаг переключающий режимы daemon/bin
+	protected $console_io = false; // если true вывод будет в консоль
 
 	protected $pid       = null;
 	protected $pid_file  = null;
 	protected $log       = null;
 	protected $log_err   = null;
 
+	/**
+	 * Конструктор демона
+	 */
 	public final function __construct() {
-		// если демон, то переопределяем вывод в файл
-		if ($this->is_daemon) {
+		if (!$this->console_io) {
 			fclose(STDIN);
 			fclose(STDOUT);
 			fclose(STDERR);
@@ -23,8 +25,8 @@ abstract class Daemon extends AppAware {
 			$this->log_err = App::get("base_dir") . "/cache/" . App::retrieve("args/0", "daemon") . "-error.log";
 
 			$STDIN	= fopen("/dev/null", "r");
-			$STDOUT = fopen($this->log, 'ab');
-			$STDERR = fopen($this->log_err, 'ab');
+			$STDOUT = fopen($this->log, "ab");
+			$STDERR = fopen($this->log_err, "ab");
 		}
 
 		if (!pcntl_fork()) {
@@ -33,11 +35,7 @@ abstract class Daemon extends AppAware {
 			$this->pid_file = App::get("base_dir") . "/cache/" . App::retrieve("args/0", "daemon") . ".pid";
 
 			if (!file_exists($this->pid_file)) {
-				// если демон, то выполняем функцию инициализации
-				if ($this->is_daemon) {
-					$this->initialize();
-				}
-
+				$this->initialize();
 				$this->run();
 			} else {
 				echo "Daemon already running!" . PHP_EOL;

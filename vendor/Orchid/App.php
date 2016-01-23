@@ -31,7 +31,7 @@ class App {
 			"data"      => [],
 			"args"      => PHP_SAPI == "cli" ? array_slice($_SERVER["argv"], 1) : [],
 
-			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : dirname($_SERVER["PHP_SELF"]),
+			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
 		], $param);
@@ -179,8 +179,8 @@ class App {
 	 * @return string
 	 */
 	public static function getClientLang($default = "ru") {
-		if (($list = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']))) {
-			if (preg_match_all('/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/', $list, $list)) {
+		if (($list = strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"]))) {
+			if (preg_match_all("/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/", $list, $list)) {
 				$language = [];
 
 				foreach (array_combine($list[1], $list[2]) as $lang => $priority) {
@@ -266,18 +266,7 @@ class App {
 			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
 		}
 
-		call_user_func([$class, 'initialize']);
-	}
-
-	/**
-	 * Исполняет демона
-	 */
-	protected static function bootDaemon() {
-		if (!empty(static::$registry["args"][0])) {
-			$class = "Orchid\\Daemon\\" . static::$registry["args"][0];
-
-			new $class();
-		}
+		call_user_func([$class, "initialize"]);
 	}
 
 	/**
@@ -293,7 +282,11 @@ class App {
 	 */
 	public static function run() {
 		if (PHP_SAPI == "cli") {
-			static::bootDaemon(); // запускаем демона
+			if (!empty(static::$registry["args"][0])) {
+				$class = static::$registry["args"][0];
+
+				new $class();
+			}
 		} else {
 			register_shutdown_function(function () {
 				// если приложение было завершено
