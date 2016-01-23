@@ -2,14 +2,12 @@
 
 namespace Orchid;
 
-use ArrayObject;
 use Closure;
 use DirectoryIterator;
-use Orchid\Entity\Module;
 
 class App {
-	public static $registry = [];
-	public static $exit     = false;
+	protected static $registry = [];
+	protected static $exit     = false;
 
 	public static function initialize(array $param = []) {
 		static::$registry = array_merge([
@@ -20,9 +18,10 @@ class App {
 
 			"secret"    => "secret",
 			"session"   => "session",
-			"locale"    => ["ru"],
+			"locale"    => [],
 
-			"autoload"  => new ArrayObject([]),
+			"autoload"  => [],
+			"module"    => [],
 			"path"      => [],
 
 			"host"      => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
@@ -37,45 +36,40 @@ class App {
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
 		], $param);
 
-		// Дополнительный загрузшик
+		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
 			foreach (App::retrieve("autoload", []) as $dir) {
-				$class_file = $dir . "/" . str_replace("\\", "/", $class) . ".php";
+				$class_path = $dir . "/" . str_replace("\\", "/", $class) . ".php";
 
-				if (file_exists($class_file)) {
-					require_once($class_file);
+				if (file_exists($class_path)) {
+					require_once($class_path);
 
 					return;
 				}
 			}
 		});
 
-		// Заполняем URI
-		foreach (explode("/", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_PATH)) as $part) {
+		// декодируем строку запроса
+		$_SERVER["REQUEST_URI"] = urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : "");
+
+		// заполняем URI
+		foreach (explode("/", parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)) as $part) {
 			if ($part) {
 				static::$registry["uri"][] = $part;
 			}
 		}
 
-		// Переписываем GET
+		// переписываем GET
 		$_GET = [];
-		foreach (explode("&", parse_url(urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), PHP_URL_QUERY)) as $part) {
+		foreach (explode("&", parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY)) as $part) {
 			if ($part) {
 				$data                                = explode("=", $part);
 				static::$registry["param"][$data[0]] = $_GET[$data[0]] = isset($data[1]) ? $data[1] : "";
 			}
 		}
 
-		// Проверяем php://input и объединяем с $_POST
-		if (
-			(
-				isset($_SERVER["CONTENT_TYPE"]) &&
-				stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false
-			) || (
-				isset($_SERVER["HTTP_CONTENT_TYPE"]) &&
-				stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false
-			)
-		) {
+		// проверяем php://input и объединяем с $_POST
+		if (static::req_is("ajax")) {
 			if ($json = json_decode(@file_get_contents("php://input"), true)) {
 				$_POST = array_merge($_POST, $json);
 			}
@@ -95,13 +89,13 @@ class App {
 
 	/**
 	 * Завершить работу приложения (exit)
-	 * @param mixed|bool $data
+	 * @param mixed|bool $message
 	 */
-	public static function terminate($data = false) {
+	public static function terminate($message = false) {
 		static::$exit = true;
-		if ($data !== false) {
+		if ($message !== false) {
 			ob_clean();
-			echo $data;
+			echo $message;
 		}
 		exit;
 	}
@@ -114,17 +108,9 @@ class App {
 		switch (strtolower($type)) {
 			case "ajax": {
 				return (
-					(
-						isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
-						$_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
-					) || (
-						isset($_SERVER["CONTENT_TYPE"]) &&
-						stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false
-					) ||
-					(
-						isset($_SERVER["HTTP_CONTENT_TYPE"]) &&
-						stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false
-					)
+					(isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest") ||
+					(isset($_SERVER["CONTENT_TYPE"]) && stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false) ||
+					(isset($_SERVER["HTTP_CONTENT_TYPE"]) && stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false)
 				);
 			}
 
@@ -256,19 +242,20 @@ class App {
 					}
 				}
 
-				static::$registry["autoload"]->append($dir);
+				// регистрируем папку автозагрузки
+				static::$registry["autoload"][] = $dir;
 			}
 		}
 	}
 
 	/**
-	 * Подгружает файл модуля
+	 * Подгружает файл модуля и инициализирует его
 	 * @param $class
 	 * @param $dir
 	 */
 	protected static function bootModule($class, $dir) {
 		// регистрируем модуль
-		Module::$list[] = $class;
+		static::$registry["module"][] = $class;
 
 		if (is_file($dir)) {
 			require_once($dir);
@@ -309,7 +296,7 @@ class App {
 			static::bootDaemon(); // запускаем демона
 		} else {
 			register_shutdown_function(function () {
-				// Если приложение было завершено
+				// если приложение было завершено
 				if (App::isTerminated()) {
 					return;
 				}

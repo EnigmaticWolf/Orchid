@@ -3,7 +3,9 @@
 namespace Orchid\Entity;
 
 abstract class Module extends AppAware {
-	public static $list = [];
-
+	/**
+	 * Функция инициализации модуля
+	 * @return mixed
+	 */
 	public static function initialize() {}
 }

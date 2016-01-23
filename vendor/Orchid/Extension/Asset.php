@@ -5,7 +5,6 @@ namespace Orchid\Extension;
 use DirectoryIterator;
 use Orchid\App;
 use Orchid\Entity\Extension;
-use Orchid\Entity\Module;
 
 class Asset extends Extension {
 	protected static $include  = [];
@@ -63,7 +62,7 @@ class Asset extends Extension {
 		}
 
 		// папки модулей
-		foreach (Module::$list as $module) {
+		foreach (App::get("module") as $module) {
 			if ($path = App::path($module . ":template")) {
 				static::templateIterator($path);
 			}
