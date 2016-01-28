@@ -28,7 +28,7 @@ Router::bind("/", function() {
 });
 ```
 
-Правила могут включать в себя переменные, которые в дальнейшем будут доступны как элементы массива в первом аргументе функции:
+Правила могут включать в себя ключи, которые в дальнейшем будут доступны как элементы массива в первом аргументе функции:
 ```php
 Router::get("/news/:date/:id", function($params) {
     return $params["date"]."-".$params["id"];
@@ -100,7 +100,7 @@ class Page {
 
 Router::bindClass("Page");
 ```
-Кроме того вы можете восспользоваться классом `Controller`.
+Кроме того вы можете воспользоваться классом `Controller`.
 
 ## Хранилище данных
 Используйте хранилище данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
@@ -215,7 +215,7 @@ Task::trigger("custometask", $params=array());
  + `shutdown` - выполняется перед завершением работы;
  
 ```php
-Task::task("after", function() {
+Task::add("after", function() {
     switch(Response::$status){
         case "404":
             Response::$body = App::render("view/404.php");

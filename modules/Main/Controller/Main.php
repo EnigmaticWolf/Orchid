@@ -3,6 +3,7 @@
 namespace Main\Controller;
 
 use ModuleMain;
+use Orchid\App;
 use Orchid\Entity\Controller;
 
 class Main extends Controller {
@@ -11,6 +12,6 @@ class Main extends Controller {
 			"hello" => ModuleMain::HelloWorld(),
 		];
 
-		return static::render("Main:View/Main.php", $data);
+		return App::render("Main:View/Main.php", $data);
 	}
 }

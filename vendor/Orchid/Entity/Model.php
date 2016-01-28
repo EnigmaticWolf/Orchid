@@ -2,7 +2,7 @@
 
 namespace Orchid\Entity;
 
-abstract class Model {
+abstract class Model extends AppAware {
 	/**
 	 * Массив описания полей модели
 	 * @var array

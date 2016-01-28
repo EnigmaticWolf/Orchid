@@ -1,7 +1,5 @@
 <?php
 
-namespace Orchid\Extension;
-
 use Orchid\App;
 use Orchid\Entity\Extension;
 

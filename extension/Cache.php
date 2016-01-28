@@ -1,11 +1,7 @@
 <?php
 
-namespace Orchid\Extension;
-
-use Closure;
 use Orchid\App;
 use Orchid\Entity\Extension;
-use RecursiveDirectoryIterator;
 
 class Cache extends Extension {
 	protected $cachePath = null;

@@ -1,8 +1,5 @@
 <?php
 
-namespace Orchid\Extension;
-
-use DirectoryIterator;
 use Orchid\App;
 use Orchid\Entity\Extension;
 

@@ -4,7 +4,7 @@ namespace Orchid\Entity;
 
 use Closure;
 
-abstract class Validator {
+abstract class Validator extends AppAware {
 	protected $data  = [];
 	protected $field = null;
 	protected $rule  = [];
