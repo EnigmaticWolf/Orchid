@@ -4,6 +4,7 @@
 require_once("bootstrap.php");
 
 use Orchid\App;
+use Orchid\Extension\Str;
 use Orchid\Task;
 
 // добавляем задачу выводящую время и память в заголовках ответа
