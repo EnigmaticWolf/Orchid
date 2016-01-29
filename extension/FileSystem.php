@@ -1,9 +1,8 @@
 <?php
 
 use Orchid\App;
-use Orchid\Entity\Extension;
 
-class FileSystem extends Extension {
+class FileSystem {
 	/**
 	 * Листинг директории
 	 * @param string|null $dirName абсолютный или ссылочный путь

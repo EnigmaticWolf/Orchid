@@ -1,9 +1,8 @@
 <?php
 
 use Orchid\App;
-use Orchid\Entity\Extension;
 
-class Crypta extends Extension {
+class Crypta {
 	/**
 	 * Зашифровать строку
 	 * @param string $input строка

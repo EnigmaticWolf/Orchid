@@ -1,9 +1,8 @@
 <?php
 
 use Orchid\App;
-use Orchid\Entity\Extension;
 
-class Asset extends Extension {
+class Asset {
 	protected static $include  = [];
 	protected static $template = [];
 

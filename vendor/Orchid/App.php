@@ -257,67 +257,53 @@ class App {
 		// регистрируем модуль
 		static::$registry["module"][] = $class;
 
-		if (is_file($dir)) {
-			require_once($dir);
-		} else {
+		if (!is_file($dir)) {
 			static::path($class, $dir);
 
 			$class = "Module" . $class;
-			require_once($dir . DIRECTORY_SEPARATOR . $class . ".php");
+			$dir = $dir . DIRECTORY_SEPARATOR . $class . ".php";
+		}
+
+		if (file_exists($dir)) {
+			require_once($dir);
 		}
 
 		call_user_func([$class, "initialize"]);
 	}
 
 	/**
-	 * Запускает выполнение демона в фоне
-	 * @param array $args первый аргумент - имя класса демона
-	 */
-	public static function runDaemon(...$args) {
-		system("php " . static::$registry["base_dir"] . DIRECTORY_SEPARATOR . "index.php " . implode(" ", $args) . " > /dev/null &");
-	}
-
-	/**
 	 * Запуск приложения
 	 */
 	public static function run() {
-		if (PHP_SAPI == "cli") {
-			if (!empty(static::$registry["args"][0])) {
-				$class = static::$registry["args"][0];
-
-				new $class();
+		register_shutdown_function(function () {
+			// если приложение было завершено
+			if (App::isTerminated()) {
+				return;
 			}
-		} else {
-			register_shutdown_function(function () {
-				// если приложение было завершено
-				if (App::isTerminated()) {
-					return;
-				}
 
-				$error = error_get_last();
-				if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
-					ob_end_clean();
-					Response::$nocache = true;
-					Response::$status  = "500";
-					Response::$body    = App::retrieve("debug", false) ? $error : "Internal Error.";
-				} elseif (!Response::$body) {
-					Response::$nocache = true;
-					Response::$status  = "404";
-					Response::$body    = "Path not found.";
-				}
+			$error = error_get_last();
+			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
+				ob_end_clean();
+				Response::$nocache = true;
+				Response::$status  = "500";
+				Response::$body    = App::retrieve("debug", false) ? $error : "Internal Error.";
+			} elseif (!Response::$body) {
+				Response::$nocache = true;
+				Response::$status  = "404";
+				Response::$body    = "Path not found.";
+			}
 
-				Task::trigger("after");
-				Response::flush();
+			Task::trigger("after");
+			Response::flush();
 
-				Task::trigger("shutdown");
-				ob_end_flush();
-			});
+			Task::trigger("shutdown");
+			ob_end_flush();
+		});
 
-			ob_start();
+		ob_start();
 
-			Task::trigger("before");
-			Response::$body = Router::dispatch();
-		}
+		Task::trigger("before");
+		Response::$body = Router::dispatch();
 	}
 
 	/**

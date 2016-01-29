@@ -1,13 +1,13 @@
 <?php
 
-namespace Orchid\Entity;
+namespace Orchid\Classes;
 
 use Closure;
 use Countable;
 use Iterator;
 use SplFixedArray;
 
-abstract class Collection extends AppAware implements Countable, Iterator {
+abstract class Collection implements Countable, Iterator {
 	/**
 	 * Полный путь класса модели
 	 * @var string|null

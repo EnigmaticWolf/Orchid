@@ -1,10 +1,9 @@
 <?php
 
 use Orchid\App;
-use Orchid\Entity\Extension;
 use function Orchid\fetch_from_array;
 
-class Session extends Extension {
+class Session {
 	/**
 	 * Создание новой сессии с заданным именем
 	 * @param null $sessionName

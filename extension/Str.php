@@ -1,8 +1,6 @@
 <?php
 
-use Orchid\Entity\Extension;
-
-class Str extends Extension {
+class Str {
 	/**
 	 * Возвращает true если строчка начинается с указанного символа
 	 * @param string $needle искомый символ

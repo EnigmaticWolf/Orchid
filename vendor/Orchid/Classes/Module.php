@@ -1,11 +1,11 @@
 <?php
 
-namespace Orchid\Entity;
+namespace Orchid\Classes;
 
-abstract class Module extends AppAware {
+abstract class Module {
 	/**
 	 * Функция инициализации модуля
-	 * @return mixed
+	 * @return void
 	 */
 	public static function initialize() {}
 }

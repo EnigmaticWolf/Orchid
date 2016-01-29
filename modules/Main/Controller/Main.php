@@ -4,9 +4,8 @@ namespace Main\Controller;
 
 use ModuleMain;
 use Orchid\App;
-use Orchid\Entity\Controller;
 
-class Main extends Controller {
+class Main {
 	public static function index() {
 		$data = [
 			"hello" => ModuleMain::HelloWorld(),

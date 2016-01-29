@@ -1,7 +1,5 @@
 <?php
 
-use Orchid\Entity\Extension;
-
 /**
  * @method static string text(string $name, array $options = [])
  * @method static string password(string $name, array $options = [])
@@ -14,7 +12,7 @@ use Orchid\Entity\Extension;
  * @method static string button(string $name, array $options = [])
  * @method static string hidden(string $name, array $options = [])
  */
-class Form extends Extension {
+class Form {
 	/**
 	 * Массив поддерживаемых типов
 	 * @var array

@@ -1,8 +1,8 @@
 <?php
 
-namespace Orchid\Entity;
+namespace Orchid\Classes;
 
-abstract class Model extends AppAware {
+abstract class Model {
 	/**
 	 * Массив описания полей модели
 	 * @var array

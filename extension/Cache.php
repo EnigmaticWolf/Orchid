@@ -1,9 +1,8 @@
 <?php
 
 use Orchid\App;
-use Orchid\Entity\Extension;
 
-class Cache extends Extension {
+class Cache {
 	protected $cachePath = null;
 
 	/**

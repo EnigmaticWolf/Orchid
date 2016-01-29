@@ -230,7 +230,7 @@ Task::add("after", function() {
 ## Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
-class Foo extends Orchid\Entity\Extension {
+class Foo extends Orchid\Classes\Extension {
     public static function bar(){
         return "Hello!";
     }
@@ -276,7 +276,7 @@ Str::translate($input, $back = false);
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
 ```php
-class ModulePage extends Orchid\Entity\Module { 
+class ModulePage extends Orchid\Classes\Module { 
     public static function initialize() {
         // зададим правило обработки запросов
         Router::bindClass("Page", "*");
@@ -295,7 +295,7 @@ ModulePage::foo(); // "bar"
 
 ## Модели
 ```php
-class Car extends Orchid\Entity\Model {
+class Car extends Orchid\Classes\Model {
     protected static $default = [
         "brand" => "",
         "model" => "",
@@ -335,7 +335,7 @@ echo $auto->getMark();
 
 ## Коллекции
 ```php
-class Cars extends Orchid\Entity\Collection {
+class Cars extends Orchid\Classes\Collection {
     protected static $model = "Car"; // указывает какую модель создать при вызове метода get
 
     public static function fetch(array $data = []) {
@@ -351,11 +351,11 @@ foreach($myCars as $key => $val) {
 
 ## Валидатор
 ```php
-class ValidData extends Orchid\Entity\Validator {
+class ValidData extends Orchid\Classes\Validator {
     // подключение стандартных проверяющих функций
-    use Orchid\Entity\Validate\Base,
-        Orchid\Entity\Validate\Type,
-        Orchid\Entity\Validate\String;
+    use Orchid\Classes\Validate\Base,
+        Orchid\Classes\Validate\Type,
+        Orchid\Classes\Validate\String;
 		
     // при необходимости можно расширить функционал
     public function isSupportedCity() {
@@ -394,10 +394,13 @@ $result = $valid->validate();   // в случае успеха результа
 ## Демоны
 Позволяют выполнять некую работу в фоне без прямого взаимодействия с пользователем.
 ```php
-class MyDaemon extends Daemon {
-    public function run() {
-        // рабочий код демона
-    }
+// подключаем файл начальной загрузки
+require_once(__DIR__ . "/../bootstrap.php");
+
+use Orchid\Classes\Daemon;
+
+for($i = 0; $i < 10; $i++){
+    echo $i . " \n\r";
 }
 ```
-Затем выполнять по `cron` или запустить фоном: `php index.php [название демона]`
+Затем выполнять по `cron` или запустить фоном: `../orchid/daemon/#php Demo.php`
