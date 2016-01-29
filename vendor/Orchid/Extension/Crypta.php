@@ -1,5 +1,7 @@
 <?php
 
+namespace Orchid\Extension;
+
 use Orchid\App;
 
 class Crypta {

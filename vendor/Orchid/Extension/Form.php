@@ -1,5 +1,7 @@
 <?php
 
+namespace Orchid\Extension;
+
 /**
  * @method static string text(string $name, array $options = [])
  * @method static string password(string $name, array $options = [])

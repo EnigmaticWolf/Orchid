@@ -1,5 +1,7 @@
 <?php
 
+namespace Orchid\Extension;
+
 use Orchid\App;
 use function Orchid\fetch_from_array;
 

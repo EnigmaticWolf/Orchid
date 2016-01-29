@@ -1,5 +1,8 @@
 <?php
 
+namespace Orchid\Extension;
+
+use DirectoryIterator;
 use Orchid\App;
 
 class Asset {

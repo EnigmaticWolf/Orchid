@@ -1,5 +1,7 @@
 <?php
 
+namespace Orchid\Extension;
+
 class Str {
 	/**
 	 * Возвращает true если строчка начинается с указанного символа
