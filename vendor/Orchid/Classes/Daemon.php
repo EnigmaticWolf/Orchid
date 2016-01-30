@@ -17,7 +17,7 @@ final class Daemon {
 	 * @param string $path
 	 * @return string
 	 */
-	public static function runDaemon($daemon, array $args = [], $path = "/daemon/") {
+	public static function run($daemon, array $args = [], $path = "/daemon/") {
 		return system("php " . App::get("base_dir") . $path . $daemon . ".php " . implode(" ", $args) . " > /dev/null &");
 	}
 
