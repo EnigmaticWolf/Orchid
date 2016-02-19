@@ -23,11 +23,7 @@ function pre(...$args) {
 use Orchid\App;
 
 // инициализация приложения
-App::initialize([
-	"autoload" => [
-		ORCHID . "/extension"
-	],
-]);
+App::initialize();
 
 // подключение модулей
 App::loadModule([
