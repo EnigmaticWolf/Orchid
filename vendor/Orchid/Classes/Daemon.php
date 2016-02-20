@@ -5,6 +5,7 @@ namespace Orchid\Classes;
 use Orchid\App;
 
 final class Daemon {
+	public static $name    = "daemon";
 	public static $pid     = null;
 	public static $pidFile = null;
 	public static $log     = null;
@@ -24,14 +25,13 @@ final class Daemon {
 	/**
 	 * Отключает рабочий процесс от консоли, создавая дочерний процесс
 	 * Внимание: при использовании данного метода, возможен запуск лишь одного инстанса
-	 * @param string $fileName
 	 * @return void
 	 */
-	public static function forkProcess($fileName = "daemon") {
+	public static function forkProcess() {
 		if (!pcntl_fork()) {
 			posix_setsid();
 			static::$pid     = getmypid();
-			static::$pidFile = App::get("base_dir") . "/cache/" . $fileName . ".pid";
+			static::$pidFile = App::get("base_dir") . "/cache/" . static::$name . ".pid";
 
 			if (!file_exists(static::$pidFile)) {
 				// запись pid в файл
@@ -54,12 +54,11 @@ final class Daemon {
 
 	/**
 	 * Переключает процесс на запись output в лог файл
-	 * @param string $fileName
 	 * @return void
 	 */
-	public static function writeLog($fileName = "daemon") {
-		static::$log    = App::get("base_dir") . "/cache/" . $fileName . ".log";
-		static::$logErr = App::get("base_dir") . "/cache/" . $fileName . "-error.log";
+	public static function writeLog() {
+		static::$log    = App::get("base_dir") . "/cache/" . static::$name . ".log";
+		static::$logErr = App::get("base_dir") . "/cache/" . static::$name . "-error.log";
 
 		fclose(STDIN);
 		$GLOBALS["STDIN"] = fopen("/dev/null", "r");

@@ -5,11 +5,13 @@ require_once(__DIR__ . "/../bootstrap.php");
 
 use Orchid\Classes\Daemon;
 
+Daemon::$name = "Demo";
+
 // разделяем рабочий процесс
-Daemon::forkProcess("Demo");
+Daemon::forkProcess();
 
 // пишем логи в файл
-Daemon::writeLog("Demo");
+Daemon::writeLog();
 
 for($i = 0; $i < 10; $i++){
 	echo $i . " \n\r";
