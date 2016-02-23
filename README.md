@@ -139,7 +139,7 @@ $url  = App::pathToUrl("view:file.php");
 ```
 
 ## База данных
-Объект `Database` реализует подключение к одному или нескольким серверам баз данных:
+Объект `Database` реализует подключение серверу базы данных:
 ```php
 Database::initialize([
     [
@@ -198,6 +198,48 @@ $sth = Database::query("
 
 $array = $sth->fetchAll(PDO::FETCH_ASSOC);
 ```
+
+## Кеширование
+Объект `Memory` реализует соединение с внешним хранилищем типа `Key-Value`:
+```php
+Memory::initialize([
+    [
+        "host"    => "localhost",
+        "port"    => 11211,
+    ]
+]);
+```
+`Memory` позволяет производить подключение к одному или
+нескольким серверам с разделением на `master` и `slave`.
+
+Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по умолчанию `master`):
+```php
+Memory::initialize([
+    [
+        "host"    => "localhost",
+        "port"    => 11211,
+        "role"    => "master",
+    ]
+]);
+
+Memory::get($key, $default = false);
+Memory::set($key, $value, $expire = 0);
+Memory::delete($key);
+Memory::flush();
+```
+
+##### Префикс ключей
+При необходимости можно задать префикс для всех ключей одновременно:
+```php
+Memory::$prefix = "orchid";
+```
+
+##### Отключение чтения
+Отключить чтение из внешнего хранилища можно изменив флаг:
+```php
+Memory::$disabled = true;
+```
+*Данный флаг не влияет на запись и удаление ключей.*
 
 ## Задачи
 ```php
