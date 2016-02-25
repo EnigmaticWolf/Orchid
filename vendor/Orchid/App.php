@@ -38,7 +38,7 @@ class App {
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
-			foreach (App::retrieve("autoload", []) as $dir) {
+			foreach (static::$registry["autoload"] as $dir) {
 				$class_path = $dir . "/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
 				if (file_exists($class_path)) {
@@ -99,8 +99,6 @@ class App {
 		if ($message !== false) {
 			echo $message;
 		}
-
-		exit;
 	}
 
 	/**
