@@ -93,10 +93,13 @@ class App {
 	 */
 	public static function terminate($message = false) {
 		static::$exit = true;
+
+		ob_clean();
+
 		if ($message !== false) {
-			ob_clean();
 			echo $message;
 		}
+
 		exit;
 	}
 
@@ -211,7 +214,7 @@ class App {
 			$url .= $app . ".";
 		}
 		$url .= static::$registry["base_host"];
-		if (static::$registry["base_port"] != "80") {
+		if (static::$registry["base_port"] != 80) {
 			$url .= ":" . static::$registry["base_port"];
 		}
 		if ($withPath) {
@@ -226,7 +229,7 @@ class App {
 	 * @return string
 	 */
 	public static function getSitePath() {
-		return implode("/", static::$registry["uri"]);
+		return "/" . implode("/", static::$registry["uri"]);
 	}
 
 	/**
