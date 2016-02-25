@@ -1,7 +1,7 @@
 <?php
 
 use Orchid\App;
-use Orchid\Classes\Module;
+use Orchid\Entity\Module;
 use Orchid\Router;
 
 class ModuleMain extends Module {

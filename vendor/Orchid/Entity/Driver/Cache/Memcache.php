@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Classes\Driver\Cache;
+namespace Orchid\Entity\Driver\Cache;
 
 use Orchid\App;
 

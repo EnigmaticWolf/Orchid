@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Classes;
+namespace Orchid\Entity;
 
 use Closure;
 

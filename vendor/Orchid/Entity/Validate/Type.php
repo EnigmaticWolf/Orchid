@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Classes\Validate;
+namespace Orchid\Entity\Validate;
 
 use Closure;
 

@@ -3,7 +3,7 @@
 // подключаем файл начальной загрузки
 require_once(__DIR__ . "/../bootstrap.php");
 
-use Orchid\Classes\Daemon;
+use Orchid\Entity\Daemon;
 
 Daemon::$name = "Demo";
 

@@ -2,7 +2,7 @@
 
 namespace Orchid;
 
-use Orchid\Classes\Driver\Cache\Memcache;
+use Orchid\Entity\Driver\Cache\Memcache;
 
 class Memory {
 	/**
