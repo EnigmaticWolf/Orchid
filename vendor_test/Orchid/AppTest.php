@@ -33,6 +33,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testDelete($key) {
 		$this->assertTrue(App::delete($key));
+		$this->assertNull(App::get($key));
 	}
 
 	public function providerSetGetDelete() {
