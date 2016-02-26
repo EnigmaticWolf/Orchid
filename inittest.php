@@ -1,11 +1,25 @@
 <?php
 
-// подключаем файл начальной загрузки
-require_once("bootstrap.php");
+define("ORCHID", __DIR__);
 
-use Orchid\App;
+// Параметры необходимые для тестов
+$_SERVER["REMOTE_ADDR"] = "127.0.0.1";
+$_SERVER["REQUEST_METHOD"] = "GET";
+$_SERVER["REQUEST_URI"] = "http://somedomain.ru/foo/bar?baz=quux";
+$_SERVER["HTTP_ACCEPT_LANGUAGE"] = "ru,en;q=0.8,en-US;q=0.6";
 
-// PSR загрузщик тестовых файлов
+// PSR совместимый загрузщик основных файлов
+spl_autoload_register(function ($class) {
+	$class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";
+
+	if (file_exists($class_path)) {
+		require_once($class_path);
+
+		return;
+	}
+});
+
+// PSR совместимый загрузщик тестовых файлов
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor_test/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
@@ -15,6 +29,8 @@ spl_autoload_register(function ($class) {
 		return;
 	}
 });
+
+use Orchid\App;
 
 // дополнительный загрузшик
 spl_autoload_register(function ($class) {

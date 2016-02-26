@@ -1,5 +1,4 @@
-<phpunit bootstrap="inittest.php"
-		 colors="true">
+<phpunit bootstrap="inittest.php" colors="true">
 	<testsuites>
 		<testsuite name="app">
 			<file>vendor_test/Orchid/AppTest.php</file>

@@ -9,6 +9,11 @@ class App {
 	protected static $registry = [];
 	protected static $exit     = false;
 
+	/**
+	 * Инициализатор приложения
+	 * @param array $param
+	 * @return bool
+	 */
 	public static function initialize(array $param = []) {
 		static::$registry = array_merge([
 			"debug"     => true,
@@ -77,6 +82,8 @@ class App {
 
 		static::$registry["data"] = $_POST;
 		$_REQUEST                 = array_merge($_GET, $_POST, $_COOKIE);
+
+		return true;
 	}
 
 	/**
@@ -461,21 +468,26 @@ class App {
 			return false;
 		}
 		switch (count($keys)) {
-			case 1:
+			case 1: {
 				static::$registry[$keys[0]] = $value;
 				break;
-			case 2:
+			}
+			case 2: {
 				static::$registry[$keys[0]][$keys[1]] = $value;
 				break;
-			case 3:
+			}
+			case 3: {
 				static::$registry[$keys[0]][$keys[1]][$keys[2]] = $value;
 				break;
-			case 4:
+			}
+			case 4: {
 				static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]] = $value;
 				break;
-			case 5:
+			}
+			case 5: {
 				static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]] = $value;
 				break;
+			}
 		}
 
 		return true;
@@ -501,6 +513,42 @@ class App {
 
 		return $value instanceof Closure ? $value() : $value;
 	}
+
+	/**
+	 * Удаляет значение из реестра
+	 * @param $key
+	 * @return bool
+	 */
+	public static function delete($key) {
+		$keys = explode("/", $key);
+		if (count($keys) > 5) {
+			return false;
+		}
+		switch (count($keys)) {
+			case 1: {
+				unset(static::$registry[$keys[0]]);
+				break;
+			}
+			case 2: {
+				unset(static::$registry[$keys[0]][$keys[1]]);
+				break;
+			}
+			case 3: {
+				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]]);
+				break;
+			}
+			case 4: {
+				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]]);
+				break;
+			}
+			case 5: {
+				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]]);
+				break;
+			}
+		}
+
+		return true;
+	}
 }
 
 function fetch_from_array(&$array, $index = null, $default = null) {
@@ -511,26 +559,36 @@ function fetch_from_array(&$array, $index = null, $default = null) {
 	} elseif (strpos($index, "/")) {
 		$keys = explode("/", $index);
 		switch (count($keys)) {
-			case 1:
+			case 1: {
 				if (isset($array[$keys[0]])) {
 					return $array[$keys[0]];
 				}
 				break;
-			case 2:
+			}
+			case 2: {
 				if (isset($array[$keys[0]][$keys[1]])) {
 					return $array[$keys[0]][$keys[1]];
 				}
 				break;
-			case 3:
+			}
+			case 3: {
 				if (isset($array[$keys[0]][$keys[1]][$keys[2]])) {
 					return $array[$keys[0]][$keys[1]][$keys[2]];
 				}
 				break;
-			case 4:
+			}
+			case 4: {
 				if (isset($array[$keys[0]][$keys[1]][$keys[2]][$keys[3]])) {
 					return $array[$keys[0]][$keys[1]][$keys[2]][$keys[3]];
 				}
 				break;
+			}
+			case 5: {
+				if (isset($array[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]])) {
+					return $array[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]];
+				}
+				break;
+			}
 		}
 	}
 

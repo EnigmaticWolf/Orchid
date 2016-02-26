@@ -2,7 +2,7 @@
 
 define("ORCHID", __DIR__);
 
-// PSR совместимый загрузщик файлов
+// PSR совместимый загрузщик основных файлов
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
