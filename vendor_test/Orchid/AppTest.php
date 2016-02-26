@@ -3,6 +3,7 @@
 namespace Orchid;
 
 use PHPUnit_Framework_TestCase;
+use stdClass;
 
 class AppTest extends PHPUnit_Framework_TestCase {
 	public function testInitialize() {
@@ -43,6 +44,13 @@ class AppTest extends PHPUnit_Framework_TestCase {
 			["foo/bar/baz", "quux"],
 			["quux/foo/bar/baz", "bat"],
 			["bat/quux/foo/bar/baz", "xyzzy"],
+			["int", 2010],
+			["float", 20.10],
+			["bool_1", true],
+			["bool_2", false],
+			["null", null],
+			["array", [1, 2, 3, 4]],
+			["object", new stdClass],
 		];
 	}
 
@@ -74,6 +82,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 			[1, 1],
 			["foo", "foo"],
 			[function(){return "bar";}, "bar"],
+			[new stdClass, new stdClass],
 		];
 	}
 }
