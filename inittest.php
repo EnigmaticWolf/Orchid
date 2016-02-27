@@ -5,7 +5,7 @@ define("ORCHID", __DIR__);
 // Параметры необходимые для тестов
 $_SERVER["REMOTE_ADDR"] = "127.0.0.1";
 $_SERVER["REQUEST_METHOD"] = "GET";
-$_SERVER["REQUEST_URI"] = "http://somedomain.ru/foo/bar?baz=quux";
+$_SERVER["REQUEST_URI"] = "http://domain.ru/foo/bar?baz=quux";
 $_SERVER["HTTP_ACCEPT_LANGUAGE"] = "ru,en;q=0.8,en-US;q=0.6";
 
 // PSR совместимый загрузщик основных файлов

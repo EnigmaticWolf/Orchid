@@ -215,7 +215,7 @@ class App {
 	 */
 	public static function getSiteUrl($withPath = false, $app = "") {
 		$url = (static::req_is("ssl") ? "https" : "http") . "://";
-		if ($app = (empty($app) && static::$registry["app"] != "public") ? static::$registry["app"] : $app) {
+		if (($app = (empty($app) ? static::$registry["app"] : $app)) && $app != "public") {
 			$url .= $app . ".";
 		}
 		$url .= static::$registry["base_host"];

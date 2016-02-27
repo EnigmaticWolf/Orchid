@@ -1,6 +1,6 @@
 <phpunit bootstrap="inittest.php" colors="true">
 	<testsuites>
-		<testsuite name="app">
+		<testsuite name="Orchid">
 			<file>vendor_test/Orchid/AppTest.php</file>
 		</testsuite>
 	</testsuites>
