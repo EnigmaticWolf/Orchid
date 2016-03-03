@@ -19,7 +19,6 @@ class Task {
 	 * @param  int           $priority приоритет задачи
 	 */
 	public static function add($name, $callback, $priority = 0) {
-		$name = strtolower($name);
 		if (!isset(static::$task[$name])) {
 			static::$task[$name] = [];
 		}
