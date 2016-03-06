@@ -3,6 +3,7 @@
 namespace Orchid\Entity\Driver\Cache;
 
 use Orchid\App;
+use Orchid\Memory;
 
 class Memcache {
 	protected $connection = null;
@@ -28,7 +29,7 @@ class Memcache {
 	 * @return mixed
 	 */
 	public function get($key) {
-		return $this->connection->get($key);
+		return $this->connection->get(Memory::getKey($key));
 	}
 
 	/**
@@ -39,7 +40,7 @@ class Memcache {
 	 * @return bool
 	 */
 	public function set($key, $value, $expire = 0) {
-		return $this->connection->set($key, $value, MEMCACHE_COMPRESSED, $expire);
+		return $this->connection->set(Memory::getKey($key), $value, MEMCACHE_COMPRESSED, $expire);
 	}
 
 	/**
@@ -48,7 +49,7 @@ class Memcache {
 	 * @return bool
 	 */
 	public function delete($key) {
-		return $this->connection->delete($key);
+		return $this->connection->delete(Memory::getKey($key));
 	}
 
 	/**

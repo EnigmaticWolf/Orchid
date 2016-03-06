@@ -18,10 +18,16 @@ class Memory {
 	public static $prefix = "";
 
 	/**
-	 * Внутреннее дублирующее хранилище
+	 * Список ключей которые будут сохраняться в буффер
 	 * @var array
 	 */
-	protected static $cache = [];
+	public static $cachedKeys = [];
+
+	/**
+	 * Внутреннее хранилище
+	 * @var array
+	 */
+	protected static $buffer = [];
 
 	/**
 	 * Массив объектов соединений с внешними хранилищами
@@ -106,7 +112,7 @@ class Memory {
 	 * @param $key
 	 * @return string
 	 */
-	protected static function getKey($key) {
+	public static function getKey($key) {
 		return static::$prefix ? static::$prefix . ":" . $key : $key;
 	}
 
@@ -118,17 +124,19 @@ class Memory {
 	 */
 	public static function get($key, $default = false) {
 		if (!static::$disabled) {
-			$key = static::getKey($key);
+			if (isset(static::$buffer[$key])) {
+				$value = static::$buffer[$key];
+			} else {
+				$value = static::getInstance(false)->get($key);
 
-			if (!isset(static::$cache[$key])) {
-				static::$cache[$key] = static::getInstance(0)->get($key);
-
-				if (static::$cache[$key] === false) {
-					static::$cache[$key] = $default;
+				foreach(static::$cachedKeys as $k){
+					if (strpos($key, $k) === 0) {
+						static::$buffer[$key] = $value;
+					}
 				}
 			}
 
-			return static::$cache[$key];
+			return $value !== false ? $value : $default;
 		}
 
 		return $default;
@@ -142,13 +150,11 @@ class Memory {
 	 * @return bool
 	 */
 	public static function set($key, $value, $expire = 0) {
-		$key = static::getKey($key);
-
-		if (isset(static::$cache[$key])) {
-			unset(static::$cache[$key]);
+		if (isset(static::$cachedKeys[$key])) {
+			unset(static::$buffer[$key]);
 		}
 
-		return static::getInstance(1)->set($key, $value, $expire);
+		return static::getInstance(true)->set($key, $value, $expire);
 	}
 
 	/**
@@ -157,22 +163,20 @@ class Memory {
 	 * @return bool
 	 */
 	public static function delete($key) {
-		$key = static::getKey($key);
-
-		if (isset(static::$cache[$key])) {
-			unset(static::$cache[$key]);
+		if (isset(static::$cachedKeys[$key])) {
+			unset(static::$buffer[$key]);
 		}
 
-		return static::getInstance(1)->delete($key);
+		return static::getInstance(true)->delete($key);
 	}
 
 	/**
 	 * Удаляет все ключи из внешнего хранилища
 	 * @return bool
 	 */
-	public function flush() {
-		static::$cache = [];
+	public static function flush() {
+		static::$buffer = [];
 
-		return static::getInstance(1)->flush();
+		return static::getInstance(true)->flush();
 	}
 }

@@ -7,12 +7,12 @@ use stdClass;
 
 class AppTest extends PHPUnit_Framework_TestCase {
 	public function testInitialize() {
-		$this->assertTrue(App::initialize([
+		App::initialize([
 			"debug"     => true,
 			"instance"  => ["public", "private"],
 			"locale"    => ["ru", "en"],
 			"base_host" => "domain.ru",
-		]));
+		]);
 	}
 
 	/**

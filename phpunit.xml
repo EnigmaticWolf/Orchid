@@ -2,6 +2,7 @@
 	<testsuites>
 		<testsuite name="Orchid">
 			<file>vendor_test/Orchid/AppTest.php</file>
+			<file>vendor_test/Orchid/MemoryTest.php</file>
 		</testsuite>
 	</testsuites>
 </phpunit>

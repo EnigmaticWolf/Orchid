@@ -12,7 +12,7 @@ class App {
 	/**
 	 * Инициализатор приложения
 	 * @param array $param
-	 * @return bool
+	 * @return void
 	 */
 	public static function initialize(array $param = []) {
 		static::$registry = array_merge([
@@ -82,8 +82,6 @@ class App {
 
 		static::$registry["data"] = $_POST;
 		$_REQUEST                 = array_merge($_GET, $_POST, $_COOKIE);
-
-		return true;
 	}
 
 	/**
