@@ -6,8 +6,8 @@ use Orchid\App;
 
 class Crypta {
 	/**
-	 * Зашифровать строку
-	 * @param string $input строка
+	 * Зашифровать переданную строку
+	 * @param string $input строка которая будет зашифрованна
 	 * @return string зашифрованная строка
 	 */
 	public static function encrypt($input) {
@@ -15,8 +15,8 @@ class Crypta {
 	}
 
 	/**
-	 * Дешифровать строку
-	 * @param string $input строка
+	 * Расшифровать переданную строку
+	 * @param string $input строка которая будет расшифрованна
 	 * @return string расшифрованная строка
 	 */
 	public static function decrypt($input) {
@@ -43,7 +43,7 @@ class Crypta {
 	/**
 	 * Сгенерировать хешсумму для строки
 	 * @param string $string строка из которой получить хешсумму
-	 * @return string хешсумма
+	 * @return string хешсумма 140 символов
 	 */
 	public static function hash($string) {
 		$salt = substr(hash("whirlpool", uniqid(rand() . App::get("secret"), true)), 0, 12);
