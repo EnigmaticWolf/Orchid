@@ -33,7 +33,6 @@ class Task {
 	 */
 	public static function trigger($name, $params = []) {
 		if (!empty(static::$task[$name])) {
-
 			$queue = new SplPriorityQueue();
 			foreach (static::$task[$name] as $index => $action) {
 				$queue->insert($index, $action["priority"]);
