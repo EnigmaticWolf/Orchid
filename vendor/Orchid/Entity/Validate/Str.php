@@ -4,7 +4,7 @@ namespace Orchid\Entity\Validate;
 
 use Closure;
 
-trait String {
+trait Str {
 	/**
 	 * Экранирует строку
 	 * @return Closure
