@@ -26,13 +26,13 @@ class Database {
 			"dsn"      => "",
 			"username" => "",
 			"password" => "",
-			"option"   => [],
+			"options"  => [],
 			"role"     => "master",
 		];
 
 		foreach ($configs as $index => $config) {
 			$config = array_merge($default, $config);
-			$key    = "database:" . $index;
+			$key = "database:" . $index;
 
 			App::addService($key, function () use ($config) {
 				try {
@@ -40,7 +40,7 @@ class Database {
 						$config["dsn"],
 						$config["username"],
 						$config["password"],
-						$config["option"]
+						$config["options"]
 					);
 				} catch (PDOException $e) {
 					http_response_code(500);
@@ -60,7 +60,7 @@ class Database {
 	 * @param bool $use_master
 	 * @return null|PDO
 	 */
-	public static function getConnection($use_master = false) {
+	public static function getInstance($use_master = false) {
 		$pool = [];
 		$role = $use_master ? "master" : "slave";
 
@@ -98,8 +98,8 @@ class Database {
 	 * @return PDOStatement
 	 */
 	public static function query($query, array $params = [], $use_master = false) {
-		// достаём соединение
-		static::$lastConnection = static::getConnection(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
+		// получаем соединение
+		static::$lastConnection = static::getInstance(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
 
 		$stm = static::$lastConnection->prepare($query);
 		$stm->execute($params);

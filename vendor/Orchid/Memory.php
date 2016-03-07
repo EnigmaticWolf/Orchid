@@ -77,7 +77,7 @@ class Memory {
 	 * @param bool $use_master
 	 * @return Memcache|false
 	 */
-	protected static function getInstance($use_master = false) {
+	public static function getInstance($use_master = false) {
 		$pool = [];
 		$role = $use_master ? "master" : "slave";
 

@@ -170,7 +170,7 @@ Database::initialize([
         "dsn"      => "mysql:dbname=base;host=localhost",
         "username" => "...",
         "password" => "...",
-        "option"   => [
+        "options"  => [
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'",
         ],
     ]
@@ -180,7 +180,7 @@ Database::initialize([
 ##### Получение соединения
 После инициализации, в любой момент можно получить объект соединения:
 ```php
-$pdo = Database::getConnection($use_master = false);
+$pdo = Database::getInstance($use_master = false);
 ```
 
 ##### Выполнение запросов
