@@ -310,7 +310,7 @@ Foo::bar(); // Hello!
 Cache::write($key, $value, $duration=-1);
 Cache::read($key, $default=null);
 Cache::delete($key);
-Cache::clear();
+Cache::flush();
 ```
 **Crypta**
 ```php

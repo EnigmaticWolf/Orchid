@@ -3,6 +3,7 @@
 define("ORCHID", __DIR__);
 
 // Параметры необходимые для тестов
+$_SERVER["DOCUMENT_ROOT"] = __DIR__;
 $_SERVER["REMOTE_ADDR"] = "127.0.0.1";
 $_SERVER["REQUEST_METHOD"] = "GET";
 $_SERVER["REQUEST_URI"] = "http://domain.ru/foo/bar?baz=quux";
