@@ -6,91 +6,131 @@ use DirectoryIterator;
 use Orchid\App;
 
 class Asset {
-	protected static $include  = [];
-	protected static $template = [];
+	/**
+	 * Карта ресурсов
+	 * @var array
+	 */
+	public static $map = [];
 
 	/**
-	 * Генерирует подключения Asset для js, css, less
-	 * @param string $path прямой или ссылочный путь до файла карты
-	 * @return null|string
+	 * Генерирует и возвращает строку подключений ресурсов на основе карты ресурсов и параметров
+	 * @return string|null
 	 */
-	public static function render($path = "app:configuration.php") {
-		if (($file = App::path($path)) !== false) {
-			/*
-			 * Подключение карты файлов, пример массива:
-			 *	[
-			 *		"link:filename.ext" => "internal/address/filename.ext"
-			 *	]
-			 */
-			$config = array_unique((array)require_once($file));
+	public static function render() {
+		$include = [];
 
-			foreach ($config as $file => $address) {
-				if (is_numeric($file)) {
-					$file    = $address;
-					$address = App::pathToUrl($file);
+		if (static::$map) {
+			// общие ресурсы
+			if (isset(static::$map["*"])) {
+				$include = array_merge($include, static::renderIterator(static::$map["*"]));
+			}
+
+			// ресурсы для определённого контроллера
+			if (($controller = App::retrieve("uri/0", false)) !== false && isset(static::$map[$controller . "/*"])) {
+				$include = array_merge($include, static::renderIterator(static::$map[$controller . "/*"]));
+			}
+
+			// ресурсы для определённого адреса
+			if (($path = substr(App::getSitePath(), 1)) && isset(static::$map[$path])) {
+				$include = array_merge($include, static::renderIterator(static::$map[$path]));
+			}
+
+			// если предыдущие проверки не дали результатов
+			if (empty($include)) {
+				$include = array_merge($include, static::renderIterator(static::$map));
+			}
+		}
+
+		return $include ? implode("\n", $include) : null;
+	}
+
+	/**
+	 * Обходит переданный массив и возвращает массив строк для подключения ресурсов
+	 * @param array $list
+	 * @return array
+	 */
+	protected static function renderIterator(array $list) {
+		$include = [];
+
+		foreach ($list as $address) {
+			switch (pathinfo($address)["extension"]) {
+				case "js": {
+					$include[] = '<script type="text/javascript" src="' . $address . '"></script>';
+					break;
 				}
-
-				switch (pathinfo($file)["extension"]) {
-					case "js": {
-						static::$include[] = '<script type="text/javascript" src="' . $address . '"></script>';
-						break;
-					}
-					case "css": {
-						static::$include[] = '<link rel="stylesheet" type="text/css" href="' . $address . '" />';
-						break;
-					}
-					case "less": {
-						static::$include[] = '<link rel="stylesheet/less" type="text/css" href="' . $address . '" />';
-						break;
-					}
+				case "css": {
+					$include[] = '<link rel="stylesheet" type="text/css" href="' . $address . '" />';
+					break;
+				}
+				case "less": {
+					$include[] = '<link rel="stylesheet/less" type="text/css" href="' . $address . '" />';
+					break;
 				}
 			}
 		}
 
-		return static::$include ? "\n" . implode("\n", static::$include) . "\n" : null;
+		return $include;
 	}
 
 	/**
-	 * Собирает все шаблоны из папки приложения и из всех подключенных модулей
+	 * Собирает все шаблоны из папок template: и из всех подключенных модулей
 	 * @return string
 	 */
 	public static function template() {
-		// папка приложения
-		if ($path = App::path("template:")) {
-			static::templateIterator($path);
+		$template = [];
+
+		// объявленные вручную каталоги с шаблонами
+		foreach (App::retrieve("path/template", []) as $path) {
+			$template = array_merge($template, static::templateIterator($path));
 		}
 
-		// папки модулей
+		// модули в которых есть шаблоны
 		foreach (App::get("module") as $module) {
 			if ($path = App::path($module . ":template")) {
-				static::templateIterator($path);
+				$template = array_merge($template, static::templateIterator($path));
 			}
 		}
 
-		return static::$template ? "\n" . implode("\n", static::$template) . "\n" : null;
+		return $template ? implode("\n", $template) : null;
 	}
 
 	/**
-	 * Рекурсивно обходит все папки и собирает шаблоны
-	 * @param $path
+	 * Рекурсивно обходит указанную директорию и собирает шаблоны
+	 * @param string $dir
+	 * @param string $initial
 	 * @return string
 	 */
-	protected static function templateIterator($path) {
-		foreach (new DirectoryIterator($path) as $item) {
+	protected static function templateIterator($dir, $initial = "") {
+		$dir = realpath($dir);
+		$template = [];
+
+		foreach (new DirectoryIterator($dir) as $item) {
 			if (!$item->isDot()) {
 				if ($item->isDir()) {
-					static::templateIterator(App::path($path . "/" . $item->getBasename()));
+					$template = array_merge($template, static::templateIterator(App::path($dir . "/" . $item->getBasename()), $dir));
 				} else {
-					$file = str_replace("//", "/", $path . "/" . $item->getBasename());
+					if ($item->isFile()) {
+						$file = realpath($item->getPathname());
+						$ext = pathinfo($file)["extension"];
+						if (in_array($ext, ["tpl", "ejs"])) {
+							$name = str_replace(["/", ".tpl", ".ejs"], ["-", "", ""], explode($initial ? $initial : $dir, $file)[1]);
 
-					if ($item->isFile() && in_array(pathinfo($file)["extension"], ["tpl", "ejs"])) {
-						$name    = str_replace(["/", ".tpl", ".ejs"], ["-", "", ""], explode("template", $file)[1]);
-						$content = file_get_contents($file);
-
-						static::$template[] = '<script id="tpl' . $name . '" type="text/template">' . $content . '</script>';
+							switch ($ext) {
+								case "tpl": {
+									$template[] = '<script id="tpl' . $name . '" type="text/template">' . App::render($file) . '</script>';
+									break;
+								}
+								case "ejs": {
+									$template[] = '<script id="tpl' . $name . '" type="text/template">' . file_get_contents($file) . '</script>';
+									break;
+								}
+							}
+						}
 					}
 				}
 			}
 		}
+
+		return $template;
 	}
 }

@@ -1,5 +1,18 @@
 Orchid Framework
 ====
+#### Требования
+* Nginx || Apache || IIS >= 8.5
+* PHP >= 5.6
+* PDO
+* GD
+* Memcache
+
+#### Установка
+* Скачать Orchid и положить папку в корневом каталоге вашего веб-проекта;
+* Убедитесь, что /path-to-project/storage и все его вложенные папки доступны для записи;
+* Вы готовы использовать Orchid;-)
+
+## Документация
 Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
 App::initialize();
@@ -11,7 +24,7 @@ Router::bind("/", function(){
 App::run();
 ```
 
-## Роутинг
+### Роутинг
 Роутинг запросов происходит по HTTP методу в паре с URL-правилом.  
 Каждое правило должно быть отдельно объявленно вызовом метода:
 ```php
@@ -52,7 +65,7 @@ Router::bind("/foo", function() {
 }, "GET", strpos($_SERVER["HTTP_USER_AGENT"], "Safari") !== false, $priority = 10);
 ```
 
-## Шаблоны
+### Шаблоны
 Можно использовать любой шаблон:
 ```php
 Router::bind("/", function() {
@@ -78,7 +91,7 @@ Router::bind("/", function() {
 </html>
 ```
 
-## ООП
+### ООП
 Просто подключите класс:
 ```php
 class Page {
@@ -102,7 +115,7 @@ Router::bindClass("Page");
 ```
 Кроме того вы можете воспользоваться классом `Controller`.
 
-## Хранилище данных
+### Хранилище данных
 Используйте хранилище данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
 ```php
 App::set("config.foo", ["bar" => 123]);
@@ -112,7 +125,7 @@ App::set("config.foo", ["bar" => 123]);
 $value = App::get("config.foo/bar"); // 123
 ```
 
-## Сервисы
+### Сервисы
 ```php
 App::addService("db", function(){
     // объект будет создан в момент первого доступа
@@ -124,7 +137,7 @@ App::addService("db", function(){
 App::get("db")->query(...);
 ```
 
-## Пути
+### Пути
 Используйте короткие ссылки на файлы/каталоги, чтобы получить быстрый доступ к ним:
 ```php
 App::path("view", __DIR__."/view");
@@ -138,7 +151,7 @@ $url  = App::pathToUrl("folder/file.php");
 $url  = App::pathToUrl("view:file.php");
 ```
 
-## База данных
+### База данных
 Объект `Database` реализует подключение серверу базы данных:
 ```php
 Database::initialize([
@@ -199,7 +212,7 @@ $sth = Database::query("
 $array = $sth->fetchAll(PDO::FETCH_ASSOC);
 ```
 
-## Кеширование
+### Кеширование
 Объект `Memory` реализует соединение с внешним хранилищем типа `Key-Value`:
 ```php
 Memory::initialize([
@@ -251,7 +264,7 @@ Memory::$cachedKeys = [
 ```
 *При такой записи во внутренний буффер попадут ключи: `car:list`, `car:model` и другие начинающиеся с `car:`*
 
-## Задачи
+### Задачи
 ```php
 // добавление задачи
 Task::add("custometask", function(){
@@ -279,7 +292,7 @@ Task::add("after", function() {
 });
 ```
 
-## Расширения
+### Расширения
 При необходимости можно расширить функционал `Orchid` расширениями:
 ```php
 class Foo extends Orchid\Entity\Extension {
@@ -345,7 +358,7 @@ ModulePage::foo(); // "bar"
 #### Модули в поставке
  + `Main` - демонстрационный модуль
 
-## Модели
+### Модели
 ```php
 class Car extends Orchid\Entity\Model {
     protected static $default = [
@@ -385,7 +398,7 @@ if ($auto->isEmpty()) {
 echo $auto->getMark();
 ```
 
-## Коллекции
+### Коллекции
 ```php
 class Cars extends Orchid\Entity\Collection {
     protected static $model = "Car"; // указывает какую модель создать при вызове метода get
@@ -401,7 +414,7 @@ foreach($myCars as $key => $val) {
 }
 ```
 
-## Валидатор
+### Валидатор
 ```php
 class ValidData extends Orchid\Entity\Validator {
     // подключение стандартных проверяющих функций
@@ -443,7 +456,7 @@ $result = $valid->validate();   // в случае успеха результа
                                 // где ключ = поле, значение = причина
 ```
 
-## Демоны
+### Демоны
 Позволяют выполнять некую работу в фоне без прямого взаимодействия с пользователем.
 ```php
 // подключаем файл начальной загрузки

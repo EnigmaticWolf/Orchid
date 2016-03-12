@@ -369,10 +369,7 @@ class App {
 	 */
 	public static function pathToUrl($path) {
 		if (($file = static::path($path)) != false) {
-			$file = str_replace(DIRECTORY_SEPARATOR, "/", $file);
-			$root = str_replace(DIRECTORY_SEPARATOR, "/", static::$registry["base_dir"]);
-
-			return "/" . ltrim(str_replace($root, "", $file), "/");
+			return "/" . ltrim(str_replace(static::$registry["base_dir"], "", $file), "/");
 		}
 
 		return false;
