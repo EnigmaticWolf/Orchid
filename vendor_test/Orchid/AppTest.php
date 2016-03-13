@@ -15,6 +15,14 @@ class AppTest extends PHPUnit_Framework_TestCase {
 		]);
 	}
 
+	public function testLoadModule() {
+		App::loadModule([
+			ORCHID . "/module", // папка модулей
+		]);
+
+		$this->assertTrue(class_exists("ModuleMain"));
+	}
+
 	/**
 	 * @param $key
 	 * @param $value
@@ -130,5 +138,29 @@ class AppTest extends PHPUnit_Framework_TestCase {
 
 	public function testSitePath() {
 		$this->assertEquals("/foo/bar", App::getSitePath());
+	}
+
+	public function testPath() {
+		App::path("test", __DIR__);
+
+		$this->assertEquals(__FILE__, App::path("test:AppTest.php"));
+	}
+
+	public function testIsAbsolutePath() {
+		$this->assertTrue(App::isAbsolutePath(__DIR__));
+		$this->assertFalse(App::isAbsolutePath("../"));
+	}
+
+	public function testPathToUrl() {
+		$this->assertEquals("/vendor_test/Orchid/AppTest.php", App::pathToUrl(__FILE__));
+		$this->assertEquals("/vendor_test/Orchid/AppTest.php", App::pathToUrl("test:AppTest.php"));
+	}
+
+	public function testAddService() {
+		$this->assertTrue(App::addService("test_service", function(){
+			return "foo";
+		}));
+
+		$this->assertEquals("foo", App::get("test_service"));
 	}
 }

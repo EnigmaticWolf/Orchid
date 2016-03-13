@@ -69,11 +69,11 @@ class Router {
 			$action = isset($part[0]) ? $part[0] : "index";
 			$params = count($part) > 1 ? array_slice($part, 1) : [];
 
-			return App::invoke($class, $action, $params);
+			return call_user_func_array([$class, $action], $params);
 		}, $method, $condition, $priority);
 
 		static::bind("/" . $clean, function () use ($class) {
-			return App::invoke($class, "index");
+			return call_user_func([$class, "index"]);
 		}, $method, $condition, $priority);
 	}
 

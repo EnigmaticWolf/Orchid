@@ -1,13 +1,13 @@
 <?php
 
-use Orchid\App;
+use Main\Controller\Main;
 use Orchid\Entity\Module;
 use Orchid\Router;
 
 class ModuleMain extends Module {
 	public static function initialize() {
 		Router::get("/", function(){
-			return App::invoke("Main\\Controller\\Main");
+			return Main::index();
 		});
 	}
 

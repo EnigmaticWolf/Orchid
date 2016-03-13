@@ -376,17 +376,6 @@ class App {
 	}
 
 	/**
-	 * Вызов класса контроллера
-	 * @param  string $controller имя контроллера
-	 * @param  string $action     метод
-	 * @param  array  $params     параметры вызова
-	 * @return mixed
-	 */
-	public static function invoke($controller, $action = "index", array $params = []) {
-		return method_exists($controller, $action) ? call_user_func_array([$controller, $action], $params) : false;
-	}
-
-	/**
 	 * Метод для отрисовки шаблонов
 	 * @param string $_template абсолютный или ссылочный путь может содержать операторы
 	 *                          "->"    указывает что шаблон слева необходимо поместить в шаблон справа
