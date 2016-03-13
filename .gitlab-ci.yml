@@ -1,3 +1,5 @@
 app:phpunit:
   script:
   - phpunit --configuration phpunit.xml
+  only:
+  - master
