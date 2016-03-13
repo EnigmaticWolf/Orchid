@@ -82,7 +82,7 @@ class Cache {
 			if ($item->isFile()) {
 				$file = realpath($item->getPathname());
 
-				if (pathinfo($file)["extension"] == ".cache") {
+				if (pathinfo($file)["extension"] == "cache") {
 					unlink($file);
 				}
 			}
