@@ -114,7 +114,17 @@ class Asset {
 						$ext = pathinfo($file)["extension"];
 						if (in_array($ext, ["tpl", "ejs"])) {
 							$name = str_replace(["/", ".tpl", ".ejs"], ["-", "", ""], explode($initial ? $initial : $dir, $file)[1]);
-							$template[] = '<script id="tpl' . $name . '" type="text/template">' . file_get_contents($file) . '</script>';
+
+							switch ($ext) {
+								case "tpl": {
+									$template[] = '<script id="tpl' . $name . '" type="text/template">' . App::render($file) . '</script>';
+									break;
+								}
+								case "ejs": {
+									$template[] = '<script id="tpl' . $name . '" type="text/template">' . file_get_contents($file) . '</script>';
+									break;
+								}
+							}
 						}
 					}
 				}
