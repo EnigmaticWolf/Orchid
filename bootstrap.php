@@ -23,11 +23,22 @@ function pre(...$args) {
 }
 
 use Orchid\App;
+use Orchid\Extension\i18n;
 
 // инициализация приложения
-App::initialize();
+App::initialize([
+	"locale" => ["ru", "en"],
+]);
 
 // подключение модулей
 App::loadModule([
 	ORCHID . "/module",
 ]);
+
+// принудительная смена языка
+if (isset($_REQUEST["lang"])) {
+	i18n::$force = $_REQUEST["lang"];
+}
+
+// инициализация расширения интернационализации
+i18n::initialize();

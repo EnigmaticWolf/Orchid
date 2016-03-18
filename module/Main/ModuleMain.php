@@ -12,6 +12,6 @@ class ModuleMain extends Module {
 	}
 
 	public static function HelloWorld() {
-		return "Здравствуй Мир! :) \n\r";
+		return L::get("greeting") . " :)\n\r";
 	}
 }
