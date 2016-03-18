@@ -2,10 +2,15 @@
 
 namespace Orchid\Extension;
 
+use Orchid\App;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
 class CacheTest extends PHPUnit_Framework_TestCase {
+	public static function setUpBeforeClass() {
+		App::path("cache", App::get("base_dir") . "/storage/cache");
+	}
+
 	/**
 	 * @param $key
 	 * @param $value

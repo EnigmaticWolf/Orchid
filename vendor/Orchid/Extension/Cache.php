@@ -2,20 +2,10 @@
 
 namespace Orchid\Extension;
 
-use Closure;
 use Orchid\App;
 use RecursiveDirectoryIterator;
 
 class Cache {
-	/**
-	 * Возвращает путь и название файла
-	 * @param string $key
-	 * @return string
-	 */
-	protected static function getFilePath($key) {
-		return App::retrieve("path/cache/0", App::get("base_dir") . "/storage/cache") . "/" . md5(App::get("secret") . ":" . $key) . ".cache";
-	}
-
 	/**
 	 * Записывает данные во временный файл
 	 * @param string $key      ключ
@@ -29,7 +19,7 @@ class Cache {
 			"value"  => serialize($value),
 		];
 
-		return file_put_contents(static::getFilePath($key), serialize($data));
+		return file_put_contents(static::getCacheFilePath($key), serialize($data));
 	}
 
 	/**
@@ -39,7 +29,7 @@ class Cache {
 	 * @return mixed
 	 */
 	public static function read($key, $default = null) {
-		$file = static::getFilePath($key);
+		$file = static::getCacheFilePath($key);
 		$data = file_exists($file) ? file_get_contents($file) : false;
 
 		if ($data !== false) {
@@ -49,7 +39,7 @@ class Cache {
 				return unserialize($data["value"]);
 			}
 
-			static::delete(static::getFilePath($key));
+			static::delete(static::getCacheFilePath($key));
 		}
 
 		return $default;
@@ -61,7 +51,7 @@ class Cache {
 	 * @return boolean
 	 */
 	public static function delete($key) {
-		$file = static::getFilePath($key);
+		$file = static::getCacheFilePath($key);
 
 		if (file_exists($file)) {
 			return unlink($file);
@@ -89,5 +79,21 @@ class Cache {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Возвращает путь и название временного файла
+	 * @param string $key
+	 * @return string
+	 */
+	protected static function getCacheFilePath($key) {
+		// директориия хранилища по-умолчанию
+		$path = App::get("base_dir") . "/storage/cache/";
+
+		if (($cache = App::path("cache:")) !== false) {
+			$path = $cache;
+		}
+
+		return $path . md5(App::get("secret") . ":" . $key) . ".cache";
 	}
 }
