@@ -91,6 +91,7 @@ class Memcache {
 	 */
 	public function deleteByTag($tag) {
 		$deleted = 0;
+		
 		if (($tags = $this->get($tag)) !== false) {
 			foreach ($tags as $key) {
 				if ($this->delete($key)) {
