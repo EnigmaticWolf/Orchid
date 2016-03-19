@@ -44,7 +44,7 @@ class Memory {
 		$default = [
 			"driver"  => "memcache",
 			"host"    => "",
-			"port"    => "",
+			"port"    => null,
 			"timeout" => 10,
 			"role"    => "master",
 		];
@@ -52,7 +52,7 @@ class Memory {
 		foreach ($configs as $index => $config) {
 			$config = array_merge($default, $config);
 			$driver = strtolower($config["driver"]);
-			$key    = "memory:" . $index;
+			$key = "memory:" . $index;
 
 			switch ($driver) {
 				case "memcache": {
@@ -129,7 +129,7 @@ class Memory {
 			} else {
 				$value = static::getInstance(false)->get($key);
 
-				foreach(static::$cachedKeys as $k){
+				foreach (static::$cachedKeys as $k) {
 					if (strpos($key, $k) === 0) {
 						static::$buffer[$key] = $value;
 					}
@@ -144,17 +144,18 @@ class Memory {
 
 	/**
 	 * Записывает значение для ключа во внешнее хранилище
-	 * @param string $key
-	 * @param mixed  $value
-	 * @param int    $expire
+	 * @param string      $key
+	 * @param mixed       $value
+	 * @param int         $expire
+	 * @param string|null $tag
 	 * @return bool
 	 */
-	public static function set($key, $value, $expire = 0) {
+	public static function set($key, $value, $expire = 0, $tag = null) {
 		if (isset(static::$cachedKeys[$key])) {
 			unset(static::$buffer[$key]);
 		}
 
-		return static::getInstance(true)->set($key, $value, $expire);
+		return static::getInstance(true)->set($key, $value, $expire, $tag);
 	}
 
 	/**
@@ -178,5 +179,23 @@ class Memory {
 		static::$buffer = [];
 
 		return static::getInstance(true)->flush();
+	}
+
+	/**
+	 * Достаёт значения по указанному тегу
+	 * @param string $tag
+	 * @return array
+	 */
+	public static function getByTag($tag) {
+		return static::getInstance(false)->getByTag($tag);
+	}
+
+	/**
+	 * Удаляет значения по указанному тегу
+	 * @param string $tag
+	 * @return bool
+	 */
+	public static function deleteByTag($tag) {
+		return static::getInstance(true)->deleteByTag($tag);
 	}
 }

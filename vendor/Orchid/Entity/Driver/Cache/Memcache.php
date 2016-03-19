@@ -34,12 +34,19 @@ class Memcache {
 
 	/**
 	 * Записывает значение для ключа во внешнее хранилище
-	 * @param string $key
-	 * @param mixed  $value
-	 * @param int    $expire
+	 * @param string      $key
+	 * @param mixed       $value
+	 * @param int         $expire
+	 * @param string|null $tag
 	 * @return bool
 	 */
-	public function set($key, $value, $expire = 0) {
+	public function set($key, $value, $expire = 0, $tag = null) {
+		if ($tag) {
+			$tags = $this->get($tag);
+			$tags[] = $key;
+			$this->set($tag, array_unique($tags));
+		}
+
 		return $this->connection->set(Memory::getKey($key), $value, MEMCACHE_COMPRESSED, $expire);
 	}
 
@@ -58,5 +65,41 @@ class Memcache {
 	 */
 	public function flush() {
 		return $this->connection->flush();
+	}
+
+	/**
+	 * Достаёт значения по указанному тегу
+	 * @param string $tag
+	 * @return array
+	 */
+	public function getByTag($tag) {
+		$data = [];
+
+		if (($tags = $this->get($tag)) !== false) {
+			foreach ($tags as $key) {
+				$data[$key] = $this->get($key);
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Удаляет значения по указанному тегу
+	 * @param string $tag
+	 * @return bool
+	 */
+	public function deleteByTag($tag) {
+		$deleted = 0;
+		if (($tags = $this->get($tag)) !== false) {
+			foreach ($tags as $key) {
+				if ($this->delete($key)) {
+					$deleted++;
+				}
+			}
+			$this->delete($tag);
+		}
+
+		return !!$deleted;
 	}
 }
