@@ -11,12 +11,18 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		App::path("lang", App::get("base_dir") . "/storage/i18n");
 	}
 
+	public function textLang() {
+		i18n::initialize();
+
+		$this->assertEquals("russian", L::get("lang"));
+	}
+
 	/**
 	 * @param $code
 	 * @param $expected
 	 * @dataProvider providerLang
 	 */
-	public function testLang($code, $expected) {
+	public function testLang_2($code, $expected) {
 		i18n::$force = $code;
 		i18n::initialize();
 
