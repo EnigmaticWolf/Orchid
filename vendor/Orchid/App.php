@@ -60,7 +60,6 @@ class App {
 		} else {
 			App::set("args", array_slice($_SERVER["argv"], 1));
 		}
-		pre(static::$registry);
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
