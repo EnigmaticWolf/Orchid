@@ -22,32 +22,45 @@ class App {
 
 			"instance"  => [],
 			"app"       => "public",
+			"locale"    => [],
 
 			"secret"    => "secret",
-			"session"   => "session",
-			"locale"    => [],
 
 			"autoload"  => [],
 			"module"    => [],
 			"path"      => [],
 
-			"host"      => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
-			"method"    => isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : "",
-
+			"host"      => "",
+			"port"      => 80,
+			"method"    => "",
 			"uri"       => [],
 			"param"     => [],
 			"data"      => [],
 			"file"      => [],
 			"cookie"    => [],
-			"args"      => PHP_SAPI == "cli" ? array_slice($_SERVER["argv"], 1) : [],
+			"session"   => [],
+
+			"args"      => [],
 
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
 		], $param);
 
-		// инициализиуем запрос
-		Request::initialize((isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), $_POST, $_FILES, $_COOKIE);
+		if (PHP_SAPI != "cli") {
+			// инициализиуем запрос
+			Request::initialize(
+				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
+				$_SERVER["REQUEST_METHOD"],
+				$_POST,
+				$_FILES,
+				$_COOKIE,
+				(isset($_SESSION) ? $_SESSION : [])
+			);
+		} else {
+			App::set("args", array_slice($_SERVER["argv"], 1));
+		}
+		pre(static::$registry);
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {

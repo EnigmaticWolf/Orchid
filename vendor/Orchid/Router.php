@@ -65,7 +65,7 @@ class Router {
 		$clean = $alias ? $alias : trim(strtolower(str_replace("\\", "/", $class)), "\\");
 
 		static::bind("/" . $clean . "/*", function () use ($class, $clean) {
-			$part   = explode("/", trim(str_replace($clean, "", Request::getSitePath()), "/"));
+			$part   = explode("/", trim(str_replace($clean, "", Request::getPath()), "/"));
 			$action = isset($part[0]) ? $part[0] : "index";
 			$params = count($part) > 1 ? array_slice($part, 1) : [];
 
@@ -190,6 +190,6 @@ class Router {
 	 * @return string
 	 */
 	public static function routeUrl($path, $app = "") {
-		return Request::getSiteUrl(false, $app) . "/" . ltrim($path, "/");
+		return Request::getUrlToApp($app) . "/" . ltrim($path, "/");
 	}
 }

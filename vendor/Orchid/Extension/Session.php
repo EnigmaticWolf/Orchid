@@ -7,21 +7,21 @@ use function Orchid\fetch_from_array;
 
 class Session {
 	/**
-	 * Создание новой сессии с заданным именем
-	 * @param null $sessionName
+	 * Создаёт новую сессию с заданным именем
+	 *
+	 * @param string $name
 	 */
-	public static function create($sessionName = null) {
+	public static function create($name = "session") {
 		if (!strlen(session_id())) {
-			$name = $sessionName ? $sessionName : App::get("session");
-
 			session_name($name);
 			session_start();
 		}
 	}
 
 	/**
-	 * Запись данных в текущую сессию
-	 * @param string $key ключевое слово
+	 * Записывает данные в текущую сессию
+	 *
+	 * @param string $key   ключевое слово
 	 * @param string $value значение для записи
 	 */
 	public static function write($key, $value) {
@@ -29,9 +29,11 @@ class Session {
 	}
 
 	/**
-	 * Чтение данных из текущей сессии по заданному ключу
-	 * @param string $key ключевое слово
+	 * Возвращает данные из текущей сессии по заданному ключу
+	 *
+	 * @param string $key     ключевое слово
 	 * @param string $default значение для записи
+	 *
 	 * @return Mixed
 	 */
 	public static function read($key, $default = null) {
@@ -39,7 +41,8 @@ class Session {
 	}
 
 	/**
-	 * Удаление данных из текущей сессии по заданному ключу
+	 * Удаляет данные из текущей сессии по заданному ключу
+	 *
 	 * @param string $key ключевое слово
 	 */
 	public static function delete($key) {
@@ -47,7 +50,7 @@ class Session {
 	}
 
 	/**
-	 * Уничтожение текущей сессии
+	 * Уничтожает текущую сессию
 	 */
 	public static function destroy() {
 		session_destroy();

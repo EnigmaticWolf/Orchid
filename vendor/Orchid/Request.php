@@ -18,28 +18,32 @@ class Request {
 	 * Подготавливает параметры запроса для дальнейшего использования
 	 *
 	 * @param string $query
+	 * @param string $method
 	 * @param array  $post
 	 * @param array  $file
 	 * @param array  $cookie
+	 * @param array  $session
 	 */
-	public static function initialize($query, $post = [], $file = [], $cookie = []) {
+	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
+		// декодируем строку
+		$query = urldecode($query);
+
+		// записываем хост и порт
+		App::set("host", parse_url($query, PHP_URL_HOST));
+		App::set("port", parse_url($query, PHP_URL_PORT));
+
 		// заполняем URI
 		$uri = [];
-		foreach (explode("/", parse_url(urldecode($query), PHP_URL_PATH)) as $part) {
+		foreach (explode("/", parse_url($query, PHP_URL_PATH)) as $part) {
 			if ($part) {
 				$uri[] = $part;
 			}
 		}
 		App::set("uri", $uri);
+		App::set("method", $method);
 
 		// переписываем GET
-		$get = [];
-		foreach (explode("&", parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY)) as $part) {
-			if ($part) {
-				$data = explode("=", $part);
-				$get[$data[0]] = isset($data[1]) ? $data[1] : "";
-			}
-		}
+		parse_str(parse_url($query, PHP_URL_QUERY), $get);
 		App::set("param", $get);
 
 		// проверяем php://input и объединяем с $_POST
@@ -51,6 +55,7 @@ class Request {
 		App::set("data", $post);
 		App::set("file", $file);
 		App::set("cookie", $cookie);
+		App::set("session", $session);
 
 		$_GET = $get;
 		$_POST = $get;
@@ -100,7 +105,13 @@ class Request {
 			case "options": {
 				return (strtolower(App::get("method")) == "options");
 			}
-			case "ssl": {
+			case "trace": {
+				return (strtolower(App::get("method")) == "trace");
+			}
+			case "connect": {
+				return (strtolower(App::get("method")) == "connect");
+			}
+			case "secure": {
 				return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
 			}
 		}
@@ -111,22 +122,26 @@ class Request {
 	/**
 	 * Возвращает IP адрес клиента
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public static function getClientIp() {
-		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-			return $_SERVER["HTTP_X_FORWARDED_FOR"];
-		} elseif (isset($_SERVER["HTTP_CLIENT_IP"])) {
-			return $_SERVER["HTTP_CLIENT_IP"];
-		} elseif (isset($_SERVER["REMOTE_ADDR"])) {
-			return $_SERVER["REMOTE_ADDR"];
+		switch (true) {
+			case isset($_SERVER["HTTP_X_FORWARDED_FOR"]): {
+				return $_SERVER["HTTP_X_FORWARDED_FOR"];
+			}
+			case isset($_SERVER["HTTP_CLIENT_IP"]): {
+				return $_SERVER["HTTP_CLIENT_IP"];
+			}
+			case isset($_SERVER["REMOTE_ADDR"]): {
+				return $_SERVER["REMOTE_ADDR"];
+			}
 		}
 
-		return false;
+		return null;
 	}
 
 	/**
-	 * Возвращает наиболее подходящий язык клиента из заданных в locale
+	 * Возвращает наиболее подходящий язык браузера клиента из заданных в locale
 	 *
 	 * @param string $default по умолчанию русский
 	 *
@@ -154,27 +169,53 @@ class Request {
 	}
 
 	/**
-	 * Возвращает адрес сайта
-	 *
-	 * @param bool   $withPath
-	 * @param string $app
+	 * Возвращает схему
 	 *
 	 * @return string
 	 */
-	public static function getSiteUrl($withPath = false, $app = "") {
-		$url = (Request::is("ssl") ? "https" : "http") . "://";
-		if (($app = (empty($app) ? App::get("app") : $app)) && $app != "public") {
-			$url .= $app . ".";
-		}
-		$url .= App::get("base_host");
-		if (($port = App::get("base_port")) != 80) {
-			$url .= ":" . $port;
-		}
-		if ($withPath) {
-			$url .= Request::getSitePath();
+	public static function getScheme() {
+		return Request::is("ssl") ? "https" : "http";
+	}
+
+	/**
+	 * Возвращает префикс приложения
+	 *
+	 * Если текущее приложение public, то будет возвращена пустая строка
+	 *
+	 * @param string $app принудительный выбор приложения
+	 *
+	 * @return string
+	 */
+	public static function getApp($app = "") {
+		if (($app = (!$app ? App::get("app") : $app)) && $app != "public") {
+			return $app . ".";
 		}
 
-		return rtrim($url, "/");
+		return "";
+	}
+
+	/**
+	 * Возвращает базовое имя хоста
+	 *
+	 * @return mixed
+	 */
+	public static function getHost() {
+		return App::get("base_host");
+	}
+
+	/**
+	 * Возвращает порт
+	 *
+	 * Если порт текущий 80, то будет возвращена пустая строка
+	 *
+	 * @return string
+	 */
+	public static function getPort() {
+		if (($port = App::get("base_port")) != 80) {
+			return ":" . $port;
+		}
+
+		return "";
 	}
 
 	/**
@@ -182,7 +223,25 @@ class Request {
 	 *
 	 * @return string
 	 */
-	public static function getSitePath() {
+	public static function getPath() {
 		return "/" . implode("/", App::get("uri"));
+	}
+
+	/**
+	 * Возвращает адрес страницы
+	 *
+	 * @param string $app
+	 * @param bool   $withPath вернуть адрес со строкой запроса
+	 *
+	 * @return string
+	 */
+	public static function getUrl($app = "", $withPath = false) {
+		$url = static::getScheme() . "://" . static::getApp($app) . static::getHost() . static::getPort();
+
+		if ($withPath) {
+			$url .= Request::getPath();
+		}
+
+		return rtrim($url, "/");
 	}
 }

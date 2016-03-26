@@ -32,7 +32,7 @@ class Asset {
 			}
 
 			// ресурсы для определённого адреса
-			if (($path = substr(Request::getSitePath(), 1)) && isset(static::$map[$path])) {
+			if (($path = substr(Request::getPath(), 1)) && isset(static::$map[$path])) {
 				$include = array_merge($include, static::renderIterator(static::$map[$path]));
 			}
 
