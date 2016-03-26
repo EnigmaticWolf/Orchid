@@ -43,7 +43,7 @@ class Router {
 	 * @param int     $priority
 	 */
 	public static function bind($path, $callback, $method = null, $condition = true, $priority = 0) {
-		if ((is_null($method) || App::req_is($method)) && $condition) {
+		if ((is_null($method) || Request::is($method)) && $condition) {
 			static::$route[] = [
 				"path"     => $path,
 				"callback" => $callback,
@@ -65,7 +65,7 @@ class Router {
 		$clean = $alias ? $alias : trim(strtolower(str_replace("\\", "/", $class)), "\\");
 
 		static::bind("/" . $clean . "/*", function () use ($class, $clean) {
-			$part   = explode("/", trim(str_replace($clean, "", App::getSitePath()), "/"));
+			$part   = explode("/", trim(str_replace($clean, "", Request::getSitePath()), "/"));
 			$action = isset($part[0]) ? $part[0] : "index";
 			$params = count($part) > 1 ? array_slice($part, 1) : [];
 
@@ -190,6 +190,6 @@ class Router {
 	 * @return string
 	 */
 	public static function routeUrl($path, $app = "") {
-		return App::getSiteUrl(false, $app) . "/" . ltrim($path, "/");
+		return Request::getSiteUrl(false, $app) . "/" . ltrim($path, "/");
 	}
 }

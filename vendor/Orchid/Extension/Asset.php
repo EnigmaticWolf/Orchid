@@ -4,6 +4,7 @@ namespace Orchid\Extension;
 
 use DirectoryIterator;
 use Orchid\App;
+use Orchid\Request;
 
 class Asset {
 	/**
@@ -31,7 +32,7 @@ class Asset {
 			}
 
 			// ресурсы для определённого адреса
-			if (($path = substr(App::getSitePath(), 1)) && isset(static::$map[$path])) {
+			if (($path = substr(Request::getSitePath(), 1)) && isset(static::$map[$path])) {
 				$include = array_merge($include, static::renderIterator(static::$map[$path]));
 			}
 

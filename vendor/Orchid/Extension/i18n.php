@@ -3,6 +3,7 @@
 namespace Orchid\Extension {
 
 	use Orchid\App;
+	use Orchid\Request;
 
 	class i18n {
 		/**
@@ -28,7 +29,7 @@ namespace Orchid\Extension {
 		 * @param string $default язык по-умолчанию
 		 */
 		public static function initialize($default = "ru") {
-			$lang = static::$force ? static::$force : App::getClientLang($default);
+			$lang = static::$force ? static::$force : Request::getClientLang($default);
 			$file = static::getLangFilePath(trim($lang));
 
 			if (file_exists($file)) {

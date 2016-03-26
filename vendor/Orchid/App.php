@@ -11,7 +11,9 @@ class App {
 
 	/**
 	 * Инициализатор приложения
+	 *
 	 * @param array $param
+	 *
 	 * @return void
 	 */
 	public static function initialize(array $param = []) {
@@ -31,15 +33,21 @@ class App {
 
 			"host"      => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"method"    => isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : "",
+
 			"uri"       => [],
 			"param"     => [],
 			"data"      => [],
+			"file"      => [],
+			"cookie"    => [],
 			"args"      => PHP_SAPI == "cli" ? array_slice($_SERVER["argv"], 1) : [],
 
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
 		], $param);
+
+		// инициализиуем запрос
+		Request::initialize((isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : ""), $_POST, $_FILES, $_COOKIE);
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
@@ -53,39 +61,11 @@ class App {
 				}
 			}
 		});
-
-		// декодируем строку запроса
-		$_SERVER["REQUEST_URI"] = urldecode(isset($_SERVER["REQUEST_URI"]) ? $_SERVER["REQUEST_URI"] : "");
-
-		// заполняем URI
-		foreach (explode("/", parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH)) as $part) {
-			if ($part) {
-				static::$registry["uri"][] = $part;
-			}
-		}
-
-		// переписываем GET
-		$_GET = [];
-		foreach (explode("&", parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY)) as $part) {
-			if ($part) {
-				$data                                = explode("=", $part);
-				static::$registry["param"][$data[0]] = $_GET[$data[0]] = isset($data[1]) ? $data[1] : "";
-			}
-		}
-
-		// проверяем php://input и объединяем с $_POST
-		if (static::req_is("ajax")) {
-			if ($json = json_decode(@file_get_contents("php://input"), true)) {
-				$_POST = array_merge($_POST, $json);
-			}
-		}
-
-		static::$registry["data"] = $_POST;
-		$_REQUEST                 = array_merge($_GET, $_POST, $_COOKIE);
 	}
 
 	/**
 	 * Приложение завершено? (выключено)
+	 *
 	 * @return bool
 	 */
 	public static function isTerminated() {
@@ -94,6 +74,7 @@ class App {
 
 	/**
 	 * Завершить работу приложения (exit)
+	 *
 	 * @param mixed|bool $message
 	 */
 	public static function terminate($message = false) {
@@ -107,136 +88,8 @@ class App {
 	}
 
 	/**
-	 * @param $type
-	 * @return bool|int
-	 */
-	public static function req_is($type) {
-		switch (strtolower($type)) {
-			case "ajax": {
-				return (
-					(isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest") ||
-					(isset($_SERVER["CONTENT_TYPE"]) && stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false) ||
-					(isset($_SERVER["HTTP_CONTENT_TYPE"]) && stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false)
-				);
-			}
-
-			case "mobile": {
-				$mobileDevices = [
-					"midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", "portalmmm",
-					"sharp", "sie-", "sonyericsson", "symbian", "windows ce", "benq", "mda", "mot-",
-					"opera mini", "philips", "pocket pc", "sagem", "samsung", "sda", "sgh-", "vodafone",
-					"xda", "iphone", "ipod", "android",
-				];
-
-				return preg_match("/(" . implode("|", $mobileDevices) . ")/i", strtolower($_SERVER["HTTP_USER_AGENT"]));
-			}
-
-			case "head": {
-				return (strtolower(static::$registry["method"]) == "head");
-			}
-
-			case "put": {
-				return (strtolower(static::$registry["method"]) == "put");
-			}
-
-			case "post": {
-				return (strtolower(static::$registry["method"]) == "post");
-			}
-
-			case "get": {
-				return (strtolower(static::$registry["method"]) == "get");
-			}
-
-			case "delete": {
-				return (strtolower(static::$registry["method"]) == "delete");
-			}
-
-			case "options": {
-				return (strtolower(static::$registry["method"]) == "options");
-			}
-
-			case "ssl": {
-				return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Возвращает IP адрес клиента
-	 * @return string
-	 */
-	public static function getClientIp() {
-		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-			return $_SERVER["HTTP_X_FORWARDED_FOR"];
-		} elseif (isset($_SERVER["HTTP_CLIENT_IP"])) {
-			return $_SERVER["HTTP_CLIENT_IP"];
-		} elseif (isset($_SERVER["REMOTE_ADDR"])) {
-			return $_SERVER["REMOTE_ADDR"];
-		}
-
-		return false;
-	}
-
-	/**
-	 * Возвращает наиболее подходящий язык клиента из заданных в locale
-	 * @param string $default по умолчанию русский
-	 * @return string
-	 */
-	public static function getClientLang($default = "ru") {
-		if (($list = strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"]))) {
-			if (preg_match_all("/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/", $list, $list)) {
-				$language = [];
-
-				foreach (array_combine($list[1], $list[2]) as $lang => $priority) {
-					$language[$lang] = (float)($priority ? $priority : 1);
-				}
-				arsort($language, SORT_NUMERIC);
-
-				foreach ($language as $lang => $priority) {
-					if (in_array($lang, static::$registry["locale"])) {
-						return $lang;
-					}
-				}
-			}
-		}
-
-		return $default;
-	}
-
-	/**
-	 * Возвращает адрес сайта
-	 * @param bool   $withPath
-	 * @param string $app
-	 * @return string
-	 */
-	public static function getSiteUrl($withPath = false, $app = "") {
-		$url = (static::req_is("ssl") ? "https" : "http") . "://";
-		if (($app = (empty($app) ? static::$registry["app"] : $app)) && $app != "public") {
-			$url .= $app . ".";
-		}
-		$url .= static::$registry["base_host"];
-		if (static::$registry["base_port"] != 80) {
-			$url .= ":" . static::$registry["base_port"];
-		}
-		if ($withPath) {
-			$url .= static::getSitePath();
-		}
-
-		return rtrim($url, "/");
-	}
-
-	/**
-	 * Возвращает путь
-	 * @return string
-	 */
-	public static function getSitePath() {
-		return "/" . implode("/", static::$registry["uri"]);
-	}
-
-	/**
 	 * Загружает модули из переданных директорий
+	 *
 	 * @param array $dirs
 	 */
 	public static function loadModule(array $dirs) {
@@ -256,6 +109,7 @@ class App {
 
 	/**
 	 * Подгружает файл модуля и инициализирует его
+	 *
 	 * @param $class
 	 * @param $dir
 	 */
@@ -291,12 +145,12 @@ class App {
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
 				ob_end_clean();
 				Response::$nocache = true;
-				Response::$status  = "500";
-				Response::$body    = App::retrieve("debug", false) ? $error : "Internal Error.";
+				Response::$status = "500";
+				Response::$body = App::retrieve("debug", false) ? $error : "Internal Error.";
 			} elseif (!Response::$body) {
 				Response::$nocache = true;
-				Response::$status  = "404";
-				Response::$body    = "Path not found.";
+				Response::$status = "404";
+				Response::$body = "Path not found.";
 			}
 
 			Task::trigger("after");
@@ -314,7 +168,9 @@ class App {
 
 	/**
 	 * Метод помощник по работе с путями
+	 *
 	 * @param $args
+	 *
 	 * @return string
 	 */
 	public static function path(...$args) {
@@ -355,7 +211,9 @@ class App {
 
 	/**
 	 * Функция помощник по работе с путями
+	 *
 	 * @param string $path путь до файла
+	 *
 	 * @return bool
 	 */
 	public static function isAbsolutePath($path) {
@@ -364,7 +222,9 @@ class App {
 
 	/**
 	 * Метод преобразует путь в ссылку
+	 *
 	 * @param string $path путь до файла
+	 *
 	 * @return string|bool
 	 */
 	public static function pathToUrl($path) {
@@ -377,10 +237,12 @@ class App {
 
 	/**
 	 * Метод для отрисовки шаблонов
+	 *
 	 * @param string $_template абсолютный или ссылочный путь может содержать операторы
 	 *                          "->"    указывает что шаблон слева необходимо поместить в шаблон справа
 	 *                          ";"     разделитель шаблонов в левой части
 	 * @param array  $_vars     массив с переменными
+	 *
 	 * @return bool|mixed
 	 */
 	public static function render($_template, array $_vars = []) {
@@ -391,7 +253,7 @@ class App {
 			list($_template, $_layout) = array_map("trim", explode("->", $_template, 2));
 		} else {
 			// если передан только один шаблон
-			$_layout   = $_template;
+			$_layout = $_template;
 			$_template = false;
 		}
 		if ($_template) {
@@ -424,8 +286,10 @@ class App {
 
 	/**
 	 * Создаёт замыкание
+	 *
 	 * @param string  $name     название сервиса
 	 * @param Closure $callable замыкание
+	 *
 	 * @return bool
 	 */
 	public static function addService($name, $callable) {
@@ -442,8 +306,10 @@ class App {
 
 	/**
 	 * Записывает значение в реестр
+	 *
 	 * @param string $key   ключ
 	 * @param mixed  $value значение
+	 *
 	 * @return bool
 	 */
 	public static function set($key, $value) {
@@ -479,7 +345,9 @@ class App {
 
 	/**
 	 * Читает значение из реестра
+	 *
 	 * @param string $key
+	 *
 	 * @return mixed
 	 */
 	public static function get($key) {
@@ -488,8 +356,10 @@ class App {
 
 	/**
 	 * Читает значение из реестра
+	 *
 	 * @param string $key
 	 * @param mixed  $default
+	 *
 	 * @return mixed
 	 */
 	public static function retrieve($key, $default = null) {
@@ -500,7 +370,9 @@ class App {
 
 	/**
 	 * Удаляет значение из реестра
+	 *
 	 * @param $key
+	 *
 	 * @return bool
 	 */
 	public static function delete($key) {
