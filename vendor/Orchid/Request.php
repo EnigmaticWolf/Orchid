@@ -15,6 +15,13 @@ class Request {
 	const METHOD_CONNECT = "CONNECT";
 
 	/**
+	 * Массив заголовков запроса
+	 *
+	 * @var array
+	 */
+	protected static $headers = [];
+
+	/**
 	 * Подготавливает параметры запроса для дальнейшего использования
 	 *
 	 * @param string $query
@@ -25,6 +32,13 @@ class Request {
 	 * @param array  $session
 	 */
 	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
+		// наполняем массив заголовков
+		foreach ($_SERVER as $name => $value) {
+			if (substr($name, 0, 5) == "HTTP_") {
+				static::$headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
+			}
+		}
+
 		// декодируем строку
 		$query = urldecode($query);
 
@@ -117,6 +131,26 @@ class Request {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Возвращает значение заголовка по ключу
+	 *
+	 * @param $key
+	 *
+	 * @return mixed|null
+	 */
+	public static function getHeader($key) {
+		return isset(static::$headers[$key]) ? static::$headers[$key] : null;
+	}
+
+	/**
+	 * Возвращает весь список заголовков
+	 *
+	 * @return array
+	 */
+	public static function getAllHeaders() {
+		return static::$headers;
 	}
 
 	/**

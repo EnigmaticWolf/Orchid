@@ -150,32 +150,31 @@ class App {
 		register_shutdown_function(function () {
 			// если приложение было завершено
 			if (App::isTerminated()) {
-				return;
+				Response::setStatus(Response::HTTP_BAD_GATEWAY);
+				Response::setContent();
 			}
 
 			$error = error_get_last();
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
-				ob_end_clean();
-				Response::$nocache = true;
-				Response::$status = "500";
-				Response::$body = App::retrieve("debug", false) ? $error : "Internal Error.";
-			} elseif (!Response::$body) {
-				Response::$nocache = true;
-				Response::$status = "404";
-				Response::$body = "Path not found.";
+				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
+				Response::setContent(App::get("debug") ? $error : "Internal Error.");
+			} elseif (!Response::getContent()) {
+				Response::setStatus(Response::HTTP_NOT_FOUND);
+				Response::setContent("Path not found.");
 			}
 
-			Task::trigger("after");
-			Response::flush();
-
 			Task::trigger("shutdown");
-			ob_end_flush();
+			Response::send();
 		});
 
-		ob_start();
+		ob_start("ob_gzhandler");
+		ob_implicit_flush(false);
 
+		Response::create();
 		Task::trigger("before");
-		Response::$body = Router::dispatch();
+
+		Response::setContent(Router::dispatch());
+		Task::trigger("after");
 	}
 
 	/**
