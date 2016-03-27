@@ -2,11 +2,6 @@
 
 define("ORCHID", __DIR__);
 
-// Параметры необходимые для тестов
-$_SERVER["DOCUMENT_ROOT"] = __DIR__;
-$_SERVER["REMOTE_ADDR"] = "127.0.0.1";
-$_SERVER["HTTP_ACCEPT_LANGUAGE"] = "ru,en;q=0.8,en-US;q=0.6";
-
 // PSR совместимый загрузщик основных файлов
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";

@@ -6,14 +6,23 @@ use PHPUnit_Framework_TestCase;
 
 class RequestTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
+		$_SERVER["REMOTE_ADDR"] = "127.0.0.1";
+		$_SERVER["HTTP_ACCEPT_LANGUAGE"] = "ru,en;q=0.8,en-US;q=0.6";
+	}
+
+	public function testInitialize(){
 		Request::initialize("http://domain.ru/foo/bar?baz=quux", "GET");
 	}
 
-	public function testClientIp() {
+	public function testGetHeader() {
+		$this->assertNotEmpty(Request::getHeader("Accept-Language"));
+	}
+
+	public function testGetClientIp() {
 		$this->assertNotFalse(filter_var(Request::getClientIp(), FILTER_VALIDATE_IP));
 	}
 
-	public function testClientLang() {
+	public function testGetClientLang() {
 		$this->assertEquals("ru", Request::getClientLang("us"));
 	}
 
@@ -22,14 +31,15 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 	 * @param $path
 	 * @param $expected
 	 * @param $forApp
-	 * @dataProvider providerSiteUrl
+	 *
+	 * @dataProvider providerGetSiteUrl
 	 */
-	public function testSiteUrl($app, $path, $expected, $forApp) {
+	public function testGetSiteUrl($app, $path, $expected, $forApp) {
 		App::set("app", $forApp);
 		$this->assertEquals($expected, Request::getUrl($app, $path));
 	}
 
-	public function providerSiteUrl() {
+	public function providerGetSiteUrl() {
 		return [
 			["",		false,	"http://private.domain.ru",			"private"],
 			["",		true,	"http://private.domain.ru/foo/bar",	"private"],
@@ -46,7 +56,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 		];
 	}
 
-	public function testSitePath() {
+	public function testGetSitePath() {
 		$this->assertEquals("/foo/bar", Request::getPath());
 	}
 }

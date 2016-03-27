@@ -6,6 +6,10 @@ use PHPUnit_Framework_TestCase;
 use stdClass;
 
 class AppTest extends PHPUnit_Framework_TestCase {
+	public static function setUpBeforeClass() {
+		$_SERVER["DOCUMENT_ROOT"] = ORCHID;
+	}
+
 	public function testInitialize() {
 		App::initialize([
 			"debug"     => true,
@@ -26,6 +30,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testSet($key, $value) {
@@ -35,6 +40,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $expected
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testGet($key, $expected) {
@@ -43,6 +49,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @param $key
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testDelete($key) {
@@ -70,6 +77,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $default
 	 * @param $expected
+	 *
 	 * @dataProvider providerRetrieve
 	 */
 	public function testRetrieve_1($default, $expected) {
@@ -79,6 +87,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $value
 	 * @param $expected
+	 *
 	 * @dataProvider providerRetrieve
 	 */
 	public function testRetrieve_2($value, $expected) {
