@@ -334,9 +334,8 @@ class Response {
 
 		$header = [];
 		foreach ($valuesByWeight as $weight => $attr) {
-			if ($weight <= $bitWeight) {
+			if ($weight & $bitWeight) {
 				$header[] = $attr;
-				$bitWeight -= $weight;
 			}
 		}
 
