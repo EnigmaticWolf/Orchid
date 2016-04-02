@@ -8,12 +8,14 @@ use SplPriorityQueue;
 class Router {
 	/**
 	 * Хранилище объявленных роутов
+	 *
 	 * @var array
 	 */
 	protected static $route = [];
 
 	/**
 	 * Метод ссылка для метода bind объявляет Get роутинг
+	 *
 	 * @param      $path
 	 * @param      $callback
 	 * @param bool $condition
@@ -25,6 +27,7 @@ class Router {
 
 	/**
 	 * Метод ссылка для метода bind объявляет Post роутинг
+	 *
 	 * @param      $path
 	 * @param      $callback
 	 * @param bool $condition
@@ -36,6 +39,7 @@ class Router {
 
 	/**
 	 * Метод для объявления роутинга
+	 *
 	 * @param string  $path
 	 * @param Closure $callback
 	 * @param string  $method
@@ -54,18 +58,18 @@ class Router {
 
 	/**
 	 * Метод для привязки класса контроллера
+	 *
 	 * @param string $class
 	 * @param bool   $alias
 	 * @param null   $method
 	 * @param bool   $condition
 	 * @param int    $priority
-	 * @return $this
 	 */
 	public static function bindClass($class, $alias = false, $method = null, $condition = true, $priority = 0) {
 		$clean = $alias ? $alias : trim(strtolower(str_replace("\\", "/", $class)), "\\");
 
 		static::bind("/" . $clean . "/*", function () use ($class, $clean) {
-			$part   = explode("/", trim(str_replace($clean, "", Request::getPath()), "/"));
+			$part = explode("/", trim(str_replace($clean, "", Request::getPath()), "/"));
 			$action = isset($part[0]) ? $part[0] : "index";
 			$params = count($part) > 1 ? array_slice($part, 1) : [];
 
@@ -79,11 +83,12 @@ class Router {
 
 	/**
 	 * Метод для перебора объявленных роутингов
-	 * @return bool|mixed|null
+	 *
+	 * @return mixed|false
 	 */
 	public static function dispatch() {
 		$param = [];
-		$path  = "/" . implode("/", App::retrieve("uri", []));
+		$path = "/" . implode("/", App::retrieve("uri", []));
 		$found = false;
 		if (static::$route) {
 			$queue = new SplPriorityQueue();
@@ -104,7 +109,7 @@ class Router {
 				if (substr($route["path"], 0, 1) == "#" && substr($route["path"], -1) == "#") {
 					if (preg_match($route["path"], $path, $match)) {
 						$param[":capture"] = array_slice($match, 1);
-						$found             = static::route($route, $param);
+						$found = static::route($route, $param);
 						break;
 					}
 				}
@@ -114,7 +119,7 @@ class Router {
 					$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["path"], "#")) . "#";
 					if (preg_match($pattern, $path, $match)) {
 						$param[":arg"] = array_slice($match, 1);
-						$found         = static::route($route, $param);
+						$found = static::route($route, $param);
 						break;
 					}
 				}
@@ -151,24 +156,27 @@ class Router {
 	}
 
 	/**
+	 * Выполняет указанный контроллер
+	 *
 	 * @param $route
 	 * @param $param
-	 * @return bool|mixed|null
+	 *
+	 * @return mixed|false
 	 */
 	protected static function route($route, $param) {
-		$ret = null;
-
 		if (is_callable($route["callback"])) {
-			$ret = call_user_func($route["callback"], $param);
+			return call_user_func($route["callback"], $param);
 		}
 
-		return !is_null($ret) ? $ret : false;
+		return false;
 	}
 
 	/**
 	 * Перенаправляет на адрес
+	 *
 	 * @param  string $path
 	 * @param  string $app
+	 *
 	 * @return void
 	 */
 	public static function reroute($path, $app = "") {
@@ -185,11 +193,13 @@ class Router {
 
 	/**
 	 * Возвращает ссылку
+	 *
 	 * @param  string $path
 	 * @param  string $app
+	 *
 	 * @return string
 	 */
 	public static function routeUrl($path, $app = "") {
-		return Request::getUrlToApp($app) . "/" . ltrim($path, "/");
+		return Request::getUrl($app) . "/" . ltrim($path, "/");
 	}
 }
