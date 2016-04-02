@@ -33,7 +33,7 @@ namespace Orchid\Extension {
 			$file = static::getLangFilePath(trim($lang));
 
 			if (file_exists($file)) {
-				static::$locale = parse_ini_file($file, true);
+				static::$locale = require_once($file);
 			} else {
 				if (static::$force != $default) {
 					static::$force = $default;
@@ -59,7 +59,7 @@ namespace Orchid\Extension {
 				$path = $lang;
 			}
 
-			return $path . static::$prefix . $locale . ".ini";
+			return $path . static::$prefix . $locale . ".php";
 		}
 	}
 }
