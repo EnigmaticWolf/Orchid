@@ -43,8 +43,8 @@ class Request {
 		$query = urldecode($query);
 
 		// записываем хост и порт
-		App::set("host", parse_url($query, PHP_URL_HOST));
-		App::set("port", parse_url($query, PHP_URL_PORT));
+		Registry::set("host", parse_url($query, PHP_URL_HOST));
+		Registry::set("port", parse_url($query, PHP_URL_PORT));
 
 		// заполняем URI
 		$uri = [];
@@ -53,12 +53,12 @@ class Request {
 				$uri[] = $part;
 			}
 		}
-		App::set("uri", $uri);
-		App::set("method", $method);
+		Registry::set("uri", $uri);
+		Registry::set("method", $method);
 
 		// переписываем GET
 		parse_str(parse_url($query, PHP_URL_QUERY), $get);
-		App::set("param", $get);
+		Registry::set("param", $get);
 
 		// проверяем php://input и объединяем с $_POST
 		if (Request::is("ajax")) {
@@ -66,10 +66,10 @@ class Request {
 				$post = array_merge($_POST, $json);
 			}
 		}
-		App::set("data", $post);
-		App::set("file", $file);
-		App::set("cookie", $cookie);
-		App::set("session", $session);
+		Registry::set("data", $post);
+		Registry::set("file", $file);
+		Registry::set("cookie", $cookie);
+		Registry::set("session", $session);
 
 		$_GET = $get;
 		$_POST = $get;
@@ -102,28 +102,28 @@ class Request {
 				return preg_match("/(" . implode("|", $mobileDevices) . ")/i", strtolower($_SERVER["HTTP_USER_AGENT"]));
 			}
 			case "head": {
-				return (strtolower(App::get("method")) == "head");
+				return (strtolower(Registry::get("method")) == "head");
 			}
 			case "put": {
-				return (strtolower(App::get("method")) == "put");
+				return (strtolower(Registry::get("method")) == "put");
 			}
 			case "post": {
-				return (strtolower(App::get("method")) == "post");
+				return (strtolower(Registry::get("method")) == "post");
 			}
 			case "get": {
-				return (strtolower(App::get("method")) == "get");
+				return (strtolower(Registry::get("method")) == "get");
 			}
 			case "delete": {
-				return (strtolower(App::get("method")) == "delete");
+				return (strtolower(Registry::get("method")) == "delete");
 			}
 			case "options": {
-				return (strtolower(App::get("method")) == "options");
+				return (strtolower(Registry::get("method")) == "options");
 			}
 			case "trace": {
-				return (strtolower(App::get("method")) == "trace");
+				return (strtolower(Registry::get("method")) == "trace");
 			}
 			case "connect": {
-				return (strtolower(App::get("method")) == "connect");
+				return (strtolower(Registry::get("method")) == "connect");
 			}
 			case "secure": {
 				return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
@@ -192,7 +192,7 @@ class Request {
 				arsort($language, SORT_NUMERIC);
 
 				foreach ($language as $lang => $priority) {
-					if (in_array($lang, App::get("locale"))) {
+					if (in_array($lang, Registry::get("locale"))) {
 						return $lang;
 					}
 				}
@@ -221,7 +221,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getApp($app = "") {
-		if (($app = (!$app ? App::get("app") : $app)) && $app != "public") {
+		if (($app = (!$app ? Registry::get("app") : $app)) && $app != "public") {
 			return $app . ".";
 		}
 
@@ -234,7 +234,7 @@ class Request {
 	 * @return mixed
 	 */
 	public static function getHost() {
-		return App::get("base_host");
+		return Registry::get("base_host");
 	}
 
 	/**
@@ -245,7 +245,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getPort() {
-		if (($port = App::get("base_port")) != 80) {
+		if (($port = Registry::get("base_port")) != 80) {
 			return ":" . $port;
 		}
 
@@ -258,7 +258,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getPath() {
-		return "/" . implode("/", App::get("uri"));
+		return "/" . implode("/", Registry::get("uri"));
 	}
 
 	/**

@@ -3,29 +3,34 @@
 namespace Orchid\Extension {
 
 	use Orchid\App;
+	use Orchid\Registry;
 	use Orchid\Request;
 
 	class i18n {
 		/**
 		 * Префикс языкового файла
+		 *
 		 * @var string
 		 */
 		public static $prefix = "";
 
 		/**
 		 * Принудительный выбор языка
-		 * @var string|null
+		 *
+		 * @var string
 		 */
 		public static $force = null;
 
 		/**
 		 * Буфферное хранилище языкового файла
+		 *
 		 * @var array
 		 */
 		public static $locale = [];
 
 		/**
 		 * Инициализирует языковую систему
+		 *
 		 * @param string $default язык по-умолчанию
 		 */
 		public static function initialize($default = "ru") {
@@ -48,12 +53,14 @@ namespace Orchid\Extension {
 
 		/**
 		 * Возвращает путь и название языкового файла
+		 *
 		 * @param string $locale выбранный язык
+		 *
 		 * @return string
 		 */
 		protected static function getLangFilePath($locale) {
 			// директориия хранилища по-умолчанию
-			$path = App::get("base_dir") . "/storage/i18n/";
+			$path = Registry::get("base_dir") . "/storage/i18n/";
 
 			if (($lang = App::path("lang:")) !== false) {
 				$path = $lang;
@@ -67,16 +74,21 @@ namespace Orchid\Extension {
 namespace {
 
 	use Orchid\Extension\i18n;
-	use function Orchid\fetch_from_array;
 
 	class L {
 		/**
 		 * Возвращает интернационализированный текст для указанного ключа
+		 *
 		 * @param $key
+		 *
 		 * @return mixed
 		 */
 		public static function get($key) {
-			return fetch_from_array(i18n::$locale, $key, null);
+			if (array_key_exists($key, i18n::$locale)) {
+				return i18n::$locale[$key];
+			}
+
+			return null;
 		}
 	}
 }

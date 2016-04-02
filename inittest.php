@@ -1,7 +1,5 @@
 <?php
 
-use Orchid\App;
-
 define("ORCHID", __DIR__);
 
 // PSR совместимый загрузщик основных файлов
@@ -28,7 +26,7 @@ spl_autoload_register(function ($class) {
 
 // дополнительный загрузшик
 spl_autoload_register(function ($class) {
-	foreach (App::get("autoload") as $dir) {
+	foreach (Registry::get("autoload") as $dir) {
 		$class_path = $dir . "_test/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
 		if (file_exists($class_path)) {

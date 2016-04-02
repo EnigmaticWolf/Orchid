@@ -56,7 +56,7 @@ class Memory {
 
 			switch ($driver) {
 				case "memcache": {
-					App::addService($key, function () use ($config) {
+					Registry::addClosure($key, function () use ($config) {
 						return new Memcache(
 							$config["host"],
 							$config["port"],
@@ -101,7 +101,7 @@ class Memory {
 		if ($pool && $key = $pool[array_rand($pool)]) {
 			static::$instance[$role] = [$key];
 
-			return App::get($key);
+			return Registry::getClosure($key);
 		}
 
 		return false;

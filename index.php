@@ -11,7 +11,7 @@ require_once("bootstrap.php");
 
 // добавляем задачу выводящую время и память в заголовках ответа
 Task::add("shutdown", function () {
-	if (App::get("debug")) {
+	if (Registry::get("debug")) {
 		Response::setHeaderCacheControl(284, 0, 0);
 		Response::setHeaderExpires(DateTime::createFromFormat(DATE_RFC2822, "Sat, 01 Jan 00 00:00:00 +0000"));
 		Response::setHeader("X-Time", round(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], 7) . "ms");
@@ -20,8 +20,4 @@ Task::add("shutdown", function () {
 });
 
 // запускаем приложение
-//App::run();
-
-Registry::set("null", null);
-pre(Registry::has("null"));
-pre(Registry::get("null"));
+App::run();

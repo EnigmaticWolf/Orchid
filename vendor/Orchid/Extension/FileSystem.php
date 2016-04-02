@@ -4,16 +4,22 @@ namespace Orchid\Extension;
 
 use DirectoryIterator;
 use Orchid\App;
+use Orchid\Registry;
 
+/**
+ * todo:: проверить
+ */
 class FileSystem {
 	/**
 	 * Листинг директории
+	 *
 	 * @param string|null $dirName абсолютный или ссылочный путь
+	 *
 	 * @return array
 	 */
 	public static function ls($dirName = null) {
 		$list = [];
-		if (($dirName = App::path(($dirName ? $dirName : App::get("base_dir")))) != false) {
+		if (($dirName = App::path(($dirName ? $dirName : Registry::get("base_dir")))) != false) {
 			foreach (new DirectoryIterator($dirName) as $iterator) {
 				if ($iterator->isDot()) {
 					continue;
@@ -27,8 +33,10 @@ class FileSystem {
 
 	/**
 	 * Создать новую папку
+	 *
 	 * @param string $dirName абсолютный или ссылочный путь
 	 * @param int    $mode    уровень доступа для владельца файла
+	 *
 	 * @return bool
 	 */
 	public static function mkdir($dirName, $mode = 0755) {
@@ -41,7 +49,9 @@ class FileSystem {
 
 	/**
 	 * Удаляет папку и все файлы, рекурсивно
+	 *
 	 * @param string $dirName абсолютный или ссылочный путь
+	 *
 	 * @return bool
 	 */
 	public static function rmdir($dirName) {
@@ -66,7 +76,9 @@ class FileSystem {
 
 	/**
 	 * Прочитать файл
+	 *
 	 * @param string $file абсолютный или ссылочный путь
+	 *
 	 * @return bool|string
 	 */
 	public static function read($file) {
@@ -79,8 +91,10 @@ class FileSystem {
 
 	/**
 	 * Записать данные в файл
+	 *
 	 * @param string $file абсолютный или ссылочный путь
 	 * @param mixed  $data содержимое для записи в файл
+	 *
 	 * @return bool|int
 	 */
 	public static function write($file, $data) {
@@ -96,8 +110,10 @@ class FileSystem {
 
 	/**
 	 * Скопировать файл в указанное место
+	 *
 	 * @param string $source      абсолютный или ссылочный путь
 	 * @param string $destination абсолютный или ссылочный путь
+	 *
 	 * @return bool
 	 */
 	public static function copy($source, $destination) {
@@ -116,8 +132,10 @@ class FileSystem {
 
 	/**
 	 * Переименовать файл
+	 *
 	 * @param string $oldName абсолютный или ссылочный путь
 	 * @param string $newName абсолютный или ссылочный путь
+	 *
 	 * @return bool
 	 */
 	public static function rename($oldName, $newName) {
@@ -136,7 +154,9 @@ class FileSystem {
 
 	/**
 	 * Удалить файл
+	 *
 	 * @param string $file абсолютный или ссылочный путь
+	 *
 	 * @return bool
 	 */
 	public static function delete($file) {
@@ -149,7 +169,9 @@ class FileSystem {
 
 	/**
 	 * Функция помощник для работы с несуществующими файлом или папкой
+	 *
 	 * @param string $path абсолютный или ссылочный путь
+	 *
 	 * @return bool|string
 	 */
 	protected static function notExistEntry($path) {

@@ -85,10 +85,11 @@ class Router {
 	 * Метод для перебора объявленных роутингов
 	 *
 	 * @return mixed|false
+	 * todo:: оптимизировать
 	 */
 	public static function dispatch() {
 		$param = [];
-		$path = "/" . implode("/", App::retrieve("uri", []));
+		$path = "/" . implode("/", Registry::get("uri", []));
 		$found = false;
 		if (static::$route) {
 			$queue = new SplPriorityQueue();
@@ -129,14 +130,14 @@ class Router {
 					$part_p = explode("/", $route["path"]);
 					array_shift($part_p);
 
-					if (count(App::retrieve("uri", [])) == count($part_p)) {
+					if (count(Registry::get("uri", [])) == count($part_p)) {
 						$matched = true;
 						foreach ($part_p as $index => $part) {
 							if (":" === substr($part, 0, 1)) {
-								$param[substr($part, 1)] = App::retrieve("uri", [])[$index];
+								$param[substr($part, 1)] = Registry::get("uri", [])[$index];
 								continue;
 							}
-							if (App::retrieve("uri", [])[$index] != $part_p[$index]) {
+							if (Registry::get("uri", [])[$index] != $part_p[$index]) {
 								$matched = false;
 								break;
 							}
@@ -178,6 +179,7 @@ class Router {
 	 * @param  string $app
 	 *
 	 * @return void
+	 * todo:: переписать
 	 */
 	public static function reroute($path, $app = "") {
 		if (strpos($path, "://") === false) {

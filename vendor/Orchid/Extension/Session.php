@@ -2,9 +2,6 @@
 
 namespace Orchid\Extension;
 
-use Orchid\App;
-use function Orchid\fetch_from_array;
-
 class Session {
 	/**
 	 * Создаёт новую сессию с заданным именем
@@ -37,7 +34,11 @@ class Session {
 	 * @return Mixed
 	 */
 	public static function read($key, $default = null) {
-		return fetch_from_array($_SESSION, $key, $default);
+		if (array_key_exists($key, $_SESSION)) {
+			return $_SESSION[$key];
+		}
+
+		return $default;
 	}
 
 	/**

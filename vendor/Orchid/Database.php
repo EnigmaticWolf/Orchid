@@ -19,6 +19,7 @@ class Database {
 
 	/**
 	 * Инициализиует подключения
+	 *
 	 * @param array $configs
 	 */
 	public static function initialize(array $configs) {
@@ -34,7 +35,7 @@ class Database {
 			$config = array_merge($default, $config);
 			$key = "database:" . $index;
 
-			App::addService($key, function () use ($config) {
+			Registry::addClosure($key, function () use ($config) {
 				try {
 					return new PDO(
 						$config["dsn"],
@@ -57,7 +58,9 @@ class Database {
 
 	/**
 	 * Возвращает объект PDO
+	 *
 	 * @param bool $use_master
+	 *
 	 * @return null|PDO
 	 */
 	public static function getInstance($use_master = false) {
@@ -84,7 +87,7 @@ class Database {
 		if ($pool && $key = $pool[array_rand($pool)]) {
 			static::$connection[$role] = [$key];
 
-			return App::get($key);
+			return Registry::getClosure($key);
 		}
 
 		return null;
@@ -92,9 +95,11 @@ class Database {
 
 	/**
 	 * Подготавливает и выполняет запрос к базе данных
+	 *
 	 * @param string     $query
 	 * @param array      $params
 	 * @param bool|false $use_master
+	 *
 	 * @return PDOStatement
 	 */
 	public static function query($query, array $params = [], $use_master = false) {
@@ -109,6 +114,7 @@ class Database {
 
 	/**
 	 * Возвращает ID последней вставленной строки
+	 * 
 	 * @return string
 	 */
 	public static function lastInsertId() {

@@ -2,7 +2,7 @@
 
 namespace Orchid\Entity;
 
-use Orchid\App;
+use Orchid\Registry;
 
 final class Daemon {
 	public static $name    = "daemon";
@@ -13,13 +13,15 @@ final class Daemon {
 
 	/**
 	 * Запускает выполнение демона
+	 *
 	 * @param string $daemon
 	 * @param array  $args
 	 * @param string $path
+	 *
 	 * @return string
 	 */
 	public static function run($daemon, array $args = [], $path = "/daemon/") {
-		return system("php " . App::get("base_dir") . $path . $daemon . ".php " . implode(" ", $args) . " > /dev/null &");
+		return system("php " . Registry::get("base_dir") . $path . $daemon . ".php " . implode(" ", $args) . " > /dev/null &");
 	}
 
 	/**
@@ -30,8 +32,8 @@ final class Daemon {
 	public static function forkProcess() {
 		if (!pcntl_fork()) {
 			posix_setsid();
-			static::$pid     = getmypid();
-			static::$pidFile = App::get("base_dir") . "/cache/" . static::$name . ".pid";
+			static::$pid = getmypid();
+			static::$pidFile = Registry::get("base_dir") . "/cache/" . static::$name . ".pid";
 
 			if (!file_exists(static::$pidFile)) {
 				// запись pid в файл
@@ -57,8 +59,8 @@ final class Daemon {
 	 * @return void
 	 */
 	public static function writeLog() {
-		static::$log    = App::get("base_dir") . "/cache/" . static::$name . ".log";
-		static::$logErr = App::get("base_dir") . "/cache/" . static::$name . "-error.log";
+		static::$log = Registry::get("base_dir") . "/cache/" . static::$name . ".log";
+		static::$logErr = Registry::get("base_dir") . "/cache/" . static::$name . "-error.log";
 
 		fclose(STDIN);
 		$GLOBALS["STDIN"] = fopen("/dev/null", "r");

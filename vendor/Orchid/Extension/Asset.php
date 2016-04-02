@@ -4,6 +4,7 @@ namespace Orchid\Extension;
 
 use DirectoryIterator;
 use Orchid\App;
+use Orchid\Registry;
 use Orchid\Request;
 
 class Asset {
@@ -16,6 +17,7 @@ class Asset {
 	/**
 	 * Генерирует и возвращает строку подключений ресурсов на основе карты ресурсов и параметров
 	 * @return string|null
+	 * todo:: переписать
 	 */
 	public static function render() {
 		$include = [];
@@ -27,7 +29,8 @@ class Asset {
 			}
 
 			// ресурсы для определённого контроллера
-			if (($controller = App::retrieve("uri/0", false)) !== false && isset(static::$map[$controller . "/*"])) {
+			$uriList = Registry::get("uri", []);
+			if (($controller = reset($uriList)) !== false && isset(static::$map[$controller . "/*"])) {
 				$include = array_merge($include, static::renderIterator(static::$map[$controller . "/*"]));
 			}
 
@@ -76,17 +79,19 @@ class Asset {
 	/**
 	 * Собирает все шаблоны из папок template: и из всех подключенных модулей
 	 * @return string
+	 * todo:: переписать
 	 */
 	public static function template() {
 		$template = [];
 
 		// объявленные вручную каталоги с шаблонами
-		foreach (App::retrieve("path/template", []) as $path) {
+		$pathList = Registry::get("path", []);
+		foreach ($pathList["template"] as $path) {
 			$template = array_merge($template, static::templateIterator($path));
 		}
 
 		// модули в которых есть шаблоны
-		foreach (App::get("module") as $module) {
+		foreach (Registry::get("module") as $module) {
 			if ($path = App::path($module . ":template")) {
 				$template = array_merge($template, static::templateIterator($path));
 			}

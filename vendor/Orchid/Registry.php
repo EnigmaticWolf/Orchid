@@ -64,6 +64,21 @@ class Registry {
 	}
 
 	/**
+	 * Задаёт массив элементов
+	 *
+	 * @param array $data
+	 *
+	 * @return bool
+	 */
+	public static function setAll(array $data) {
+		foreach ($data as $key => $value) {
+			static::$storage[$key] = $value;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Проверяет наличие ключа в реестре
 	 *
 	 * @param string $key
@@ -82,7 +97,7 @@ class Registry {
 	 *
 	 * @return mixed
 	 */
-	public static function get($key, $default = null) {
+	public static function &get($key, $default = null) {
 		if (array_key_exists($key, static::$storage)) {
 			return static::$storage[$key];
 		}

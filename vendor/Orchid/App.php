@@ -2,7 +2,6 @@
 
 namespace Orchid;
 
-use Closure;
 use DirectoryIterator;
 
 class App {
@@ -17,7 +16,7 @@ class App {
 	 * @return void
 	 */
 	public static function initialize(array $param = []) {
-		static::$registry = array_merge([
+		Registry::setAll(array_merge([
 			"debug"     => true,
 
 			"instance"  => [],
@@ -45,7 +44,7 @@ class App {
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
 			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
 			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
-		], $param);
+		], $param));
 
 		if (PHP_SAPI != "cli") {
 			// инициализиуем запрос
@@ -58,12 +57,12 @@ class App {
 				(isset($_SESSION) ? $_SESSION : [])
 			);
 		} else {
-			App::set("args", array_slice($_SERVER["argv"], 1));
+			Registry::set("args", array_slice($_SERVER["argv"], 1));
 		}
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
-			foreach (static::$registry["autoload"] as $dir) {
+			foreach (Registry::get("autoload", []) as $dir) {
 				$class_path = $dir . "/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
 				if (file_exists($class_path)) {
@@ -114,7 +113,7 @@ class App {
 				}
 
 				// регистрируем папку автозагрузки
-				static::$registry["autoload"][] = $dir;
+				Registry::add("autoload", $dir);
 			}
 		}
 	}
@@ -127,7 +126,7 @@ class App {
 	 */
 	protected static function bootModule($class, $dir) {
 		// регистрируем модуль
-		static::$registry["module"][] = $class;
+		Registry::add("module", $class);
 
 		if (!is_file($dir)) {
 			static::path($class, $dir);
@@ -157,7 +156,7 @@ class App {
 			$error = error_get_last();
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
 				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
-				Response::setContent(App::get("debug") ? $error : "Internal Error.");
+				Response::setContent(Registry::get("debug") ? $error : "Internal Error.");
 			} elseif (!Response::getContent()) {
 				Response::setStatus(Response::HTTP_NOT_FOUND);
 				Response::setContent("Path not found.");
@@ -183,6 +182,7 @@ class App {
 	 * @param $args
 	 *
 	 * @return string
+	 * todo:: переписать
 	 */
 	public static function path(...$args) {
 		switch (count($args)) {
@@ -194,11 +194,12 @@ class App {
 				}
 
 				if (($parts = explode(":", $file, 2)) && count($parts) == 2) {
-					if (!isset(static::$registry["path"][$parts[0]])) {
+					$pathList = Registry::get("path", []);
+					if (!isset($pathList[$parts[0]])) {
 						return false;
 					}
 
-					foreach (static::$registry["path"][$parts[0]] as &$path) {
+					foreach ($pathList[$parts[0]] as &$path) {
 						if (file_exists($path . $parts[1])) {
 							return $path . $parts[1];
 						}
@@ -207,12 +208,13 @@ class App {
 
 				return false;
 			case 2:
+				$pathList = &Registry::get("path", []);
 				list($name, $path) = $args;
-				if (!isset(static::$registry["path"][$name])) {
-					static::$registry["path"][$name] = [];
+				if (!isset($pathList[$name])) {
+					$pathList[$name] = [];
 				}
 				$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
-				array_unshift(static::$registry["path"][$name], is_file($path) ? $path : $path . "/");
+				array_unshift($pathList[$name], is_file($path) ? $path : $path . "/");
 
 				break;
 		}
@@ -240,7 +242,7 @@ class App {
 	 */
 	public static function pathToUrl($path) {
 		if (($file = static::path($path)) != false) {
-			return "/" . ltrim(str_replace(static::$registry["base_dir"], "", $file), "/");
+			return "/" . ltrim(str_replace(Registry::get("base_dir"), "", $file), "/");
 		}
 
 		return false;
@@ -294,170 +296,4 @@ class App {
 
 		return $content ? $content : false;
 	}
-
-	/**
-	 * Создаёт замыкание
-	 *
-	 * @param string  $name     название сервиса
-	 * @param Closure $callable замыкание
-	 *
-	 * @return bool
-	 */
-	public static function addService($name, $callable) {
-		return static::set($name, function ($param = null) use ($callable) {
-			static $object;
-
-			if ($object === null) {
-				$object = $callable($param);
-			}
-
-			return $object;
-		});
-	}
-
-	/**
-	 * Записывает значение в реестр
-	 *
-	 * @param string $key   ключ
-	 * @param mixed  $value значение
-	 *
-	 * @return bool
-	 */
-	public static function set($key, $value) {
-		$keys = explode("/", $key);
-		if (count($keys) > 5) {
-			return false;
-		}
-		switch (count($keys)) {
-			case 1: {
-				static::$registry[$keys[0]] = $value;
-				break;
-			}
-			case 2: {
-				static::$registry[$keys[0]][$keys[1]] = $value;
-				break;
-			}
-			case 3: {
-				static::$registry[$keys[0]][$keys[1]][$keys[2]] = $value;
-				break;
-			}
-			case 4: {
-				static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]] = $value;
-				break;
-			}
-			case 5: {
-				static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]] = $value;
-				break;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Читает значение из реестра
-	 *
-	 * @param string $key
-	 *
-	 * @return mixed
-	 */
-	public static function get($key) {
-		return static::retrieve($key);
-	}
-
-	/**
-	 * Читает значение из реестра
-	 *
-	 * @param string $key
-	 * @param mixed  $default
-	 *
-	 * @return mixed
-	 */
-	public static function retrieve($key, $default = null) {
-		$value = fetch_from_array(static::$registry, $key, $default);
-
-		return $value instanceof Closure ? $value() : $value;
-	}
-
-	/**
-	 * Удаляет значение из реестра
-	 *
-	 * @param $key
-	 *
-	 * @return bool
-	 */
-	public static function delete($key) {
-		$keys = explode("/", $key);
-		if (count($keys) > 5) {
-			return false;
-		}
-		switch (count($keys)) {
-			case 1: {
-				unset(static::$registry[$keys[0]]);
-				break;
-			}
-			case 2: {
-				unset(static::$registry[$keys[0]][$keys[1]]);
-				break;
-			}
-			case 3: {
-				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]]);
-				break;
-			}
-			case 4: {
-				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]]);
-				break;
-			}
-			case 5: {
-				unset(static::$registry[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]]);
-				break;
-			}
-		}
-
-		return true;
-	}
-}
-
-function fetch_from_array(&$array, $index = null, $default = null) {
-	if (is_null($index)) {
-		return $array;
-	} elseif (isset($array[$index])) {
-		return $array[$index];
-	} elseif (strpos($index, "/")) {
-		$keys = explode("/", $index);
-		switch (count($keys)) {
-			case 1: {
-				if (isset($array[$keys[0]])) {
-					return $array[$keys[0]];
-				}
-				break;
-			}
-			case 2: {
-				if (isset($array[$keys[0]][$keys[1]])) {
-					return $array[$keys[0]][$keys[1]];
-				}
-				break;
-			}
-			case 3: {
-				if (isset($array[$keys[0]][$keys[1]][$keys[2]])) {
-					return $array[$keys[0]][$keys[1]][$keys[2]];
-				}
-				break;
-			}
-			case 4: {
-				if (isset($array[$keys[0]][$keys[1]][$keys[2]][$keys[3]])) {
-					return $array[$keys[0]][$keys[1]][$keys[2]][$keys[3]];
-				}
-				break;
-			}
-			case 5: {
-				if (isset($array[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]])) {
-					return $array[$keys[0]][$keys[1]][$keys[2]][$keys[3]][$keys[4]];
-				}
-				break;
-			}
-		}
-	}
-
-	return $default;
 }
