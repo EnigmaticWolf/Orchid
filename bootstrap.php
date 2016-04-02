@@ -5,6 +5,9 @@ use Orchid\Extension\i18n;
 
 define("ORCHID", __DIR__);
 
+// принудительно используем функции для работы с многобайтными строками
+ini_set("mbstring.func_overload", 7);
+
 // PSR совместимый загрузщик основных файлов
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";
