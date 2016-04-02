@@ -1,5 +1,7 @@
 <?php
 
+use Orchid\App;
+
 define("ORCHID", __DIR__);
 
 // PSR совместимый загрузщик основных файлов
@@ -23,8 +25,6 @@ spl_autoload_register(function ($class) {
 		return;
 	}
 });
-
-use Orchid\App;
 
 // дополнительный загрузшик
 spl_autoload_register(function ($class) {

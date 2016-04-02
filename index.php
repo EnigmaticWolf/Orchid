@@ -1,12 +1,12 @@
 <?php
 
-// подключаем файл начальной загрузки
-require_once("bootstrap.php");
-
 use Orchid\App;
 use Orchid\Extension\Str;
 use Orchid\Response;
 use Orchid\Task;
+
+// подключаем файл начальной загрузки
+require_once("bootstrap.php");
 
 // добавляем задачу выводящую время и память в заголовках ответа
 Task::add("shutdown", function () {

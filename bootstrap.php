@@ -1,5 +1,8 @@
 <?php
 
+use Orchid\App;
+use Orchid\Extension\i18n;
+
 define("ORCHID", __DIR__);
 
 // PSR совместимый загрузщик основных файлов
@@ -21,9 +24,6 @@ function pre(...$args) {
 	}
 	echo "</pre>";
 }
-
-use Orchid\App;
-use Orchid\Extension\i18n;
 
 // инициализация приложения
 App::initialize([
