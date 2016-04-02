@@ -2,6 +2,7 @@
 
 use Orchid\App;
 use Orchid\Extension\Str;
+use Orchid\Registry;
 use Orchid\Response;
 use Orchid\Task;
 
@@ -19,4 +20,8 @@ Task::add("shutdown", function () {
 });
 
 // запускаем приложение
-App::run();
+//App::run();
+
+Registry::set("null", null);
+pre(Registry::has("null"));
+pre(Registry::get("null"));
