@@ -55,8 +55,8 @@ namespace Orchid\Extension {
 			// директориия хранилища по-умолчанию
 			$path = App::get("base_dir") . "/storage/i18n/";
 
-			if (($cache = App::path("lang:")) !== false) {
-				$path = $cache;
+			if (($lang = App::path("lang:")) !== false) {
+				$path = $lang;
 			}
 
 			return $path . static::$prefix . $locale . ".ini";
