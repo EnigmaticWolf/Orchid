@@ -10,6 +10,7 @@
 			<file>vendor_test/Orchid/Extension/AssetTest.php</file>
 			<file>vendor_test/Orchid/Extension/CacheTest.php</file>
 			<file>vendor_test/Orchid/Extension/CryptaTest.php</file>
+			<file>vendor_test/Orchid/Extension/FileSystemTest.php</file>
 			<file>vendor_test/Orchid/Extension/i18nTest.php</file>
 			<file>vendor_test/Orchid/Extension/StrTest.php</file>
 		</testsuite>

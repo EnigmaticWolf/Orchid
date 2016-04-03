@@ -4,23 +4,19 @@ namespace Orchid\Extension;
 
 use DirectoryIterator;
 use Orchid\App;
-use Orchid\Registry;
 
-/**
- * todo:: проверить
- */
 class FileSystem {
 	/**
-	 * Листинг директории
+	 * Возвращает листинг директории
 	 *
-	 * @param string|null $dirName абсолютный или ссылочный путь
+	 * @param string $path
 	 *
 	 * @return array
 	 */
-	public static function ls($dirName = null) {
+	public static function ls($path = null) {
 		$list = [];
-		if (($dirName = App::path(($dirName ? $dirName : Registry::get("base_dir")))) != false) {
-			foreach (new DirectoryIterator($dirName) as $iterator) {
+		if (($path = App::path(($path))) != false) {
+			foreach (new DirectoryIterator($path) as $iterator) {
 				if ($iterator->isDot()) {
 					continue;
 				}
@@ -32,33 +28,33 @@ class FileSystem {
 	}
 
 	/**
-	 * Создать новую папку
+	 * Создаёт новую папку
 	 *
-	 * @param string $dirName абсолютный или ссылочный путь
-	 * @param int    $mode    уровень доступа для владельца файла
+	 * @param string $folder
+	 * @param int    $mode
 	 *
 	 * @return bool
 	 */
-	public static function mkdir($dirName, $mode = 0755) {
-		if (!App::path($dirName)) {
-			return mkdir(static::notExistEntry($dirName), $mode);
+	public static function mkdir($folder, $mode = 0755) {
+		if (!App::path($folder)) {
+			return mkdir(static::notExistEntry($folder), $mode);
 		}
 
 		return false;
 	}
 
 	/**
-	 * Удаляет папку и все файлы, рекурсивно
+	 * Рекурсивно удаляет папку и все файлы
 	 *
-	 * @param string $dirName абсолютный или ссылочный путь
+	 * @param string $folder
 	 *
 	 * @return bool
 	 */
-	public static function rmdir($dirName) {
-		if ($dirName = App::path($dirName)) {
-			if ($ls = static::ls($dirName)) {
+	public static function rmdir($folder) {
+		if ($folder = App::path($folder)) {
+			if ($ls = static::ls($folder)) {
 				foreach ($ls as $key => $val) {
-					$path = $dirName . DIRECTORY_SEPARATOR . $val;
+					$path = $folder . DIRECTORY_SEPARATOR . $val;
 
 					if (is_dir($path) || is_link($path)) {
 						static::rmdir($path);
@@ -68,18 +64,18 @@ class FileSystem {
 				}
 			}
 
-			return rmdir($dirName);
+			return rmdir($folder);
 		}
 
 		return false;
 	}
 
 	/**
-	 * Прочитать файл
+	 * Возвращает содержимое файла
 	 *
-	 * @param string $file абсолютный или ссылочный путь
+	 * @param string $file
 	 *
-	 * @return bool|string
+	 * @return string|bool
 	 */
 	public static function read($file) {
 		if ($file = App::path($file)) {
@@ -90,10 +86,10 @@ class FileSystem {
 	}
 
 	/**
-	 * Записать данные в файл
+	 * Записывает данные в файл
 	 *
-	 * @param string $file абсолютный или ссылочный путь
-	 * @param mixed  $data содержимое для записи в файл
+	 * @param string $file
+	 * @param mixed  $data
 	 *
 	 * @return bool|int
 	 */
@@ -109,10 +105,10 @@ class FileSystem {
 	}
 
 	/**
-	 * Скопировать файл в указанное место
+	 * Копирует файл в указанное место
 	 *
-	 * @param string $source      абсолютный или ссылочный путь
-	 * @param string $destination абсолютный или ссылочный путь
+	 * @param string $source
+	 * @param string $destination
 	 *
 	 * @return bool
 	 */
@@ -131,10 +127,10 @@ class FileSystem {
 	}
 
 	/**
-	 * Переименовать файл
+	 * Переименовывает файл
 	 *
-	 * @param string $oldName абсолютный или ссылочный путь
-	 * @param string $newName абсолютный или ссылочный путь
+	 * @param string $oldName
+	 * @param string $newName
 	 *
 	 * @return bool
 	 */
@@ -153,9 +149,9 @@ class FileSystem {
 	}
 
 	/**
-	 * Удалить файл
+	 * Удаляет файл
 	 *
-	 * @param string $file абсолютный или ссылочный путь
+	 * @param string $file
 	 *
 	 * @return bool
 	 */
@@ -170,7 +166,7 @@ class FileSystem {
 	/**
 	 * Функция помощник для работы с несуществующими файлом или папкой
 	 *
-	 * @param string $path абсолютный или ссылочный путь
+	 * @param string $path
 	 *
 	 * @return bool|string
 	 */
