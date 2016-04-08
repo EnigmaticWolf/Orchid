@@ -3,7 +3,7 @@
 namespace Main\Controller;
 
 use ModuleMain;
-use Orchid\App;
+use Orchid\Entity\View;
 
 class Main {
 	public static function index() {
@@ -11,6 +11,6 @@ class Main {
 			"hello" => ModuleMain::HelloWorld(),
 		];
 
-		return App::render("Main:View/Main.php", $data);
+		return View::fetch("Main:View/Main.php", $data);
 	}
 }

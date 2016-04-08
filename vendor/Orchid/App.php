@@ -155,6 +155,7 @@ class App {
 
 			$error = error_get_last();
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
+				ob_end_clean();
 				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
 				Response::setContent(Registry::get("debug") ? $error : "Internal Error.");
 			} elseif (!Response::getContent()) {
@@ -246,54 +247,5 @@ class App {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Метод для отрисовки шаблонов
-	 *
-	 * @param string $_template абсолютный или ссылочный путь может содержать операторы
-	 *                          "->"    указывает что шаблон слева необходимо поместить в шаблон справа
-	 *                          ";"     разделитель шаблонов в левой части
-	 * @param array  $_vars     массив с переменными
-	 *
-	 * @return bool|mixed
-	 */
-	public static function render($_template, array $_vars = []) {
-		$content = [];
-		extract($_vars, EXTR_REFS);
-
-		if (strpos($_template, "->") !== false) {
-			list($_template, $_layout) = array_map("trim", explode("->", $_template, 2));
-		} else {
-			// если передан только один шаблон
-			$_layout = $_template;
-			$_template = false;
-		}
-		if ($_template) {
-			if (strpos($_template, ";") !== false) {
-				$_template = array_map("trim", explode(";", $_template));
-			} else {
-				// если шаблон только один
-				$_template = [$_template];
-			}
-
-			// рендерим дополнительные шаблоны
-			foreach ($_template as $val) {
-				if ($_file = static::path($val)) {
-					ob_start();
-					require $_file;
-					$content[basename($_file, ".php")] = ob_get_clean();
-				}
-			}
-		}
-
-		// рендерим шаблон
-		if ($_layout && $_file = static::path($_layout)) {
-			ob_start();
-			require $_file;
-			$content = ob_get_clean();
-		}
-
-		return $content ? $content : false;
 	}
 }

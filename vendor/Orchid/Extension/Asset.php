@@ -4,6 +4,7 @@ namespace Orchid\Extension;
 
 use DirectoryIterator;
 use Orchid\App;
+use Orchid\Entity\View;
 use Orchid\Registry;
 use Orchid\Request;
 
@@ -119,7 +120,7 @@ class Asset {
 
 							switch ($ext) {
 								case "tpl": {
-									$template[] = '<script id="tpl' . $name . '" type="text/template">' . App::render($file) . '</script>';
+									$template[] = '<script id="tpl' . $name . '" type="text/template">' . View::fetch($file) . '</script>';
 									break;
 								}
 								case "ejs": {
