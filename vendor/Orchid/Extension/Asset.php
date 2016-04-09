@@ -29,7 +29,7 @@ class Asset {
 			}
 
 			// ресурсы для определённого контроллера
-			if (($controller = reset(Registry::get("uri", []))) !== false && isset(static::$map[$controller . "/*"])) {
+			if (($controller = Request::getUri(0)) !== null && isset(static::$map[$controller . "/*"])) {
 				$include = array_merge($include, static::renderIterator(static::$map[$controller . "/*"]));
 			}
 

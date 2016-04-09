@@ -29,16 +29,6 @@ class App {
 			"module"    => [],
 			"path"      => [],
 
-			"host"      => "",
-			"port"      => 80,
-			"method"    => "",
-			"uri"       => [],
-			"param"     => [],
-			"data"      => [],
-			"file"      => [],
-			"cookie"    => [],
-			"session"   => [],
-
 			"args"      => [],
 
 			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",

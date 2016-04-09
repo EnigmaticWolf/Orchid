@@ -15,11 +15,74 @@ class Request {
 	const METHOD_CONNECT = "CONNECT";
 
 	/**
-	 * Массив заголовков запроса
+	 * Хост
+	 *
+	 * @var string
+	 */
+	protected static $host = "";
+
+	/**
+	 * Порт
+	 *
+	 * @var int
+	 */
+	protected static $port = 80;
+
+	/**
+	 * Строка
 	 *
 	 * @var array
 	 */
-	protected static $headers = [];
+	protected static $uri = [];
+
+	/**
+	 * Метод
+	 *
+	 * @var string
+	 */
+	protected static $method = "";
+
+	/**
+	 * Параметры
+	 *
+	 * @var array
+	 */
+	protected static $param = [];
+
+	/**
+	 * POST данные
+	 *
+	 * @var array
+	 */
+	protected static $data = [];
+
+	/**
+	 * Загруженные файлы
+	 *
+	 * @var array
+	 */
+	protected static $file = [];
+
+	/**
+	 * Куки
+	 *
+	 * @var array
+	 */
+	protected static $cookie = [];
+
+	/**
+	 * Сессия
+	 *
+	 * @var array
+	 */
+	public static $session = [];
+
+	/**
+	 * Массив заголовков
+	 *
+	 * @var array
+	 */
+	public static $headers = [];
 
 	/**
 	 * Подготавливает параметры запроса для дальнейшего использования
@@ -32,19 +95,12 @@ class Request {
 	 * @param array  $session
 	 */
 	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
-		// наполняем массив заголовков
-		foreach ($_SERVER as $name => $value) {
-			if (substr($name, 0, 5) == "HTTP_") {
-				static::$headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
-			}
-		}
-
 		// декодируем строку
 		$query = urldecode($query);
 
 		// записываем хост и порт
-		Registry::set("host", parse_url($query, PHP_URL_HOST));
-		Registry::set("port", parse_url($query, PHP_URL_PORT));
+		static::$host = parse_url($query, PHP_URL_HOST);
+		static::$port = parse_url($query, PHP_URL_PORT);
 
 		// заполняем URI
 		$uri = [];
@@ -53,26 +109,35 @@ class Request {
 				$uri[] = $part;
 			}
 		}
-		Registry::set("uri", $uri);
-		Registry::set("method", $method);
+		static::$uri = $uri;
+		static::$method = $method;
 
 		// переписываем GET
 		parse_str(parse_url($query, PHP_URL_QUERY), $get);
-		Registry::set("param", $get);
+		static::$param = $get;
 
 		// проверяем php://input и объединяем с $_POST
 		if (Request::is("ajax")) {
 			if ($json = json_decode(@file_get_contents("php://input"), true)) {
-				$post = array_merge($_POST, $json);
+				$post = array_merge($post, $json);
 			}
 		}
-		Registry::set("data", $post);
-		Registry::set("file", $file);
-		Registry::set("cookie", $cookie);
-		Registry::set("session", $session);
+		static::$data = $post;
+		static::$file = $file;
+
+		// заполняем "печеньки" и сессию
+		static::$cookie = $cookie;
+		static::$session = $session;
+
+		// наполняем массив заголовков
+		foreach ($_SERVER as $name => $value) {
+			if (substr($name, 0, 5) == "HTTP_") {
+				static::$headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
+			}
+		}
 
 		$_GET = $get;
-		$_POST = $get;
+		$_POST = $post;
 		$_COOKIE = $cookie;
 		$_REQUEST = array_merge($get, $post, $cookie);
 	}
@@ -102,28 +167,28 @@ class Request {
 				return preg_match("/(" . implode("|", $mobileDevices) . ")/i", strtolower($_SERVER["HTTP_USER_AGENT"]));
 			}
 			case "head": {
-				return (strtolower(Registry::get("method")) == "head");
+				return (strtolower(static::$method) == "head");
 			}
 			case "put": {
-				return (strtolower(Registry::get("method")) == "put");
+				return (strtolower(static::$method) == "put");
 			}
 			case "post": {
-				return (strtolower(Registry::get("method")) == "post");
+				return (strtolower(static::$method) == "post");
 			}
 			case "get": {
-				return (strtolower(Registry::get("method")) == "get");
+				return (strtolower(static::$method) == "get");
 			}
 			case "delete": {
-				return (strtolower(Registry::get("method")) == "delete");
+				return (strtolower(static::$method) == "delete");
 			}
 			case "options": {
-				return (strtolower(Registry::get("method")) == "options");
+				return (strtolower(static::$method) == "options");
 			}
 			case "trace": {
-				return (strtolower(Registry::get("method")) == "trace");
+				return (strtolower(static::$method) == "trace");
 			}
 			case "connect": {
-				return (strtolower(Registry::get("method")) == "connect");
+				return (strtolower(static::$method) == "connect");
 			}
 			case "secure": {
 				return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
@@ -136,9 +201,9 @@ class Request {
 	/**
 	 * Возвращает значение заголовка по ключу
 	 *
-	 * @param $key
+	 * @param string $key
 	 *
-	 * @return mixed|null
+	 * @return mixed
 	 */
 	public static function getHeader($key) {
 		return isset(static::$headers[$key]) ? static::$headers[$key] : null;
@@ -151,6 +216,95 @@ class Request {
 	 */
 	public static function getAllHeaders() {
 		return static::$headers;
+	}
+
+	/**
+	 * Возвращает значение из строки запроса по индексу
+	 *
+	 * @param int $index
+	 *
+	 * @return mixed
+	 */
+	public static function getUri($index) {
+		return isset(static::$uri[$index]) ? static::$uri[$index] : null;
+	}
+
+	/**
+	 * Возвращает весь список
+	 *
+	 * @return array
+	 */
+	public static function getAllUri() {
+		return static::$uri;
+	}
+
+	/**
+	 * Возвращает текущий метод
+	 *
+	 * @return string
+	 */
+	public static function getMethod() {
+		return static::$method;
+	}
+
+	/**
+	 * Возвращает GET параметр по ключу
+	 *
+	 * @param string $key
+	 *
+	 * @return mixed
+	 */
+	public static function getParam($key) {
+		return isset(static::$param[$key]) ? static::$param[$key] : null;
+	}
+
+	/**
+	 * Возвращает весь список GET параметров
+	 *
+	 * @return array
+	 */
+	public static function getAllParams() {
+		return static::$param;
+	}
+
+	/**
+	 * Возвращает POST параметр по ключу
+	 *
+	 * @param string $key
+	 *
+	 * @return mixed
+	 */
+	public static function getData($key) {
+		return isset(static::$data[$key]) ? static::$data[$key] : null;
+	}
+
+	/**
+	 * Возвращает весь список POST параметров
+	 *
+	 * @return array
+	 */
+	public static function getAllData() {
+		return static::$data;
+	}
+
+	/**
+	 * Возвращает массив с данными загруженного файла по ключу
+	 *
+	 * @param string $key
+	 *
+	 * @return array
+	 */
+	public static function getFile($key) {
+		return isset(static::$file[$key]) ? static::$file[$key] : null;
+	}
+
+	/**
+	 * Возвращает весь список загруженных файлов
+	 *
+	 * @return array
+	 */
+	public static function getAllFiles() {
+		return static::$file;
 	}
 
 	/**
@@ -258,7 +412,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getPath() {
-		return "/" . implode("/", Registry::get("uri"));
+		return "/" . implode("/", static::$uri);
 	}
 
 	/**
