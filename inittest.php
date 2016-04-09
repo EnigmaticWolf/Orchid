@@ -1,5 +1,7 @@
 <?php
 
+use Orchid\Registry;
+
 define("ORCHID", __DIR__);
 
 // PSR совместимый загрузщик основных файлов

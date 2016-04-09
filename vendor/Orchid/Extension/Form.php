@@ -4,14 +4,26 @@ namespace Orchid\Extension;
 
 /**
  * @method static string text(string $name, array $options = [])
+ * @method static string search(string $name, array $options = [])
+ * @method static string url(string $name, array $options = [])
+ * @method static string email(string $name, array $options = [])
+ * @method static string tel(string $name, array $options = [])
  * @method static string password(string $name, array $options = [])
+ * @method static string number(string $name, array $options = [])
+ * @method static string range(string $name, array $options = [])
+ * @method static string time(string $name, array $options = [])
+ * @method static string date(string $name, array $options = [])
+ * @method static string datetime(string $name, array $options = [])
+ * @method static string week(string $name, array $options = [])
+ * @method static string month(string $name, array $options = [])
+ * @method static string color(string $name, array $options = [])
  * @method static string textarea(string $name, array $options = [])
  * @method static string checkbox(string $name, array $options = [])
  * @method static string radio(string $name, array $options = [])
- * @method static string file(string $name, array $options = [])
  * @method static string submit(string $name, array $options = [])
  * @method static string reset(string $name, array $options = [])
  * @method static string button(string $name, array $options = [])
+ * @method static string file(string $name, array $options = [])
  * @method static string hidden(string $name, array $options = [])
  */
 class Form {
@@ -20,23 +32,20 @@ class Form {
 	 * @var array
 	 */
 	protected static $type = [
-		"text",
-		"password",
+		"text", "search", "url", "email", "tel", "password",
+		"number", "range",
+		"time", "date", "datetime", "week", "month",
+		"color",
 		"textarea",
-		"checkbox",
-		"radio",
-		"file",
-		"select",
-		"submit",
-		"reset",
-		"button",
+		"checkbox", "radio", "select",
+		"submit", "reset", "button", "file",
 		"hidden",
 	];
 
 	/**
-	 * Сформировать поле
 	 * @param string $type тип поля
 	 * @param array  $args [name, data]
+	 *
 	 * @return $this|mixed|null|string
 	 */
 	public static function __callStatic($type, $args) {
@@ -55,43 +64,51 @@ class Form {
 	}
 
 	/**
-	 * Сформировать поле выбора
 	 * @param string $name   имя поля
 	 * @param array  $option массив значений выбора
 	 * @param array  $data   массив дополнительных атрибутов
+	 *
 	 * @return string
 	 */
 	public static function select($name, array $option = [], array $data = []) {
 		return static::render(array_merge($data, ["name" => $name, "type" => "select", "option" => $option]));
 	}
 
+	/**
+	 * @param array $data
+	 *
+	 * @return string
+	 */
 	protected static function render(array $data = []) {
 		$default = [
-			"method"      => "post",
-			"id"          => null,
-			"class"       => [],
-			"error"       => [],
-			"style"       => null,
-			"type"        => "text",
-			"name"        => null,
-			"placeholder" => null,
-			"tabindex"    => null,
-			"readonly"    => false,
-			"disabled"    => false,
-			"required"    => false,
-			"autofocus"   => false,
+			"method"       => "post",
+			"id"           => null,
+			"class"        => [],
+			"error"        => "",
+			"style"        => null,
+			"type"         => "text",
+			"name"         => null,
+			"data"         => [],
+			"placeholder"  => null,
+			"tabindex"     => null,
+			"form"         => null,
+			"list"         => null,
+			"readonly"     => false,
+			"disabled"     => false,
+			"required"     => false,
+			"autofocus"    => false,
+			"autocomplete" => null,
 		];
-		$form    = "";
+		$form = "";
 
 		// определяем тип требуемой формы
 		switch ($data["type"]) {
 			case "textarea": {
 				$attr = [
-					"autocomplete" => null,
-					"maxlength"    => null,
-					"cols"         => null,
-					"rows"         => null,
-					"wrap"         => null,
+					"maxlength" => null,
+					"cols"      => null,
+					"rows"      => null,
+					"wrap"      => null,
 				];
 				$data = array_merge($default, $attr, $data);
 
@@ -132,23 +149,51 @@ class Form {
 					case "radio":
 					case "checkbox": {
 						$attr = [
-							"checked" => false,
 							"value"   => null,
+							"checked" => false,
 						];
 
 						break;
 					}
 					case "file": {
 						$attr = [
-							"accept" => null,
-							"value"  => null,
+							"value"    => null,
+							"accept"   => null,
+							"multiple" => false,
 						];
+
+						break;
+					}
+					case "number":
+					case "range":
+					case "date":
+					case "week":
+					case "month": {
+						$attr = [
+							"value" => null,
+							"max"   => null,
+							"min"   => null,
+							"step"  => null,
+						];
+
+						break;
+					}
+					case "datetime": {
+						$attr = [
+							"value" => null,
+							"max"   => null,
+							"min"   => null,
+							"step"  => null,
+						];
+						$data["type"] = "datetime-local";
 
 						break;
 					}
 					default: {
 						$attr = [
-							"value" => null,
+							"value"     => null,
+							"maxlength" => null,
+							"pattern"   => null,
 						];
 
 						break;
@@ -166,12 +211,42 @@ class Form {
 
 	/**
 	 * Вспомогательный метод для генерации аттрибутов и свойств
+	 *
 	 * @param array $data
 	 * @param array $exclude
+	 *
 	 * @return string
 	 */
 	protected static function getAttr(array &$data = [], array $exclude = []) {
-		$attr = "";
+		$attr = [];
+
+		// подставление значения
+		switch (strtolower($data['method'])) {
+			case "get": {
+				if (isset($_GET[$data["name"]])) {
+					if (in_array($data["type"], ["radio", "checkbox"])) {
+						if ($_GET[$data["name"]] == $data["value"]) {
+							$data["checked"] = true;
+						}
+					} else {
+						$data["value"] = $_GET[$data["name"]];
+					}
+				}
+				break;
+			}
+			case "post": {
+				if (isset($_POST[$data["name"]])) {
+					if (in_array($data["type"], ["radio", "checkbox"])) {
+						if ($_POST[$data["name"]] == $data["value"]) {
+							$data["checked"] = true;
+						}
+					} else {
+						$data["value"] = $_POST[$data["name"]];
+					}
+				}
+				break;
+			}
+		}
 
 		if ($data["error"]) {
 			$data["class"][] = "error";
@@ -179,20 +254,25 @@ class Form {
 		if ($data["class"]) {
 			$data["class"] = implode(" ", (is_array($data["class"]) ? $data["class"] : [$data["class"]]));
 		}
-
-		$exclude = array_merge($exclude, ["method", "option", "selected", "error"]);
-		foreach ($data as $key => $val) {
-			if (in_array($key, $exclude) || is_array($val)) {
-				continue;
-			}
-
-			if (is_bool($val) && $val) {
-				$attr .= " " . $key;
-			} elseif (!is_bool($val) && !is_null($val)) {
-				$attr .= " " . $key . "=\"" . $val . "\"";
+		if ($data["data"]) {
+			foreach ($data["data"] as $key => $value) {
+				$data["data-" . $key] = $value;
 			}
 		}
 
-		return $attr;
+		$exclude = array_merge($exclude, ["data", "method", "option", "selected", "error"]);
+		foreach ($data as $key => $value) {
+			if (in_array($key, $exclude) || is_array($value)) {
+				continue;
+			}
+
+			if (is_bool($value) && $value) {
+				$attr[] = $key;
+			} elseif (!is_bool($value) && !is_null($value)) {
+				$attr[] = $key . "=\"" . $value . "\"";
+			}
+		}
+
+		return implode(" ", $attr);
 	}
 }
