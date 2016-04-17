@@ -4,12 +4,11 @@ namespace Orchid\Extension;
 
 use L;
 use Orchid\App;
-use Orchid\Registry;
 use PHPUnit_Framework_TestCase;
 
 class i18nTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		App::path("lang", Registry::get("base_dir") . "/storage/i18n");
+		App::path("lang", App::getBaseDir() . "/storage/i18n");
 	}
 
 	public function textLang() {

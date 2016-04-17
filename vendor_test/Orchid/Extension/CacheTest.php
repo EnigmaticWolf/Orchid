@@ -3,18 +3,18 @@
 namespace Orchid\Extension;
 
 use Orchid\App;
-use Orchid\Registry;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
 class CacheTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		App::path("cache", Registry::get("base_dir") . "/storage/cache");
+		App::path("cache", App::getBaseDir() . "/storage/cache");
 	}
 
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerWriteReadDelete
 	 */
 	public function testWrite($key, $value) {
@@ -24,6 +24,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $expected
+	 *
 	 * @dataProvider providerWriteReadDelete
 	 */
 	public function testRead($key, $expected) {
@@ -32,6 +33,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @param $key
+	 *
 	 * @dataProvider providerWriteReadDelete
 	 */
 	public function testDelete($key) {
@@ -40,14 +42,14 @@ class CacheTest extends PHPUnit_Framework_TestCase {
 
 	public function providerWriteReadDelete() {
 		return [
-			["baz",						"bar"],
-			["int",						2010],
-			["float",					20.10],
-			["bool_1",					true],
-			["bool_2",					false],
-			["null",					null],
-			["array",					[1, 2, 3, 4]],
-			["object",					new stdClass],
+			["baz", "bar"],
+			["int", 2010],
+			["float", 20.10],
+			["bool_1", true],
+			["bool_2", false],
+			["null", null],
+			["array", [1, 2, 3, 4]],
+			["object", new stdClass],
 		];
 	}
 

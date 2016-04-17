@@ -18,6 +18,7 @@ class MemoryTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testSet($key, $value) {
@@ -27,6 +28,7 @@ class MemoryTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $expected
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testGet($key, $expected) {
@@ -35,6 +37,7 @@ class MemoryTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @param $key
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testDelete($key) {
@@ -62,6 +65,7 @@ class MemoryTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerSetGetDelete
 	 */
 	public function testSetWithTag($key, $value) {

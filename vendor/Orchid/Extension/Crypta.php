@@ -2,7 +2,7 @@
 
 namespace Orchid\Extension;
 
-use Orchid\Registry;
+use Orchid\App;
 
 class Crypta {
 	/**
@@ -29,7 +29,7 @@ class Crypta {
 	 * @return string обработанная строка
 	 */
 	protected static function crypt($input) {
-		$salt = md5(Registry::get("secret"));
+		$salt = md5(App::getSecret());
 		$len = strlen($input);
 		$gamma = "";
 		$n = $len > 100 ? 8 : 2;
@@ -46,7 +46,7 @@ class Crypta {
 	 * @return string хешсумма 140 символов
 	 */
 	public static function hash($string) {
-		$salt = substr(hash("whirlpool", uniqid(rand() . Registry::get("secret"), true)), 0, 12);
+		$salt = substr(hash("whirlpool", uniqid(rand() . App::getSecret(), true)), 0, 12);
 		$hash = hash("whirlpool", $salt . $string);
 		$saltPos = (strlen($string) >= strlen($hash) ? strlen($hash) : strlen($string));
 

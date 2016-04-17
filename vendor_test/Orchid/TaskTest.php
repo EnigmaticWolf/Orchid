@@ -8,7 +8,7 @@ class TaskTest extends PHPUnit_Framework_TestCase {
 	public static $result = null;
 
 	public function testAdd() {
-		Task::add("task", function(){
+		Task::add("task", function () {
 			TaskTest::$result = "passed";
 		});
 	}
@@ -20,10 +20,10 @@ class TaskTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testAddPriority() {
-		Task::add("taskPriority", function(){
+		Task::add("taskPriority", function () {
 			TaskTest::$result .= "p-10";
 		}, 10);
-		Task::add("taskPriority", function(){
+		Task::add("taskPriority", function () {
 			TaskTest::$result .= "p-20";
 		}, 20);
 	}

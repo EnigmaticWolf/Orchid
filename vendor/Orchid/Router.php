@@ -89,7 +89,7 @@ class Router {
 	 */
 	public static function dispatch() {
 		$param = [];
-		$path = "/" . implode("/", Registry::get("uri", []));
+		$path = "/" . implode("/", Request::getAllUri());
 		$found = false;
 		if (static::$route) {
 			$queue = new SplPriorityQueue();
@@ -130,14 +130,15 @@ class Router {
 					$part_p = explode("/", $route["path"]);
 					array_shift($part_p);
 
-					if (count(Registry::get("uri", [])) == count($part_p)) {
+					$uri = Request::getUriList();
+					if (count($uri) == count($part_p)) {
 						$matched = true;
 						foreach ($part_p as $index => $part) {
 							if (":" === substr($part, 0, 1)) {
-								$param[substr($part, 1)] = Registry::get("uri", [])[$index];
+								$param[substr($part, 1)] = $uri[$index];
 								continue;
 							}
-							if (Registry::get("uri", [])[$index] != $part_p[$index]) {
+							if (Request::getUri($index) != $part_p[$index]) {
 								$matched = false;
 								break;
 							}

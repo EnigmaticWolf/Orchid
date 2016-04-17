@@ -9,6 +9,7 @@ class AssetTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $resource
 	 * @param $expected
+	 *
 	 * @dataProvider providerRender
 	 */
 	public function testRender($resource, $expected) {
@@ -60,7 +61,7 @@ class AssetTest extends PHPUnit_Framework_TestCase {
 		App::path("template", ORCHID . "/storage/test/template");
 
 		$expected = '<script id="tpl-php-template-1" type="text/template">hello world</script>' . "\n" .
-					'<script id="tpl-js-template-2" type="text/template">hello world</script>';
+			'<script id="tpl-js-template-2" type="text/template">hello world</script>';
 
 		$this->assertEquals($expected, Asset::template());
 	}

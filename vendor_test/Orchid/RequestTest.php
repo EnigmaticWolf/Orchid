@@ -35,7 +35,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerGetSiteUrl
 	 */
 	public function testGetSiteUrl($app, $path, $expected, $forApp) {
-		Registry::set("app", $forApp);
+		App::setApp($forApp);
 		$this->assertEquals($expected, Request::getUrl($app, $path));
 	}
 

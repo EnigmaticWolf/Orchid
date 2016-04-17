@@ -22,6 +22,7 @@ class StrTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $count
 	 * @param $expected
+	 *
 	 * @dataProvider providerEos
 	 */
 	public function testEos($count, $expected) {

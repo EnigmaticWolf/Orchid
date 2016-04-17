@@ -5,7 +5,6 @@ namespace Orchid\Extension;
 use DirectoryIterator;
 use Orchid\App;
 use Orchid\Entity\View;
-use Orchid\Registry;
 use Orchid\Request;
 
 class Asset {
@@ -49,7 +48,9 @@ class Asset {
 
 	/**
 	 * Обходит переданный массив и возвращает массив строк для подключения ресурсов
+	 *
 	 * @param array $list
+	 *
 	 * @return array
 	 */
 	protected static function renderIterator(array $list) {
@@ -83,12 +84,12 @@ class Asset {
 		$template = [];
 
 		// объявленные вручную каталоги с шаблонами
-		foreach (Registry::get("path", ["template" => []])["template"] as $path) {
+		foreach (App::getPathListByName("template") as $path) {
 			$template = array_merge($template, static::templateIterator($path));
 		}
 
 		// модули в которых есть шаблоны
-		foreach (Registry::get("module") as $module) {
+		foreach (App::getModuleList() as $module) {
 			if ($path = App::path($module . ":template")) {
 				$template = array_merge($template, static::templateIterator($path));
 			}
@@ -99,8 +100,10 @@ class Asset {
 
 	/**
 	 * Рекурсивно обходит указанную директорию и собирает шаблоны
+	 *
 	 * @param string $dir
 	 * @param string $initial
+	 *
 	 * @return string
 	 */
 	protected static function templateIterator($dir, $initial = "") {

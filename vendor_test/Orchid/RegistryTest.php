@@ -69,7 +69,7 @@ class RegistryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testClosure() {
-		$this->assertTrue(Registry::addClosure("closure", function($a = 0) {
+		$this->assertTrue(Registry::addClosure("closure", function ($a = 0) {
 			return $a * $a;
 		}));
 

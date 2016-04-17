@@ -3,7 +3,6 @@
 namespace Orchid\Extension;
 
 use Orchid\App;
-use Orchid\Registry;
 use RecursiveDirectoryIterator;
 
 class Cache {
@@ -66,7 +65,7 @@ class Cache {
 	 * @return boolean
 	 */
 	public static function flush() {
-		$path = Registry::get("base_dir") . "/storage/cache";
+		$path = App::getBaseDir() . "/storage/cache";
 
 		if (($cache = App::path("cache:")) !== false) {
 			$path = $cache;
@@ -95,12 +94,12 @@ class Cache {
 	 */
 	protected static function getCacheFilePath($key) {
 		// директориия хранилища по-умолчанию
-		$path = Registry::get("base_dir") . "/storage/cache/";
+		$path = App::getBaseDir() . "/storage/cache/";
 
 		if (($cache = App::path("cache:")) !== false) {
 			$path = $cache;
 		}
 
-		return $path . md5(Registry::get("secret") . ":" . $key) . ".cache";
+		return $path . md5(App::getSecret() . ":" . $key) . ".cache";
 	}
 }

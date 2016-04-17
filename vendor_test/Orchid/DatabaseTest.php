@@ -12,7 +12,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 				"dsn"      => "sqlite:" . ORCHID . "/test.db",
 				"username" => null,
 				"password" => null,
-				"options"   => [
+				"options"  => [
 					PDO::ATTR_PERSISTENT => true,
 				],
 			],
@@ -36,6 +36,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerKeyValues
 	 */
 	public function testInsert($key, $value) {
@@ -46,6 +47,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @param $key
 	 * @param $value
+	 *
 	 * @dataProvider providerKeyValues
 	 */
 	public function testSelect($key, $value) {
@@ -55,6 +57,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * @param $key
+	 *
 	 * @dataProvider providerKeyValues
 	 */
 	public function testDelete($key) {

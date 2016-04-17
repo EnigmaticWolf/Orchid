@@ -3,7 +3,6 @@
 namespace Orchid\Extension {
 
 	use Orchid\App;
-	use Orchid\Registry;
 	use Orchid\Request;
 
 	class i18n {
@@ -60,7 +59,7 @@ namespace Orchid\Extension {
 		 */
 		protected static function getLangFilePath($locale) {
 			// директориия хранилища по-умолчанию
-			$path = Registry::get("base_dir") . "/storage/i18n/";
+			$path = App::getBaseDir() . "/storage/i18n/";
 
 			if (($lang = App::path("lang:")) !== false) {
 				$path = $lang;

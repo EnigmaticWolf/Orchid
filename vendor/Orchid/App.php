@@ -5,8 +5,96 @@ namespace Orchid;
 use DirectoryIterator;
 
 class App {
-	protected static $registry = [];
-	protected static $exit     = false;
+	/**
+	 * Режим отладки
+	 *
+	 * @var bool
+	 */
+	protected static $debug = true;
+
+	/**
+	 * Список возможных приложений
+	 *
+	 * @var array
+	 */
+	protected static $instance = [];
+
+	/**
+	 * Активное приложение
+	 *
+	 * @var string
+	 */
+	protected static $app = "public";
+
+	/**
+	 * Возможные языки приложения
+	 *
+	 * @var array
+	 */
+	protected static $locale = [];
+
+	/**
+	 * Хэш-соль
+	 *
+	 * @var string
+	 */
+	protected static $secret = "secret";
+
+	/**
+	 * Подключенные модули
+	 *
+	 * @var array
+	 */
+	protected static $module = [];
+
+	/**
+	 * Пути папок модулей для автозагрузки
+	 *
+	 * @var array
+	 */
+	protected static $autoload = [];
+
+	/**
+	 * Пути приложения
+	 *
+	 * @var array
+	 */
+	protected static $path = [];
+
+	/**
+	 * Аргументы переданные скрипту
+	 *
+	 * @var array
+	 */
+	public static $args = [];
+
+	/**
+	 * Базовая директория приложения
+	 *
+	 * @var string
+	 */
+	protected static $base_dir = null;
+
+	/**
+	 * Базовое имя хоста
+	 *
+	 * @var string
+	 */
+	protected static $base_host = null;
+
+	/**
+	 * Базовый порт
+	 *
+	 * @var int
+	 */
+	protected static $base_port = 80;
+
+	/**
+	 * Завершено ли приложение
+	 *
+	 * @var bool
+	 */
+	protected static $exit = false;
 
 	/**
 	 * Инициализатор приложения
@@ -16,25 +104,14 @@ class App {
 	 * @return void
 	 */
 	public static function initialize(array $param = []) {
-		Registry::setAll(array_merge([
-			"debug"     => true,
-
-			"instance"  => [],
-			"app"       => "public",
-			"locale"    => [],
-
-			"secret"    => "secret",
-
-			"autoload"  => [],
-			"module"    => [],
-			"path"      => [],
-
-			"args"      => [],
-
-			"base_dir"  => isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "",
-			"base_host" => isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "",
-			"base_port" => (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80),
-		], $param));
+		static::$debug = isset($param["debug"]) ? $param["debug"] : true;
+		static::$instance = isset($param["instance"]) ? $param["instance"] : [];
+		static::$app = isset($param["app"]) ? $param["app"] : "public";
+		static::$locale = isset($param["locale"]) ? $param["locale"] : [];
+		static::$secret = isset($param["secret"]) ? $param["secret"] : "secret";
+		static::$base_dir = isset($param["base_dir"]) ? $param["base_dir"] : (isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "");
+		static::$base_host = isset($param["base_host"]) ? $param["base_host"] : (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "");
+		static::$base_port = isset($param["base_port"]) ? $param["base_port"] : (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80);
 
 		if (PHP_SAPI != "cli") {
 			// инициализиуем запрос
@@ -47,12 +124,12 @@ class App {
 				(isset($_SESSION) ? $_SESSION : [])
 			);
 		} else {
-			Registry::set("args", array_slice($_SERVER["argv"], 1));
+			static::$args = array_slice($_SERVER["argv"], 1);
 		}
 
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
-			foreach (Registry::get("autoload", []) as $dir) {
+			foreach (static::$autoload as $dir) {
 				$class_path = $dir . "/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
 				if (file_exists($class_path)) {
@@ -62,6 +139,125 @@ class App {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Включен ли режим отладки
+	 *
+	 * @return bool
+	 */
+	public static function isDebug() {
+		return static::$debug;
+	}
+
+	/**
+	 * Возвращает массив возможных приложений
+	 *
+	 * @return array
+	 */
+	public static function getInstanceList() {
+		return static::$instance;
+	}
+
+	/**
+	 * Устанавливает текущее приложение
+	 *
+	 * @param $app
+	 */
+	public static function setApp($app) {
+		static::$app = $app;
+	}
+
+	/**
+	 * Возвращает текущее приложение
+	 *
+	 * @return string
+	 */
+	public static function getApp() {
+		return static::$app;
+	}
+
+	/**
+	 * Возвращает массив возможных языков приложения
+	 *
+	 * @return string
+	 */
+	public static function getLocaleList() {
+		return static::$locale;
+	}
+
+	/**
+	 * Возвращает хэш-соль
+	 *
+	 * @return string
+	 */
+	public static function getSecret() {
+		return static::$secret;
+	}
+
+	/**
+	 * Возвращает массив подключенных модулей
+	 *
+	 * @return array
+	 */
+	public static function getModuleList() {
+		return static::$module;
+	}
+
+	/**
+	 * Возвращает массив папок модулей
+	 *
+	 * @return array
+	 */
+	public static function getAutoloadList() {
+		return static::$autoload;
+	}
+
+	/**
+	 * Возвращает массив путей
+	 *
+	 * @return array
+	 */
+	public static function getPathList() {
+		return static::$path;
+	}
+
+	/**
+	 * Возвращает массив путей по имени
+	 *
+	 * @param $name
+	 *
+	 * @return array
+	 */
+	public static function getPathListByName($name) {
+		return isset(static::$path[$name]) ? static::$path[$name] : [];
+	}
+
+	/**
+	 * Возвращает базовую директорию
+	 *
+	 * @return string
+	 */
+	public static function getBaseDir() {
+		return static::$base_dir;
+	}
+
+	/**
+	 * Возвращает базовый хост
+	 *
+	 * @return string
+	 */
+	public static function getBaseHost() {
+		return static::$base_host;
+	}
+
+	/**
+	 * Возвращает базовый порт
+	 *
+	 * @return int
+	 */
+	public static function getBasePort() {
+		return static::$base_port;
 	}
 
 	/**
@@ -103,7 +299,7 @@ class App {
 				}
 
 				// регистрируем папку автозагрузки
-				Registry::add("autoload", $dir);
+				static::$autoload[] = $dir;
 			}
 		}
 	}
@@ -116,7 +312,7 @@ class App {
 	 */
 	protected static function bootModule($class, $dir) {
 		// регистрируем модуль
-		Registry::add("module", $class);
+		static::$module[] = $class;
 
 		if (!is_file($dir)) {
 			static::path($class, $dir);
@@ -147,7 +343,7 @@ class App {
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
 				ob_end_clean();
 				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
-				Response::setContent(Registry::get("debug") ? $error : "Internal Error.");
+				Response::setContent(static::$debug ? $error : "Internal Error.");
 			} elseif (!Response::getContent()) {
 				Response::setStatus(Response::HTTP_NOT_FOUND);
 				Response::setContent("Path not found.");
@@ -185,12 +381,11 @@ class App {
 				}
 
 				if (($parts = explode(":", $file, 2)) && count($parts) == 2) {
-					$pathList = Registry::get("path", []);
-					if (!isset($pathList[$parts[0]])) {
+					if (!isset(static::$path[$parts[0]])) {
 						return false;
 					}
 
-					foreach ($pathList[$parts[0]] as &$path) {
+					foreach (static::$path[$parts[0]] as &$path) {
 						if (file_exists($path . $parts[1])) {
 							return $path . $parts[1];
 						}
@@ -199,13 +394,12 @@ class App {
 
 				return false;
 			case 2:
-				$pathList = &Registry::get("path", []);
 				list($name, $path) = $args;
-				if (!isset($pathList[$name])) {
-					$pathList[$name] = [];
+				if (!isset(static::$path[$name])) {
+					static::$path[$name] = [];
 				}
 				$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
-				array_unshift($pathList[$name], is_file($path) ? $path : $path . "/");
+				array_unshift(static::$path[$name], is_file($path) ? $path : $path . "/");
 
 				break;
 		}
@@ -233,7 +427,7 @@ class App {
 	 */
 	public static function pathToUrl($path) {
 		if (($file = static::path($path)) != false) {
-			return "/" . ltrim(str_replace(Registry::get("base_dir"), "", $file), "/");
+			return "/" . ltrim(str_replace(static::$base_dir, "", $file), "/");
 		}
 
 		return false;

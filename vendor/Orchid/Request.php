@@ -214,7 +214,7 @@ class Request {
 	 *
 	 * @return array
 	 */
-	public static function getAllHeaders() {
+	public static function getHeaderList() {
 		return static::$headers;
 	}
 
@@ -234,7 +234,7 @@ class Request {
 	 *
 	 * @return array
 	 */
-	public static function getAllUri() {
+	public static function getUriList() {
 		return static::$uri;
 	}
 
@@ -263,7 +263,7 @@ class Request {
 	 *
 	 * @return array
 	 */
-	public static function getAllParams() {
+	public static function getParamList() {
 		return static::$param;
 	}
 
@@ -283,7 +283,7 @@ class Request {
 	 *
 	 * @return array
 	 */
-	public static function getAllData() {
+	public static function getDataList() {
 		return static::$data;
 	}
 
@@ -346,7 +346,7 @@ class Request {
 				arsort($language, SORT_NUMERIC);
 
 				foreach ($language as $lang => $priority) {
-					if (in_array($lang, Registry::get("locale"))) {
+					if (in_array($lang, App::getLocaleList())) {
 						return $lang;
 					}
 				}
@@ -375,7 +375,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getApp($app = "") {
-		if (($app = (!$app ? Registry::get("app") : $app)) && $app != "public") {
+		if (($app = (!$app ? App::getApp() : $app)) && $app != "public") {
 			return $app . ".";
 		}
 
@@ -388,7 +388,7 @@ class Request {
 	 * @return mixed
 	 */
 	public static function getHost() {
-		return Registry::get("base_host");
+		return App::getBaseHost();
 	}
 
 	/**
@@ -399,7 +399,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getPort() {
-		if (($port = Registry::get("base_port")) != 80) {
+		if (($port = App::getBasePort()) != 80) {
 			return ":" . $port;
 		}
 
