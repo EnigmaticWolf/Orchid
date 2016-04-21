@@ -4,7 +4,6 @@
 			<file>vendor_test/Orchid/AppTest.php</file>
 			<file>vendor_test/Orchid/DatabaseTest.php</file>
 			<file>vendor_test/Orchid/MemoryTest.php</file>
-			<file>vendor_test/Orchid/RegistryTest.php</file>
 			<file>vendor_test/Orchid/RequestTest.php</file>
 			<file>vendor_test/Orchid/TaskTest.php</file>
 		</testsuite>

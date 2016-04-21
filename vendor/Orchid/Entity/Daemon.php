@@ -3,7 +3,6 @@
 namespace Orchid\Entity;
 
 use Orchid\App;
-use Orchid\Registry;
 
 final class Daemon {
 	public static $name    = "daemon";

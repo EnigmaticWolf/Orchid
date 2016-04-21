@@ -35,7 +35,7 @@ class Database {
 			$config = array_merge($default, $config);
 			$key = "database:" . $index;
 
-			Registry::addClosure($key, function () use ($config) {
+			App::addClosure($key, function () use ($config) {
 				try {
 					return new PDO(
 						$config["dsn"],
@@ -87,7 +87,7 @@ class Database {
 		if ($pool && $key = $pool[array_rand($pool)]) {
 			static::$connection[$role] = [$key];
 
-			return Registry::getClosure($key);
+			return App::getClosure($key);
 		}
 
 		return null;

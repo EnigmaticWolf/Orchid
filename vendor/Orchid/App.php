@@ -2,6 +2,7 @@
 
 namespace Orchid;
 
+use Closure;
 use DirectoryIterator;
 
 class App {
@@ -431,5 +432,53 @@ class App {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Хранилище сервисов
+	 * @var array
+	 */
+	protected static $closures = [];
+
+	/**
+	 * Добавляет замыкание
+	 *
+	 * @param string  $name
+	 * @param Closure $callable
+	 *
+	 * @return bool
+	 */
+	public static function addClosure($name, $callable) {
+		if (!isset(static::$closures[$name])) {
+			static::$closures[$name] = function ($param = null) use ($callable) {
+				static $object;
+
+				if ($object === null) {
+					$object = $callable($param);
+				}
+
+				return $object;
+			};
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Возвращает результат работы замыкания
+	 *
+	 * @param string $name
+	 * @param array  ...$param
+	 *
+	 * @return mixed
+	 */
+	public static function getClosure($name, ...$param) {
+		if (array_key_exists($name, static::$closures) && is_callable(static::$closures[$name])) {
+			return call_user_func_array(static::$closures[$name], $param);
+		}
+
+		return null;
 	}
 }

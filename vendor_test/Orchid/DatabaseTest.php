@@ -6,7 +6,7 @@ use PDO;
 use PHPUnit_Framework_TestCase;
 
 class DatabaseTest extends PHPUnit_Framework_TestCase {
-	public function testInitialize() {
+	public function setUp() {
 		Database::initialize([
 			[
 				"dsn"      => "sqlite:" . ORCHID . "/test.db",
