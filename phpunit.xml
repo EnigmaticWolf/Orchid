@@ -7,6 +7,9 @@
 			<file>vendor_test/Orchid/RequestTest.php</file>
 			<file>vendor_test/Orchid/TaskTest.php</file>
 		</testsuite>
+		<testsuite name="Orchid Entity">
+			<file>vendor_test/Orchid/Entity/ModelTest.php</file>
+		</testsuite>
 		<testsuite name="Orchid Extension">
 			<file>vendor_test/Orchid/Extension/AssetTest.php</file>
 			<file>vendor_test/Orchid/Extension/CacheTest.php</file>

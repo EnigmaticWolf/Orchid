@@ -6,7 +6,7 @@ use PHPUnit_Framework_TestCase;
 use stdClass;
 
 class MemoryTest extends PHPUnit_Framework_TestCase {
-	public function testInitialize() {
+	public static function setUpBeforeClass() {
 		Memory::initialize([
 			[
 				"host" => "localhost",
