@@ -10,6 +10,7 @@
 		<testsuite name="Orchid Entity">
 			<file>vendor_test/Orchid/Entity/CollectionTest.php</file>
 			<file>vendor_test/Orchid/Entity/ModelTest.php</file>
+			<file>vendor_test/Orchid/Entity/ValidatorTest.php</file>
 		</testsuite>
 		<testsuite name="Orchid Extension">
 			<file>vendor_test/Orchid/Extension/AssetTest.php</file>
