@@ -105,16 +105,51 @@ class App {
 	 * @return void
 	 */
 	public static function initialize(array $param = []) {
-		static::$debug = isset($param["debug"]) ? $param["debug"] : true;
-		static::$instance = isset($param["instance"]) ? $param["instance"] : [];
-		static::$app = isset($param["app"]) ? $param["app"] : "public";
-		static::$locale = isset($param["locale"]) ? $param["locale"] : [];
-		static::$secret = isset($param["secret"]) ? $param["secret"] : "secret";
-		static::$base_dir = isset($param["base_dir"]) ? $param["base_dir"] : (isset($_SERVER["DOCUMENT_ROOT"]) ? $_SERVER["DOCUMENT_ROOT"] : "");
-		static::$base_host = isset($param["base_host"]) ? $param["base_host"] : (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "");
-		static::$base_port = isset($param["base_port"]) ? $param["base_port"] : (int)(isset($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80);
+		if (isset($param["debug"])) {
+			static::$debug = $param["debug"];
+		}
+
+		if (isset($param["instance"])) {
+			static::$instance = $param["instance"];
+		}
+
+		if (isset($param["app"])) {
+			static::$app = $param["app"];
+		}
+
+		if (isset($param["locale"])) {
+			static::$locale = $param["locale"];
+		}
+
+		if (isset($param["secret"])) {
+			static::$secret = $param["secret"];
+		}
 
 		if (PHP_SAPI != "cli") {
+			if (isset($param["base_dir"])) {
+				static::$base_dir = $param["base_dir"];
+			} else {
+				if (isset($_SERVER["DOCUMENT_ROOT"])) {
+					static::$base_dir = $_SERVER["DOCUMENT_ROOT"];
+				}
+			}
+
+			if (isset($param["base_host"])) {
+				static::$base_host = $param["base_host"];
+			} else {
+				if (isset($_SERVER["HTTP_HOST"])) {
+					static::$base_host = $_SERVER["HTTP_HOST"];
+				}
+			}
+
+			if (isset($param["base_port"])) {
+				static::$base_port = $param["base_port"];
+			} else {
+				if (isset($_SERVER["SERVER_PORT"])) {
+					static::$base_port = $_SERVER["SERVER_PORT"];
+				}
+			}
+			
 			// инициализиуем запрос
 			Request::initialize(
 				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
