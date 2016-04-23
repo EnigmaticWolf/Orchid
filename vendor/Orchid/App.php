@@ -125,31 +125,31 @@ class App {
 			static::$secret = $param["secret"];
 		}
 
+		if (isset($param["base_dir"])) {
+			static::$base_dir = $param["base_dir"];
+		} else {
+			if (isset($_SERVER["DOCUMENT_ROOT"])) {
+				static::$base_dir = $_SERVER["DOCUMENT_ROOT"];
+			}
+		}
+
+		if (isset($param["base_host"])) {
+			static::$base_host = $param["base_host"];
+		} else {
+			if (isset($_SERVER["HTTP_HOST"])) {
+				static::$base_host = $_SERVER["HTTP_HOST"];
+			}
+		}
+
+		if (isset($param["base_port"])) {
+			static::$base_port = $param["base_port"];
+		} else {
+			if (isset($_SERVER["SERVER_PORT"])) {
+				static::$base_port = $_SERVER["SERVER_PORT"];
+			}
+		}
+
 		if (PHP_SAPI != "cli") {
-			if (isset($param["base_dir"])) {
-				static::$base_dir = $param["base_dir"];
-			} else {
-				if (isset($_SERVER["DOCUMENT_ROOT"])) {
-					static::$base_dir = $_SERVER["DOCUMENT_ROOT"];
-				}
-			}
-
-			if (isset($param["base_host"])) {
-				static::$base_host = $param["base_host"];
-			} else {
-				if (isset($_SERVER["HTTP_HOST"])) {
-					static::$base_host = $_SERVER["HTTP_HOST"];
-				}
-			}
-
-			if (isset($param["base_port"])) {
-				static::$base_port = $param["base_port"];
-			} else {
-				if (isset($_SERVER["SERVER_PORT"])) {
-					static::$base_port = $_SERVER["SERVER_PORT"];
-				}
-			}
-			
 			// инициализиуем запрос
 			Request::initialize(
 				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
