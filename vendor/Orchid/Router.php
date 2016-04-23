@@ -89,7 +89,7 @@ class Router {
 	 */
 	public static function dispatch() {
 		$param = [];
-		$path = "/" . implode("/", Request::getAllUri());
+		$path = "/" . implode("/", Request::getUriList());
 		$found = false;
 		if (static::$route) {
 			$queue = new SplPriorityQueue();
