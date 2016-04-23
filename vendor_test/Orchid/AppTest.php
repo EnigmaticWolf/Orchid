@@ -27,9 +27,9 @@ class AppTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testPath() {
-		App::path("test", __DIR__);
+		App::addPath("test", __DIR__);
 
-		$this->assertEquals(__FILE__, App::path("test:AppTest.php"));
+		$this->assertEquals(__FILE__, App::getPath("test:AppTest.php"));
 	}
 
 	public function testIsAbsolutePath() {

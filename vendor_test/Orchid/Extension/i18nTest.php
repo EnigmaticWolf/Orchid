@@ -8,7 +8,7 @@ use PHPUnit_Framework_TestCase;
 
 class i18nTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		App::path("lang", App::getBaseDir() . "/storage/i18n");
+		App::addPath("lang", App::getBaseDir() . "/storage/i18n");
 	}
 
 	public function textLang() {

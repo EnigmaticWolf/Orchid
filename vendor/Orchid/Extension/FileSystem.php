@@ -15,7 +15,7 @@ class FileSystem {
 	 */
 	public static function ls($path = null) {
 		$list = [];
-		if (($path = App::path(($path))) != false) {
+		if (($path = App::getPath(($path))) != false) {
 			foreach (new DirectoryIterator($path) as $iterator) {
 				if ($iterator->isDot()) {
 					continue;
@@ -36,7 +36,7 @@ class FileSystem {
 	 * @return bool
 	 */
 	public static function mkdir($folder, $mode = 0755) {
-		if (!App::path($folder)) {
+		if (!App::getPath($folder)) {
 			return mkdir(static::notExistEntry($folder), $mode);
 		}
 
@@ -51,7 +51,7 @@ class FileSystem {
 	 * @return bool
 	 */
 	public static function rmdir($folder) {
-		if ($folder = App::path($folder)) {
+		if ($folder = App::getPath($folder)) {
 			if ($ls = static::ls($folder)) {
 				foreach ($ls as $key => $val) {
 					$path = $folder . DIRECTORY_SEPARATOR . $val;
@@ -78,7 +78,7 @@ class FileSystem {
 	 * @return string|bool
 	 */
 	public static function read($file) {
-		if ($file = App::path($file)) {
+		if ($file = App::getPath($file)) {
 			return file_get_contents($file);
 		}
 
@@ -95,7 +95,7 @@ class FileSystem {
 	 */
 	public static function write($file, $data) {
 		if (
-			($path = App::path($file)) ||
+			($path = App::getPath($file)) ||
 			($path = static::notExistEntry($file))
 		) {
 			return file_put_contents($path, $data);
@@ -114,9 +114,9 @@ class FileSystem {
 	 */
 	public static function copy($source, $destination) {
 		if (
-			($source = App::path($source)) &&
+			($source = App::getPath($source)) &&
 			(
-				($new = App::path($destination)) ||
+				($new = App::getPath($destination)) ||
 				($new = static::notExistEntry($destination))
 			)
 		) {
@@ -136,9 +136,9 @@ class FileSystem {
 	 */
 	public static function rename($oldName, $newName) {
 		if (
-			($old = App::path($oldName)) &&
+			($old = App::getPath($oldName)) &&
 			(
-				($new = App::path($newName)) ||
+				($new = App::getPath($newName)) ||
 				($new = static::notExistEntry($newName))
 			)
 		) {
@@ -156,7 +156,7 @@ class FileSystem {
 	 * @return bool
 	 */
 	public static function delete($file) {
-		if ($file = App::path($file)) {
+		if ($file = App::getPath($file)) {
 			return unlink($file);
 		}
 
@@ -175,7 +175,7 @@ class FileSystem {
 			return $path;
 		}
 		if (($file = explode(":", $path)) && count($file) == 2) {
-			return App::path($file[0] . ":") . $file[1];
+			return App::getPath($file[0] . ":") . $file[1];
 		}
 
 		return false;

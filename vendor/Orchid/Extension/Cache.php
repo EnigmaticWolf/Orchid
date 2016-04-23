@@ -67,7 +67,7 @@ class Cache {
 	public static function flush() {
 		$path = App::getBaseDir() . "/storage/cache";
 
-		if (($cache = App::path("cache:")) !== false) {
+		if (($cache = App::getPath("cache:")) !== false) {
 			$path = $cache;
 		}
 
@@ -96,7 +96,7 @@ class Cache {
 		// директориия хранилища по-умолчанию
 		$path = App::getBaseDir() . "/storage/cache/";
 
-		if (($cache = App::path("cache:")) !== false) {
+		if (($cache = App::getPath("cache:")) !== false) {
 			$path = $cache;
 		}
 

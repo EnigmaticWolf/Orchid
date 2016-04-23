@@ -11,9 +11,9 @@ class FileSystemTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testMkdir() {
-		$this->assertFalse(App::path(App::getBaseDir() . "/testFolder"));
+		$this->assertFalse(App::getPath(App::getBaseDir() . "/testFolder"));
 		$this->assertTrue(FileSystem::mkdir(App::getBaseDir() . "/testFolder"));
-		$this->assertTrue(!!App::path(App::getBaseDir() . "/testFolder"));
+		$this->assertTrue(!!App::getPath(App::getBaseDir() . "/testFolder"));
 	}
 
 	public function testWrite() {
@@ -48,8 +48,8 @@ class FileSystemTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testRmdir() {
-		$this->assertTrue(!!App::path(App::getBaseDir() . "/testFolder"));
+		$this->assertTrue(!!App::getPath(App::getBaseDir() . "/testFolder"));
 		$this->assertTrue(FileSystem::rmdir(App::getBaseDir() . "/testFolder"));
-		$this->assertFalse(App::path(App::getBaseDir() . "/testFolder"));
+		$this->assertFalse(App::getPath(App::getBaseDir() . "/testFolder"));
 	}
 }

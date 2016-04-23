@@ -61,7 +61,7 @@ namespace Orchid\Extension {
 			// директориия хранилища по-умолчанию
 			$path = App::getBaseDir() . "/storage/i18n/";
 
-			if (($lang = App::path("lang:")) !== false) {
+			if (($lang = App::getPath("lang:")) !== false) {
 				$path = $lang;
 			}
 

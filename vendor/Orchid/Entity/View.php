@@ -130,7 +130,7 @@ class View {
 			extract(View::$globalData, EXTR_SKIP | EXTR_REFS);
 		}
 
-		if ($_file = App::path($_file)) {
+		if ($_file = App::getPath($_file)) {
 			ob_start();
 			require $_file;
 

@@ -8,7 +8,7 @@ use stdClass;
 
 class CacheTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		App::path("cache", App::getBaseDir() . "/storage/cache");
+		App::addPath("cache", App::getBaseDir() . "/storage/cache");
 	}
 
 	/**

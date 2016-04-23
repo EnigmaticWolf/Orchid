@@ -58,7 +58,7 @@ class AssetTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testTemplate() {
-		App::path("template", ORCHID . "/storage/test/template");
+		App::addPath("template", ORCHID . "/storage/test/template");
 
 		$expected = '<script id="tpl-php-template-1" type="text/template">hello world</script>' . "\n" .
 			'<script id="tpl-js-template-2" type="text/template">hello world</script>';

@@ -250,6 +250,76 @@ class App {
 	}
 
 	/**
+	 * Функция помощник по работе с путями
+	 *
+	 * @param string $path путь до файла
+	 *
+	 * @return bool
+	 */
+	public static function isAbsolutePath($path) {
+		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
+	}
+
+	/**
+	 * Добавление короткой ссылки для пути до каталога или файла
+	 *
+	 * @param $shortcut
+	 * @param $path
+	 *
+	 * @return int
+	 */
+	public static function addPath($shortcut, $path) {
+		$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
+
+		if (!isset(static::$path[$shortcut])) {
+			static::$path[$shortcut] = [];
+		}
+
+		return array_unshift(static::$path[$shortcut], is_file($path) ? $path : $path . "/");
+	}
+
+	/**
+	 * Получение пути до каталога или файла
+	 * Пример: view:template.php
+	 *
+	 * @param $path
+	 *
+	 * @return bool|string
+	 */
+	public static function getPath($path) {
+		if (static::isAbsolutePath($path) && file_exists($path)) {
+			return $path;
+		}
+
+		if (($parts = explode(":", $path, 2)) && count($parts) == 2) {
+			if (isset(static::$path[$parts[0]])) {
+				foreach (static::$path[$parts[0]] as &$path) {
+					if (file_exists($path . $parts[1])) {
+						return $path . $parts[1];
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Метод преобразует путь в ссылку
+	 *
+	 * @param string $path путь до файла
+	 *
+	 * @return string|bool
+	 */
+	public static function pathToUrl($path) {
+		if (($file = static::getPath($path)) != false) {
+			return "/" . ltrim(str_replace(static::$base_dir, "", $file), "/");
+		}
+
+		return false;
+	}
+
+	/**
 	 * Возвращает массив путей
 	 *
 	 * @return array
@@ -351,7 +421,7 @@ class App {
 		static::$module[] = $class;
 
 		if (!is_file($dir)) {
-			static::path($class, $dir);
+			static::addPath($class, $dir);
 
 			$class = "Module" . $class;
 			$dir = $dir . DIRECTORY_SEPARATOR . $class . ".php";
@@ -397,76 +467,6 @@ class App {
 
 		Response::setContent(Router::dispatch());
 		Task::trigger("after");
-	}
-
-	/**
-	 * Метод помощник по работе с путями
-	 *
-	 * @param $args
-	 *
-	 * @return string
-	 * todo:: переписать
-	 */
-	public static function path(...$args) {
-		switch (count($args)) {
-			case 1:
-				$file = $args[0];
-
-				if (static::isAbsolutePath($file) && file_exists($file)) {
-					return $file;
-				}
-
-				if (($parts = explode(":", $file, 2)) && count($parts) == 2) {
-					if (!isset(static::$path[$parts[0]])) {
-						return false;
-					}
-
-					foreach (static::$path[$parts[0]] as &$path) {
-						if (file_exists($path . $parts[1])) {
-							return $path . $parts[1];
-						}
-					}
-				}
-
-				return false;
-			case 2:
-				list($name, $path) = $args;
-				if (!isset(static::$path[$name])) {
-					static::$path[$name] = [];
-				}
-				$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
-				array_unshift(static::$path[$name], is_file($path) ? $path : $path . "/");
-
-				break;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Функция помощник по работе с путями
-	 *
-	 * @param string $path путь до файла
-	 *
-	 * @return bool
-	 */
-	public static function isAbsolutePath($path) {
-		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
-	}
-
-	/**
-	 * Метод преобразует путь в ссылку
-	 *
-	 * @param string $path путь до файла
-	 *
-	 * @return string|bool
-	 */
-	public static function pathToUrl($path) {
-		if (($file = static::path($path)) != false) {
-			return "/" . ltrim(str_replace(static::$base_dir, "", $file), "/");
-		}
-
-		return false;
 	}
 
 	/**

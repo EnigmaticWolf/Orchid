@@ -90,7 +90,7 @@ class Asset {
 
 		// модули в которых есть шаблоны
 		foreach (App::getModuleList() as $module) {
-			if ($path = App::path($module . ":template")) {
+			if ($path = App::getPath($module . ":template")) {
 				$template = array_merge($template, static::templateIterator($path));
 			}
 		}
@@ -113,7 +113,7 @@ class Asset {
 		foreach (new DirectoryIterator($dir) as $item) {
 			if (!$item->isDot()) {
 				if ($item->isDir()) {
-					$template = array_merge($template, static::templateIterator(App::path($dir . "/" . $item->getBasename()), $dir));
+					$template = array_merge($template, static::templateIterator(App::getPath($dir . "/" . $item->getBasename()), $dir));
 				} else {
 					if ($item->isFile()) {
 						$file = realpath($item->getPathname());
