@@ -257,7 +257,7 @@ class App {
 	 * @return bool
 	 */
 	public static function isAbsolutePath($path) {
-		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
+		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
 	}
 
 	/**
@@ -367,30 +367,6 @@ class App {
 	}
 
 	/**
-	 * Приложение завершено? (выключено)
-	 *
-	 * @return bool
-	 */
-	public static function isTerminated() {
-		return static::$exit;
-	}
-
-	/**
-	 * Завершить работу приложения (exit)
-	 *
-	 * @param mixed|bool $message
-	 */
-	public static function terminate($message = false) {
-		static::$exit = true;
-
-		ob_clean();
-
-		if ($message !== false) {
-			echo $message;
-		}
-	}
-
-	/**
 	 * Загружает модули из переданных директорий
 	 *
 	 * @param array $dirs
@@ -440,17 +416,12 @@ class App {
 	public static function run() {
 		register_shutdown_function(function () {
 			// если приложение было завершено
-			if (App::isTerminated()) {
-				Response::setStatus(Response::HTTP_BAD_GATEWAY);
-				Response::setContent();
-			}
-
 			$error = error_get_last();
 			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
 				ob_end_clean();
 				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
 				Response::setContent(static::$debug ? $error : "Internal Error.");
-			} elseif (!Response::getContent()) {
+			} elseif (Response::isOk() && !Response::getContent()) {
 				Response::setStatus(Response::HTTP_NOT_FOUND);
 				Response::setContent("Path not found.");
 			}

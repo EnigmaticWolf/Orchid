@@ -401,8 +401,8 @@ class Response {
 			$content = json_encode($content);
 		}
 
-		if ($content === null || is_string($content) || is_numeric($content) || is_callable([$content, "__toString"])) {
-			static::setHeader("Content-Length", strlen($content));
+		if ($content === null || ($content && is_string($content) || is_numeric($content) || is_callable([$content, "__toString"]))) {
+			static::setHeader("Content-Length", mb_strlen($content));
 			static::$content = $content;
 		}
 	}
@@ -593,15 +593,6 @@ class Response {
 	}
 
 	/**
-	 * Является ли ответ перенаправлением в той или иной форме?
-	 *
-	 * @return mixed
-	 */
-	public static function isRedirect() {
-		return in_array(static::$statusCode, [201, 301, 302, 303, 307, 308]);
-	}
-
-	/**
 	 * Является ли ответ пустым?
 	 *
 	 * @return mixed
@@ -633,8 +624,8 @@ class Response {
 			static::setHeader("Content-Type", static::$contentType . "; charset=" . static::$charset);
 		}
 
-		// если ответ информационный или пуст
-		if (static::isInformational() || static::isEmpty()) {
+		// если ответ информационный, перенаправление или пуст
+		if (static::isInformational() || static::isRedirection() || static::isEmpty()) {
 			static::setContent(null);
 			static::deleteHeader("Content-Type");
 			static::deleteHeader("Content-Length");

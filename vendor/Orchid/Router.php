@@ -85,24 +85,19 @@ class Router {
 	 * Метод для перебора объявленных роутингов
 	 *
 	 * @return mixed|false
-	 * todo:: оптимизировать
 	 */
 	public static function dispatch() {
-		$param = [];
-		$path = "/" . implode("/", Request::getUriList());
 		$found = false;
-		if (static::$route) {
-			$queue = new SplPriorityQueue();
-			foreach (static::$route as $index => $action) {
-				$queue->insert($index, $action["priority"]);
-			}
 
-			$queue->top();
-			while ($queue->valid()) {
-				$route = static::$route[$queue->current()];
+		if (static::$route) {
+			$path = Request::getPath();
+
+			arsort(static::$route, SORT_NUMERIC);
+			foreach (static::$route as $route) {
+				$param = [];
 
 				if ($route["path"] === $path) {
-					$found = static::route($route, $param);
+					$found = static::route($route["callback"], $param);
 					break;
 				}
 
@@ -110,7 +105,7 @@ class Router {
 				if (substr($route["path"], 0, 1) == "#" && substr($route["path"], -1) == "#") {
 					if (preg_match($route["path"], $path, $match)) {
 						$param[":capture"] = array_slice($match, 1);
-						$found = static::route($route, $param);
+						$found = static::route($route["callback"], $param);
 						break;
 					}
 				}
@@ -120,7 +115,7 @@ class Router {
 					$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["path"], "#")) . "#";
 					if (preg_match($pattern, $path, $match)) {
 						$param[":arg"] = array_slice($match, 1);
-						$found = static::route($route, $param);
+						$found = static::route($route["callback"], $param);
 						break;
 					}
 				}
@@ -138,19 +133,17 @@ class Router {
 								$param[substr($part, 1)] = $uri[$index];
 								continue;
 							}
-							if (Request::getUri($index) != $part_p[$index]) {
+							if ($uri[$index] != $part_p[$index]) {
 								$matched = false;
 								break;
 							}
 						}
 						if ($matched) {
-							$found = static::route($route, $param);
+							$found = static::route($route["callback"], $param);
 							break;
 						}
 					}
 				}
-
-				$queue->next();
 			}
 		}
 
@@ -160,14 +153,14 @@ class Router {
 	/**
 	 * Выполняет указанный контроллер
 	 *
-	 * @param $route
-	 * @param $param
+	 * @param Closure $callable
+	 * @param array   $param
 	 *
 	 * @return mixed|false
 	 */
-	protected static function route($route, $param) {
-		if (is_callable($route["callback"])) {
-			return call_user_func($route["callback"], $param);
+	protected static function route($callable, $param = []) {
+		if (is_callable($callable)) {
+			return call_user_func_array($callable, $param);
 		}
 
 		return false;
@@ -180,7 +173,6 @@ class Router {
 	 * @param  string $app
 	 *
 	 * @return void
-	 * todo:: переписать
 	 */
 	public static function reroute($path, $app = "") {
 		if (strpos($path, "://") === false) {
@@ -190,8 +182,8 @@ class Router {
 			$path = static::routeUrl($path, $app);
 		}
 
-		header("Location: " . $path);
-		App::terminate();
+		Response::setStatus(Response::HTTP_PERMANENTLY_REDIRECT);
+		Response::setHeader("Location", $path);
 	}
 
 	/**

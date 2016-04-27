@@ -336,7 +336,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getClientLang($default = "ru") {
-		if (($list = strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"]))) {
+		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) && ($list = strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"]))) {
 			if (preg_match_all("/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/", $list, $list)) {
 				$language = [];
 

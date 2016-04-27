@@ -9,7 +9,7 @@ class Session {
 	 * @param string $name
 	 */
 	public static function create($name = "session") {
-		if (!strlen(session_id())) {
+		if (!mb_strlen(session_id())) {
 			session_name($name);
 			session_start();
 		}

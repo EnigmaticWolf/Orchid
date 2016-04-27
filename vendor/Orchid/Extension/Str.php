@@ -5,22 +5,26 @@ namespace Orchid\Extension;
 class Str {
 	/**
 	 * Возвращает true если строчка начинается с указанного символа
-	 * @param string $needle искомый символ
+	 *
+	 * @param string $needle   искомый символ
 	 * @param string $haystack строка
+	 *
 	 * @return Boolean;
 	 */
 	public static function start($needle, $haystack) {
-		return !strncmp($haystack, $needle, strlen($needle));
+		return !strncmp($haystack, $needle, mb_strlen($needle));
 	}
 
 	/**
 	 * Возвращает true если строчка заканчивается указанным символом
-	 * @param string $needle искомый символ
+	 *
+	 * @param string $needle   искомый символ
 	 * @param string $haystack строка
+	 *
 	 * @return Boolean;
 	 */
 	public static function end($needle, $haystack) {
-		$length = strlen($needle);
+		$length = mb_strlen($needle);
 		if ($length == 0) {
 			return true;
 		}
@@ -30,9 +34,11 @@ class Str {
 
 	/**
 	 * Безопасно обрезать строку до указанного значения, без потери последнего слова
+	 *
 	 * @param   string $string строка
-	 * @param   int $length необходимая длинна
+	 * @param   int    $length необходимая длинна
 	 * @param   string $append символы в конце строки
+	 *
 	 * @return  string
 	 */
 	public static function truncate($string, $length, $append = "...") {
@@ -50,10 +56,12 @@ class Str {
 
 	/**
 	 * Склоненить слово в зависимости от числа
-	 * @param int $count количество
-	 * @param string $one слово
-	 * @param string $two слово
-	 * @param string $five слово
+	 *
+	 * @param int    $count количество
+	 * @param string $one   слово
+	 * @param string $two   слово
+	 * @param string $five  слово
+	 *
 	 * @return string
 	 */
 	public static function eos($count, $one, $two, $five) {
@@ -70,7 +78,9 @@ class Str {
 
 	/**
 	 * Заэкранировать строку или массив строк
+	 *
 	 * @param string|array $input входящая строка
+	 *
 	 * @return string;
 	 */
 	public static function escape($input) {
@@ -87,7 +97,9 @@ class Str {
 
 	/**
 	 * Убирать экранирование в строке или массив строк
+	 *
 	 * @param string|array $input входящая строка
+	 *
 	 * @return string;
 	 */
 	public static function unEscape($input) {
@@ -104,8 +116,10 @@ class Str {
 
 	/**
 	 * Транслитерировать строку
+	 *
 	 * @param string $input
-	 * @param bool $back
+	 * @param bool   $back
+	 *
 	 * @return mixed
 	 */
 	public static function translate($input, $back = false) {
@@ -126,7 +140,9 @@ class Str {
 
 	/**
 	 * Возвращает строковое представление размера данных
+	 *
 	 * @param int $size
+	 *
 	 * @return string
 	 */
 	public static function convertSize($size) {
