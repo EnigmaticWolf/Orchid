@@ -55,7 +55,7 @@ class Str {
 	}
 
 	/**
-	 * Склоненить слово в зависимости от числа
+	 * Склонить слово в зависимости от числа
 	 *
 	 * @param int    $count количество
 	 * @param string $one   слово
@@ -74,6 +74,39 @@ class Str {
 				return $five;
 			}
 		}
+	}
+
+	/**
+	 * Преобразовать арабское число в римское
+	 *
+	 * @param $int
+	 *
+	 * @return string
+	 */
+	public static function romanNumber($int) {
+		$romanNumerals = [
+			"M"  => 1000,
+			"CM" => 900,
+			"D"  => 500,
+			"CD" => 400,
+			"C"  => 100,
+			"XC" => 90,
+			"L"  => 50,
+			"XL" => 40,
+			"X"  => 10,
+			"IX" => 9,
+			"V"  => 5,
+			"IV" => 4,
+			"I"  => 1,
+		];
+
+		$result = "";
+		foreach ($romanNumerals as $roman => $number) {
+			$result .= str_repeat($roman, intval($int / $number));
+			$int = $int % $number;
+		}
+
+		return $result;
 	}
 
 	/**
