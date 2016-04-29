@@ -253,14 +253,15 @@ class Response {
 	/**
 	 * Генерирует ответ
 	 *
-	 * @param  mixed $content
+	 * @param mixed  $content
 	 * @param int    $status
+	 * @param string $mime
 	 * @param array  $headers
 	 */
-	public static function create($content = "", $status = 200, array $headers = []) {
-		static::setContent($content);
-		static::setContentType("html");
+	public static function create($content = "", $status = 200, $mime = "html", array $headers = []) {
+		static::setContentType($mime);
 		static::setStatus($status);
+		static::setContent($content);
 
 		static::$headers = [];
 		foreach ($headers as $key => $value) {
@@ -396,8 +397,9 @@ class Response {
 	 *
 	 * @param mixed $content
 	 */
-	public static function setContent($content = "") {
+	public static function setContent($content) {
 		if (is_array($content)) {
+			Response::setContentType("json");
 			$content = json_encode($content);
 		}
 

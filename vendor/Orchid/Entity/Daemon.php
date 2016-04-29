@@ -3,13 +3,14 @@
 namespace Orchid\Entity;
 
 use Orchid\App;
+use Orchid\Entity\Exception\RuntimeException;
 
 final class Daemon {
-	public static $name    = "daemon";
-	public static $pid     = null;
-	public static $pidFile = null;
-	public static $log     = null;
-	public static $logErr  = null;
+	protected static $name    = "daemon";
+	protected static $pid     = null;
+	protected static $pidFile = null;
+	protected static $log     = null;
+	protected static $logErr  = null;
 
 	/**
 	 * Запускает выполнение демона
@@ -27,50 +28,58 @@ final class Daemon {
 	/**
 	 * Отключает рабочий процесс от консоли, создавая дочерний процесс
 	 * Внимание: при использовании данного метода, возможен запуск лишь одного инстанса
-	 * 
-	 * @return void
+	 *
+	 * @throws RuntimeException
 	 */
 	public static function forkProcess() {
-		if (!pcntl_fork()) {
-			posix_setsid();
-			static::$pid = getmypid();
-			static::$pidFile = App::getBaseDir() . "/cache/" . static::$name . ".pid";
+		if (PHP_SAPI == "cli") {
+			if (!pcntl_fork()) {
+				posix_setsid();
+				static::$pid = getmypid();
+				static::$pidFile = App::getBaseDir() . "/cache/" . static::$name . ".pid";
 
-			if (!file_exists(static::$pidFile)) {
-				// запись pid в файл
-				file_put_contents(static::$pidFile, static::$pid);
+				if (!file_exists(static::$pidFile)) {
+					// запись pid в файл
+					file_put_contents(static::$pidFile, static::$pid);
 
-				// обработка завершения работы демона
-				register_shutdown_function(function () {
-					if (file_exists(Daemon::$pidFile)) {
-						unlink(Daemon::$pidFile);
-					}
-				});
+					// обработка завершения работы демона
+					register_shutdown_function(function () {
+						if (file_exists(Daemon::$pidFile)) {
+							unlink(Daemon::$pidFile);
+						}
+					});
+				} else {
+					echo "Daemon already running!" . PHP_EOL;
+					exit(SIG_ERR);
+				}
 			} else {
-				echo "Daemon already running!" . PHP_EOL;
-				exit(SIG_ERR);
+				exit(SIG_DFL);
 			}
 		} else {
-			exit(SIG_DFL);
+			throw new RuntimeException("Данный метод доступен только в Daemon");
 		}
 	}
 
 	/**
 	 * Переключает процесс на запись output в лог файл
 	 *
-	 * @return void
+	 * @throws RuntimeException
 	 */
 	public static function writeLog() {
-		static::$log = App::getBaseDir() . "/cache/" . static::$name . ".log";
-		static::$logErr = App::getBaseDir() . "/cache/" . static::$name . "-error.log";
+		if (PHP_SAPI == "cli") {
+			static::$log = App::getBaseDir() . "/cache/" . static::$name . ".log";
+			static::$logErr = App::getBaseDir() . "/cache/" . static::$name . "-error.log";
 
-		fclose(STDIN);
-		$GLOBALS["STDIN"] = fopen("/dev/null", "r");
+			fclose(STDIN);
+			$GLOBALS["STDIN"] = fopen("/dev/null", "r");
 
-		fclose(STDOUT);
-		$GLOBALS["STDOUT"] = fopen(static::$log, "ab");
+			fclose(STDOUT);
+			$GLOBALS["STDOUT"] = fopen(static::$log, "ab");
 
-		fclose(STDERR);
-		$GLOBALS["STDERR"] = fopen(static::$logErr, "ab");
+			fclose(STDERR);
+			$GLOBALS["STDERR"] = fopen(static::$logErr, "ab");
+		} else {
+			throw new RuntimeException("Данный метод доступен только в Daemon");
+		}
 	}
 }

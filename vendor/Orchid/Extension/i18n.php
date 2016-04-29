@@ -3,6 +3,7 @@
 namespace Orchid\Extension {
 
 	use Orchid\App;
+	use Orchid\Entity\Exception\FileNotFoundException;
 	use Orchid\Request;
 
 	class i18n {
@@ -31,21 +32,32 @@ namespace Orchid\Extension {
 		 * Инициализирует языковую систему
 		 *
 		 * @param string $default язык по-умолчанию
+		 *
+		 * @throws FileNotFoundException
 		 */
 		public static function initialize($default = "ru") {
 			$lang = static::$force ? static::$force : Request::getClientLang($default);
-			$file = static::getLangFilePath(trim($lang));
+			$path = static::getLangFilePath(trim($lang));
 
-			if (file_exists($file)) {
-				static::$locale = require_once($file);
+			if (file_exists($path)) {
+				$ext = pathinfo($path);
+
+				switch ($ext["extension"]) {
+					case "ini": {
+						static::$locale = parse_ini_file($path, true);
+						break;
+					}
+					case "php": {
+						static::$locale = require_once $path;
+						break;
+					}
+				}
 			} else {
 				if (static::$force != $default) {
 					static::$force = $default;
 					static::initialize();
 				} else {
-					http_response_code(500);
-
-					App::terminate("Не удалось найти языковый файл");
+					throw new FileNotFoundException("Не удалось найти файл языка");
 				}
 			}
 		}

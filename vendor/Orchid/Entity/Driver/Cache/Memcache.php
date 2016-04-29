@@ -2,7 +2,7 @@
 
 namespace Orchid\Entity\Driver\Cache;
 
-use Orchid\App;
+use Orchid\Entity\Exception\CacheException;
 use Orchid\Memory;
 
 class Memcache {
@@ -10,16 +10,18 @@ class Memcache {
 
 	/**
 	 * Создаёт подключение к серверу внешнего хранилища
+	 *
 	 * @param string $host
 	 * @param int    $port
 	 * @param int    $timeout
+	 *
+	 * @throws CacheException
 	 */
 	public function __construct($host, $port, $timeout) {
 		$this->connection = new \Memcache;
 
 		if (!$this->connection->connect($host, $port, $timeout)) {
-			http_response_code(500);
-			App::terminate("Подключение к кеширующему серверу не удалось");
+			throw new CacheException("Подключение к серверу кэша не удалось");
 		}
 	}
 

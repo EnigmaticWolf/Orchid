@@ -3,7 +3,8 @@
 namespace Orchid;
 
 use Closure;
-use SplPriorityQueue;
+use Orchid\Entity\Exception\NoSuchMethodException;
+use Orchid\Entity\Exception\RuntimeException;
 
 class Router {
 	/**
@@ -73,11 +74,19 @@ class Router {
 			$action = isset($part[0]) ? $part[0] : "index";
 			$params = count($part) > 1 ? array_slice($part, 1) : [];
 
-			return call_user_func_array([$class, $action], $params);
+			if (method_exists($class, $action)) {
+				return call_user_func_array([$class, $action], $params);
+			}
+
+			throw new NoSuchMethodException("Метод " . $action . " не найден в классе " . $class);
 		}, $method, $condition, $priority);
 
 		static::bind("/" . $clean, function () use ($class) {
-			return call_user_func([$class, "index"]);
+			if (method_exists($class, "index")) {
+				return call_user_func([$class, "index"]);
+			}
+
+			throw new NoSuchMethodException("Метод index не найден в классе " . $class);
 		}, $method, $condition, $priority);
 	}
 
@@ -156,14 +165,15 @@ class Router {
 	 * @param Closure $callable
 	 * @param array   $param
 	 *
-	 * @return mixed|false
+	 * @return mixed
+	 * @throws RuntimeException
 	 */
 	protected static function route($callable, $param = []) {
 		if (is_callable($callable)) {
 			return call_user_func_array($callable, $param);
 		}
 
-		return false;
+		throw new RuntimeException("Не удалось выполнить функцию");
 	}
 
 	/**

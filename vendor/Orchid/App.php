@@ -4,6 +4,9 @@ namespace Orchid;
 
 use Closure;
 use DirectoryIterator;
+use Exception;
+use Orchid\Entity\Exception\NoSuchMethodException;
+use Orchid\Entity\Exception\RuntimeException;
 
 class App {
 	/**
@@ -174,6 +177,42 @@ class App {
 					return;
 				}
 			}
+		});
+
+		// обработка исключений
+		set_exception_handler(function (Exception $ex) {
+			ob_end_clean();
+
+			if (static::$debug) {
+				$message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " . $ex->getFile() . " (at " . $ex->getLine() . " line)";
+			} else {
+				$message = "Internal Error";
+			}
+
+			Response::create($message, Response::HTTP_INTERNAL_SERVER_ERROR, "txt");
+		});
+
+		// обработка заверщения работы
+		register_shutdown_function(function () {
+			if (($error = error_get_last()) && error_reporting() & $error["type"]) {
+				ob_end_clean();
+
+				if (static::$debug) {
+					$message = "ERROR: " . $error["message"] . " (code " . $error["type"] . ")\nFile: " . $error["file"] . " (at " . $error["line"] . " line)";
+				} else {
+					$message = "Internal Error";
+				}
+
+				Response::create($message, Response::HTTP_INTERNAL_SERVER_ERROR, "txt");
+			} else {
+				if (Response::isOk() && !Response::getContent()) {
+					Response::setStatus(Response::HTTP_NOT_FOUND);
+					Response::setContent("Path not found");
+				}
+			}
+
+			Task::trigger("shutdown");
+			Response::send();
 		});
 	}
 
@@ -391,6 +430,9 @@ class App {
 	 *
 	 * @param $class
 	 * @param $dir
+	 *
+	 * @return mixed
+	 * @throws NoSuchMethodException
 	 */
 	protected static function bootModule($class, $dir) {
 		// регистрируем модуль
@@ -407,36 +449,22 @@ class App {
 			require_once($dir);
 		}
 
-		call_user_func([$class, "initialize"]);
+		if (method_exists($class, "initialize")) {
+			return call_user_func([$class, "initialize"]);
+		}
+
+		throw new NoSuchMethodException("Метод initialize не найден в классе " . $class);
 	}
 
 	/**
 	 * Запуск приложения
 	 */
 	public static function run() {
-		register_shutdown_function(function () {
-			// если приложение было завершено
-			$error = error_get_last();
-			if ($error && in_array($error["type"], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_RECOVERABLE_ERROR, E_USER_ERROR])) {
-				ob_end_clean();
-				Response::setStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
-				Response::setContent(static::$debug ? $error : "Internal Error.");
-			} elseif (Response::isOk() && !Response::getContent()) {
-				Response::setStatus(Response::HTTP_NOT_FOUND);
-				Response::setContent("Path not found.");
-			}
-
-			Task::trigger("shutdown");
-			Response::send();
-		});
-
 		ob_start("ob_gzhandler");
 		ob_implicit_flush(false);
 
-		Response::create();
 		Task::trigger("before");
-
-		Response::setContent(Router::dispatch());
+		Response::create(Router::dispatch());
 		Task::trigger("after");
 	}
 
@@ -453,9 +481,10 @@ class App {
 	 * @param Closure $callable
 	 *
 	 * @return bool
+	 * @throws RuntimeException
 	 */
 	public static function addClosure($name, $callable) {
-		if (!isset(static::$closures[$name])) {
+		if (is_string($name) && !isset(static::$closures[$name])) {
 			static::$closures[$name] = function ($param = null) use ($callable) {
 				static $object;
 
@@ -469,7 +498,7 @@ class App {
 			return true;
 		}
 
-		return false;
+		throw new RuntimeException("Не удалось добавить замыкание " . $name);
 	}
 
 	/**
@@ -479,12 +508,13 @@ class App {
 	 * @param array  ...$param
 	 *
 	 * @return mixed
+	 * @throws RuntimeException
 	 */
 	public static function getClosure($name, ...$param) {
-		if (array_key_exists($name, static::$closures) && is_callable(static::$closures[$name])) {
+		if (is_string($name) && array_key_exists($name, static::$closures) && is_callable(static::$closures[$name])) {
 			return call_user_func_array(static::$closures[$name], $param);
 		}
 
-		return null;
+		throw new RuntimeException("Не удалось выполнить замыкание " . $name);
 	}
 }

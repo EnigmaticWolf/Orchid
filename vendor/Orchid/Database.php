@@ -2,6 +2,7 @@
 
 namespace Orchid;
 
+use Orchid\Entity\Exception\DatabaseException;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -44,12 +45,8 @@ class Database {
 						$config["options"]
 					);
 				} catch (PDOException $e) {
-					http_response_code(500);
-
-					App::terminate("Подключение не удалось: " . $e->getMessage());
+					throw new DatabaseException("Cоединение с сервером базы данных завершилась неудачно (" . $e->getMessage() . ")");
 				}
-
-				return null;
 			});
 
 			static::$connection[$config["role"] == "master" ? "master" : "slave"][] = $key;

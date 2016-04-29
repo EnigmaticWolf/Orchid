@@ -3,6 +3,8 @@
 namespace Orchid\Entity;
 
 use Orchid\App;
+use Orchid\Entity\Exception\FileNotFoundException;
+use Orchid\Entity\Exception\RuntimeException;
 
 class Configuration {
 	protected $item;
@@ -13,12 +15,13 @@ class Configuration {
 	 * @param $path
 	 *
 	 * @return bool|static
+	 * @throws FileNotFoundException
 	 */
 	public static function fromFile($path) {
 		if ($path = App::getPath($path)) {
 			$ext = pathinfo($path);
 
-			switch ($ext["extension"]){
+			switch ($ext["extension"]) {
 				case "ini": {
 					return new static((array)parse_ini_file($path, true));
 				}
@@ -28,7 +31,7 @@ class Configuration {
 			}
 		}
 
-		return false;
+		throw new FileNotFoundException("Не удалось найти файл конфигурации");
 	}
 
 	/**
@@ -37,13 +40,14 @@ class Configuration {
 	 * @param array $data
 	 *
 	 * @return bool|static
+	 * @throws RuntimeException
 	 */
 	public static function fromArray(array $data) {
 		if (!empty($data)) {
 			return new static($data);
 		}
 
-		return false;
+		throw new RuntimeException("Переданный массив пуст");
 	}
 
 	protected function __construct(array $data) {
