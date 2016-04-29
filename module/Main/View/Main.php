@@ -5,6 +5,10 @@
 	<title>Orchid | Демо</title>
 </head>
 <body>
-<?= $hello; ?>
+<?
+if (ModuleMain::$config->get("debug")) {
+	echo $hello;
+}
+?>
 </body>
 </html>
