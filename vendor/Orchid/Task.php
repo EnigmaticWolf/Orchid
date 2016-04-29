@@ -3,7 +3,6 @@
 namespace Orchid;
 
 use Closure;
-use SplPriorityQueue;
 
 class Task {
 	/**

@@ -6,7 +6,8 @@ use Orchid\App;
 use Orchid\Entity\Exception\RuntimeException;
 
 final class Daemon {
-	protected static $name    = "daemon";
+	public static $name    = "daemon";
+
 	protected static $pid     = null;
 	protected static $pidFile = null;
 	protected static $log     = null;
