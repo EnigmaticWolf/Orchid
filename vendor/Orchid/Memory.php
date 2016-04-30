@@ -2,7 +2,9 @@
 
 namespace Orchid;
 
+use Orchid\Entity\Configuration;
 use Orchid\Entity\Driver\Cache\Memcache;
+use Orchid\Entity\Exception\CacheException;
 
 class Memory {
 	/**
@@ -37,10 +39,12 @@ class Memory {
 
 	/**
 	 * Инициализиует подключения
-	 * @param array $configs
+	 *
+	 * @param Configuration $configs
+	 *
 	 * @return void
 	 */
-	public static function initialize(array $configs) {
+	public static function initialize(Configuration $configs) {
 		$default = [
 			"driver"  => "memcache",
 			"host"    => "",
@@ -50,11 +54,10 @@ class Memory {
 		];
 
 		foreach ($configs as $index => $config) {
-			$config = array_merge($default, $config);
-			$driver = strtolower($config["driver"]);
 			$key = "memory:" . $index;
+			$config = array_merge($default, $config);
 
-			switch ($driver) {
+			switch (strtolower($config["driver"])) {
 				case "memcache": {
 					App::addClosure($key, function () use ($config) {
 						return new Memcache(
@@ -74,8 +77,11 @@ class Memory {
 
 	/**
 	 * Открывает и возвращает соединение с внешним хранилищем
+	 *
 	 * @param bool $use_master
-	 * @return Memcache|false
+	 *
+	 * @return Memcache
+	 * @throws CacheException
 	 */
 	public static function getInstance($use_master = false) {
 		$pool = [];
@@ -98,18 +104,22 @@ class Memory {
 			}
 		}
 
-		if ($pool && $key = $pool[array_rand($pool)]) {
-			static::$instance[$role] = [$key];
-
-			return App::getClosure($key);
+		if ($pool) {
+			if (is_array($pool)) {
+				return static::$instance[$role] = App::getClosure($pool[array_rand($pool)]);
+			} else {
+				return $pool;
+			}
 		}
 
-		return false;
+		throw new CacheException("Не удалось установить подключение");
 	}
 
 	/**
 	 * Генерирует ключ и возвращает его
+	 *
 	 * @param $key
+	 *
 	 * @return string
 	 */
 	public static function getKey($key) {
@@ -118,8 +128,10 @@ class Memory {
 
 	/**
 	 * Производит чтение ключа из внешнего хранилища и возвращает значение
+	 *
 	 * @param string $key
 	 * @param mixed  $default
+	 *
 	 * @return mixed
 	 */
 	public static function get($key, $default = false) {
@@ -144,10 +156,12 @@ class Memory {
 
 	/**
 	 * Записывает значение для ключа во внешнее хранилище
+	 *
 	 * @param string      $key
 	 * @param mixed       $value
 	 * @param int         $expire
 	 * @param string|null $tag
+	 *
 	 * @return bool
 	 */
 	public static function set($key, $value, $expire = 0, $tag = null) {
@@ -160,7 +174,9 @@ class Memory {
 
 	/**
 	 * Удаляет указанный ключ из внешнего хранилища
+	 *
 	 * @param string $key
+	 *
 	 * @return bool
 	 */
 	public static function delete($key) {
@@ -183,7 +199,9 @@ class Memory {
 
 	/**
 	 * Достаёт значения по указанному тегу
+	 *
 	 * @param string $tag
+	 *
 	 * @return array
 	 */
 	public static function getByTag($tag) {
@@ -192,7 +210,9 @@ class Memory {
 
 	/**
 	 * Удаляет значения по указанному тегу
+	 *
 	 * @param string $tag
+	 *
 	 * @return bool
 	 */
 	public static function deleteByTag($tag) {

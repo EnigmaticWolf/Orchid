@@ -4,10 +4,11 @@ namespace Orchid;
 
 use PDO;
 use PHPUnit_Framework_TestCase;
+use Orchid\Entity\Configuration;
 
 class DatabaseTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		Database::initialize([
+		Database::initialize(Configuration::fromArray([
 			[
 				"dsn"      => "sqlite:" . ORCHID . "/test.db",
 				"username" => null,
@@ -16,7 +17,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 					PDO::ATTR_PERSISTENT => true,
 				],
 			],
-		]);
+		]));
 	}
 
 	public function testCreateTable() {

@@ -2,17 +2,18 @@
 
 namespace Orchid;
 
+use Orchid\Entity\Configuration;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
 class MemoryTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		Memory::initialize([
+		Memory::initialize(Configuration::fromArray([
 			[
 				"host" => "localhost",
 				"port" => 11211,
 			],
-		]);
+		]));
 	}
 
 	/**

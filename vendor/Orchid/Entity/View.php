@@ -3,6 +3,7 @@
 namespace Orchid\Entity;
 
 use Orchid\App;
+use Orchid\Entity\Exception\FileNotFoundException;
 
 class View {
 	/**
@@ -13,25 +14,25 @@ class View {
 	public static $layout = "view:layout.php";
 
 	/**
-	 * Массив глобальных данных передваваемых во все шаблоны
-	 *
-	 * @var array
-	 */
-	protected static $globalData = [];
-
-	/**
 	 * Адрес файла шаблона
 	 *
 	 * @var string
 	 */
-	protected $file = "";
+	protected $file;
 
 	/**
 	 * Массив данных передваваемых в шаблон
 	 *
 	 * @var array
 	 */
-	protected $data = [];
+	protected $data;
+
+	/**
+	 * Массив глобальных данных передваваемых во все шаблоны
+	 *
+	 * @var array
+	 */
+	protected static $globalData = [];
 
 	/**
 	 * Задаёт глобальные переменные для всех View
@@ -57,7 +58,7 @@ class View {
 	 */
 	protected function __construct($file, array $data = []) {
 		$this->file = $file;
-		$this->data = array_replace_recursive($this->data, $data);
+		$this->data = $data;
 	}
 
 	/**
@@ -95,14 +96,9 @@ class View {
 	/**
 	 * Отрисовывает объект View
 	 *
-	 * @param string $file
-	 *
 	 * @return string
 	 */
-	public function render($file = null) {
-		if (!is_null($file)) {
-			$this->file = $file;
-		}
+	public function render() {
 		if (!empty($this->file)) {
 			$this->data["content"] = View::fetch($this->file, $this->data);
 		}
@@ -122,12 +118,15 @@ class View {
 	 * @param array  $_data
 	 *
 	 * @return bool
+	 * @throws FileNotFoundException
 	 */
 	public static function fetch($_file, array $_data = []) {
-		extract($_data, EXTR_SKIP);
+		if ($_data) {
+			extract($_data, EXTR_SKIP);
+		}
 
 		if (View::$globalData) {
-			extract(View::$globalData, EXTR_SKIP | EXTR_REFS);
+			extract(View::$globalData, EXTR_SKIP);
 		}
 
 		if ($_file = App::getPath($_file)) {
@@ -137,6 +136,6 @@ class View {
 			return ob_get_clean();
 		}
 
-		return "";
+		throw new FileNotFoundException("Не удалось найти файл шаблона");
 	}
 }

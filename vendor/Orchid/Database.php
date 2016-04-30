@@ -2,10 +2,11 @@
 
 namespace Orchid;
 
-use Orchid\Entity\Exception\DatabaseException;
 use PDO;
 use PDOException;
 use PDOStatement;
+use Orchid\Entity\Configuration;
+use Orchid\Entity\Exception\DatabaseException;
 
 class Database {
 	protected static $connection = [
@@ -21,9 +22,9 @@ class Database {
 	/**
 	 * Инициализиует подключения
 	 *
-	 * @param array $configs
+	 * @param Configuration $configs
 	 */
-	public static function initialize(array $configs) {
+	public static function initialize(Configuration $configs) {
 		$default = [
 			"dsn"      => "",
 			"username" => "",
@@ -33,8 +34,8 @@ class Database {
 		];
 
 		foreach ($configs as $index => $config) {
-			$config = array_merge($default, $config);
 			$key = "database:" . $index;
+			$config = array_merge($default, $config);
 
 			App::addClosure($key, function () use ($config) {
 				try {
@@ -44,8 +45,8 @@ class Database {
 						$config["password"],
 						$config["options"]
 					);
-				} catch (PDOException $e) {
-					throw new DatabaseException("Cоединение с сервером базы данных завершилась неудачно (" . $e->getMessage() . ")");
+				} catch (PDOException $ex) {
+					throw new DatabaseException("Cоединение с сервером базы данных завершилась неудачно (" . $ex->getMessage() . ")", 0, $ex);
 				}
 			});
 
@@ -58,7 +59,8 @@ class Database {
 	 *
 	 * @param bool $use_master
 	 *
-	 * @return null|PDO
+	 * @return PDO
+	 * @throws DatabaseException
 	 */
 	public static function getInstance($use_master = false) {
 		$pool = [];
@@ -81,13 +83,15 @@ class Database {
 			}
 		}
 
-		if ($pool && $key = $pool[array_rand($pool)]) {
-			static::$connection[$role] = [$key];
-
-			return App::getClosure($key);
+		if ($pool) {
+			if (is_array($pool)) {
+				return static::$connection[$role] = App::getClosure($pool[array_rand($pool)]);
+			} else {
+				return $pool;
+			}
 		}
 
-		return null;
+		throw new DatabaseException("Не удалось установить подключение");
 	}
 
 	/**

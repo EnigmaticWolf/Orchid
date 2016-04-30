@@ -5,8 +5,9 @@ namespace Orchid;
 use Closure;
 use DirectoryIterator;
 use Exception;
+use RuntimeException;
+use Orchid\Entity\Exception\FileNotFoundException;
 use Orchid\Entity\Exception\NoSuchMethodException;
-use Orchid\Entity\Exception\RuntimeException;
 
 class App {
 	/**
@@ -184,7 +185,7 @@ class App {
 			ob_end_clean();
 
 			if (static::$debug) {
-				$message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " . $ex->getFile() . " (at " . $ex->getLine() . " line)";
+				$message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " . $ex->getFile() . " (at " . $ex->getLine() . " line)\nTrace:\n" . $ex->getTraceAsString();
 			} else {
 				$message = "Internal Error";
 			}
@@ -432,6 +433,7 @@ class App {
 	 * @param $dir
 	 *
 	 * @return mixed
+	 * @throws FileNotFoundException
 	 * @throws NoSuchMethodException
 	 */
 	protected static function bootModule($class, $dir) {
@@ -447,6 +449,8 @@ class App {
 
 		if (file_exists($dir)) {
 			require_once($dir);
+		} else {
+			throw new FileNotFoundException("Не удалось найти указанный файл");
 		}
 
 		if (method_exists($class, "initialize")) {

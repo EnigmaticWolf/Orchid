@@ -2,11 +2,11 @@
 
 namespace Orchid\Entity;
 
+use RuntimeException;
 use Orchid\App;
-use Orchid\Entity\Exception\RuntimeException;
 
 final class Daemon {
-	public static $name    = "daemon";
+	public static $name = "daemon";
 
 	protected static $pid     = null;
 	protected static $pidFile = null;

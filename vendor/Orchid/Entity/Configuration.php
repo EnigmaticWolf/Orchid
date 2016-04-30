@@ -2,19 +2,21 @@
 
 namespace Orchid\Entity;
 
+use Iterator;
+use RuntimeException;
 use Orchid\App;
 use Orchid\Entity\Exception\FileNotFoundException;
-use Orchid\Entity\Exception\RuntimeException;
 
-class Configuration {
-	protected $item;
+final class Configuration implements Iterator {
+	protected $position = 0;
+	protected $array;
 
 	/**
 	 * Инициализация из указанного файла
 	 *
-	 * @param $path
+	 * @param string $path
 	 *
-	 * @return bool|static
+	 * @return static
 	 * @throws FileNotFoundException
 	 */
 	public static function fromFile($path) {
@@ -39,34 +41,64 @@ class Configuration {
 	 *
 	 * @param array $data
 	 *
-	 * @return bool|static
-	 * @throws RuntimeException
+	 * @return static
 	 */
 	public static function fromArray(array $data) {
-		if (!empty($data)) {
-			return new static($data);
-		}
-
-		throw new RuntimeException("Переданный массив пуст");
+		return new static($data);
 	}
 
+	/**
+	 * @param array $data
+	 *
+	 * @throws RuntimeException
+	 */
 	protected function __construct(array $data) {
-		$this->item = $data;
+		if (empty($data)) {
+			throw new RuntimeException("Переданный массив пуст");
+		}
+
+		$this->array = $data;
 	}
 
 	/**
 	 * Получение ключа из конфигурации
 	 *
-	 * @param      $key
-	 * @param null $default
+	 * @param string $key
+	 * @param mixed  $default
 	 *
-	 * @return mixed|null
+	 * @return mixed
 	 */
 	public function get($key, $default = null) {
-		if (isset($this->item[$key])) {
-			return $this->item[$key];
+		if (isset($this->array[$key])) {
+			return $this->array[$key];
 		}
 
 		return $default;
+	}
+
+	/* Методы Iterator */
+
+	public function current() {
+		return $this->array[$this->position];
+	}
+
+	public function next() {
+		$this->position++;
+	}
+
+	public function prev() {
+		$this->position--;
+	}
+
+	public function key() {
+		return $this->position;
+	}
+
+	public function valid() {
+		return isset($this->array[$this->position]);
+	}
+
+	public function rewind() {
+		$this->position = 0;
 	}
 }

@@ -3,8 +3,8 @@
 namespace Orchid;
 
 use Closure;
+use RuntimeException;
 use Orchid\Entity\Exception\NoSuchMethodException;
-use Orchid\Entity\Exception\RuntimeException;
 
 class Router {
 	/**
