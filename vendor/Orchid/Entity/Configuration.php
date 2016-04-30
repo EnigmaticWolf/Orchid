@@ -2,12 +2,13 @@
 
 namespace Orchid\Entity;
 
+use ArrayAccess;
 use Iterator;
 use RuntimeException;
 use Orchid\App;
 use Orchid\Entity\Exception\FileNotFoundException;
 
-final class Configuration implements Iterator {
+final class Configuration implements ArrayAccess, Iterator {
 	protected $position = 0;
 	protected $array;
 
@@ -74,6 +75,24 @@ final class Configuration implements Iterator {
 		}
 
 		return $default;
+	}
+
+	/* Методы ArrayAccess */
+
+	public function offsetGet($key) {
+		return $this->array[$key];
+	}
+
+	public function offsetSet($key, $value) {
+		throw new RuntimeException("Не возможно изменить значение конфигурации");
+	}
+
+	public function offsetExists($key) {
+		return isset($this->array[$key]);
+	}
+
+	public function offsetUnset($key) {
+		throw new RuntimeException("Не возможно удалить значение конфигурации");
 	}
 
 	/* Методы Iterator */
