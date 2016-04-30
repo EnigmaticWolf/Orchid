@@ -288,7 +288,7 @@ $sth = Database::query("
     FROM
         `fruit`
     WHERE
-        `calories`  < :calories AND
+        `calories`  = :calories AND
         `colour`    = :colour
 ", [":calories" => 150, ":colour" => "red"], $use_master = false);
 
