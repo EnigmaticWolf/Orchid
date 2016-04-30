@@ -499,8 +499,8 @@ use Orchid\Entity\Daemon;
 // подключаем файл начальной загрузки
 require_once(__DIR__ . "/../bootstrap.php");
 
-for($i = 0; $i < 10; $i++){
-    echo $i . " \n\r";
+while(true){
+    echo $i++ . " \n\r";
 }
 ```
 Запустить исполняемый файл: `../orchid/daemon/# php Demo.php`
