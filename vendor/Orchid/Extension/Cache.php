@@ -5,6 +5,7 @@ namespace Orchid\Extension;
 use Orchid\App;
 use RecursiveDirectoryIterator;
 
+/* todo переписать */
 class Cache {
 	/**
 	 * Записывает данные во временный файл
@@ -25,7 +26,7 @@ class Cache {
 	}
 
 	/**
-	 * Читаемт данные из временного файла
+	 * Читает данные из временного файла
 	 *
 	 * @param string $key     ключ
 	 * @param mixed  $default возвращаемое значение, если данных нет
@@ -34,16 +35,15 @@ class Cache {
 	 */
 	public static function read($key, $default = null) {
 		$file = static::getCacheFilePath($key);
-		$data = file_exists($file) ? file_get_contents($file) : false;
 
-		if ($data !== false) {
-			$data = unserialize($data);
+		if (file_exists($file)) {
+			$data = unserialize(file_get_contents($file));
 
 			if (($data["expire"] > time()) || $data["expire"] < 0) {
 				return unserialize($data["value"]);
 			}
 
-			static::delete(static::getCacheFilePath($key));
+			unlink($file);
 		}
 
 		return $default;
@@ -72,10 +72,11 @@ class Cache {
 	 * @return boolean
 	 */
 	public static function flush() {
+		// директориия хранилища по-умолчанию
 		$path = App::getBaseDir() . "/storage/cache";
 
-		if (($cache = App::getPath("cache:")) !== false) {
-			$path = $cache;
+		if (($dir = App::getPath("cache:")) !== false) {
+			$path = $dir;
 		}
 
 		$iterator = new RecursiveDirectoryIterator($path . "/");
@@ -105,8 +106,8 @@ class Cache {
 		// директориия хранилища по-умолчанию
 		$path = App::getBaseDir() . "/storage/cache/";
 
-		if (($cache = App::getPath("cache:")) !== false) {
-			$path = $cache;
+		if (($dir = App::getPath("cache:")) !== false) {
+			$path = $dir;
 		}
 
 		return $path . md5(App::getSecret() . ":" . $key) . ".cache";
