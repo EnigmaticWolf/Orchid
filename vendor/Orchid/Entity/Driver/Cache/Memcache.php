@@ -27,7 +27,9 @@ class Memcache {
 
 	/**
 	 * Производит чтение ключа из внешнего хранилища и возвращает значение
+	 *
 	 * @param string $key
+	 *
 	 * @return mixed
 	 */
 	public function get($key) {
@@ -36,10 +38,12 @@ class Memcache {
 
 	/**
 	 * Записывает значение для ключа во внешнее хранилище
+	 *
 	 * @param string      $key
 	 * @param mixed       $value
 	 * @param int         $expire
 	 * @param string|null $tag
+	 *
 	 * @return bool
 	 */
 	public function set($key, $value, $expire = 0, $tag = null) {
@@ -54,7 +58,9 @@ class Memcache {
 
 	/**
 	 * Удаляет указанный ключ из внешнего хранилища
+	 *
 	 * @param string $key
+	 *
 	 * @return bool
 	 */
 	public function delete($key) {
@@ -71,7 +77,9 @@ class Memcache {
 
 	/**
 	 * Достаёт значения по указанному тегу
+	 *
 	 * @param string $tag
+	 *
 	 * @return array
 	 */
 	public function getByTag($tag) {
@@ -88,12 +96,14 @@ class Memcache {
 
 	/**
 	 * Удаляет значения по указанному тегу
+	 *
 	 * @param string $tag
+	 *
 	 * @return bool
 	 */
 	public function deleteByTag($tag) {
 		$deleted = 0;
-		
+
 		if (($tags = $this->get($tag)) !== false) {
 			foreach ($tags as $key) {
 				if ($this->delete($key)) {

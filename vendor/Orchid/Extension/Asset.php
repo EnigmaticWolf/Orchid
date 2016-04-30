@@ -16,6 +16,7 @@ class Asset {
 
 	/**
 	 * Генерирует и возвращает строку подключений ресурсов на основе карты ресурсов и параметров
+	 *
 	 * @return string|null
 	 */
 	public static function render() {
@@ -78,6 +79,7 @@ class Asset {
 
 	/**
 	 * Собирает все шаблоны из папок template: и из всех подключенных модулей
+	 * 
 	 * @return string
 	 */
 	public static function template() {

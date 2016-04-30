@@ -104,9 +104,7 @@ class App {
 	/**
 	 * Инициализатор приложения
 	 *
-	 * @param array}|Configuration $param
-	 *
-	 * @return void
+	 * @param $param
 	 */
 	public static function initialize($param = []) {
 		if (isset($param["debug"])) {

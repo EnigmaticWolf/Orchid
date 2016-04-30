@@ -40,11 +40,11 @@ class Memory {
 	/**
 	 * Инициализиует подключения
 	 *
-	 * @param Configuration $configs
+	 * @param $configs
 	 *
 	 * @return void
 	 */
-	public static function initialize(Configuration $configs) {
+	public static function initialize($configs) {
 		$default = [
 			"driver"  => "memcache",
 			"host"    => "",
@@ -157,10 +157,10 @@ class Memory {
 	/**
 	 * Записывает значение для ключа во внешнее хранилище
 	 *
-	 * @param string      $key
-	 * @param mixed       $value
-	 * @param int         $expire
-	 * @param string|null $tag
+	 * @param string $key
+	 * @param mixed  $value
+	 * @param int    $expire
+	 * @param string $tag
 	 *
 	 * @return bool
 	 */

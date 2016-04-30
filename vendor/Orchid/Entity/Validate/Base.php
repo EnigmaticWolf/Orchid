@@ -12,7 +12,9 @@ trait Base {
 
 	/**
 	 * Проверяемое значение будет преобразовано в дату в указанном формате
+	 *
 	 * @param string $format
+	 *
 	 * @return Closure
 	 */
 	public function date($format = "") {
@@ -30,7 +32,9 @@ trait Base {
 	/**
 	 * Проверяемое значение должно быть больше или равно указанному
 	 * В случае если проверяемое значение - строка, проверяется длинна строки
+	 *
 	 * @param int $min
+	 *
 	 * @return Closure
 	 */
 	public function min($min = -INF) {
@@ -49,7 +53,9 @@ trait Base {
 	/**
 	 * Проверяемое значение должно быть меньше или равно указанному
 	 * В случае если проверяемое значение - строка, проверяется длинна строки
+	 *
 	 * @param int $max
+	 *
 	 * @return Closure
 	 */
 	public function max($max = INF) {

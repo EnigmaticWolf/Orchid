@@ -4,16 +4,15 @@ Orchid Framework
 * Nginx || Apache || IIS >= 8.5
 * PHP >= 5.6
 * PDO
-* GD
 * Memcache
+* GD
 
 #### Установка
 * Скачать Orchid и положить папку в корневом каталоге вашего веб-проекта;
 * Убедитесь, что /path-to-project/storage и все его вложенные папки доступны для записи;
-* Вы готовы использовать Orchid;-)
+* Вы готовы использовать Orchid ;-)
 
 ## Документация
-Класс `Orchid` это основа фреймворка для быстрого создания Web-приложений на PHP.
 ```php
 App::initialize();
 
@@ -24,7 +23,7 @@ Router::bind("/", function(){
 App::run();
 ```
 
-### Роутинг
+### Роутер
 Роутинг запросов происходит по HTTP методу в паре с URL-правилом.  
 Каждое правило должно быть отдельно объявленно вызовом метода:
 ```php
@@ -74,7 +73,7 @@ Router::bind("/", function() {
         "body"  => "Здравствуй Мир! :)",
     ];
 
-    return App::render("view/layout.php", $data);
+    return View::fetch("view/layout.php", $data);
 });
 ```
 `view/layout.php`:
@@ -97,17 +96,17 @@ Router::bind("/", function() {
 class Page {
     /* /page или /page/index */
     public function index() {
-        return App::render("page/index.php");
+        return View::fetch("page/index.php");
     }
 
     /* /page/contact */
     public function contact() {
-        return App::render("page/contact.php");
+        return View::fetch("page/contact.php");
     }
 
     /* /page/welcome/foo */
     public function welcome($name) {
-        return App::render("page/welcome.php", ["name" => $name]);
+        return View::fetch("page/welcome.php", ["name" => $name]);
     }
 }
 
@@ -115,40 +114,123 @@ Router::bindClass("Page");
 ```
 Кроме того вы можете воспользоваться классом `Controller`.
 
-### Хранилище данных
-Используйте хранилище данных типа `ключ=значение`, просто установив ключ к объекту `$app`.
-```php
-App::set("config.foo", ["bar" => 123]);
-```
-Простой доступ к элементам массива с помощью разделителя `/`.
-```php
-$value = App::get("config.foo/bar"); // 123
-```
-
-### Сервисы
-```php
-App::addService("db", function(){
-    // объект будет создан в момент первого доступа
-    $obj = new PDO(...);
-
-    return $obj;
-});
-
-App::get("db")->query(...);
-```
-
 ### Пути
 Используйте короткие ссылки на файлы/каталоги, чтобы получить быстрый доступ к ним:
 ```php
-App::path("view", __DIR__."/view");
+App::addPath("view", __DIR__."/view");
 
-$view = App::path("view:detail.php");
-$view = App::render("view:detail.php");
+$view = App::getPath("view:detail.php");
 ```
 Получить URL для файла:
 ```php
 $url  = App::pathToUrl("folder/file.php");
 $url  = App::pathToUrl("view:file.php");
+```
+
+### Расширения
+При необходимости можно расширить функционал `Orchid` расширениями:
+```php
+namespace Orchid\Extension;
+
+class Foo {
+    public static function bar(){
+        return "Hello!";
+    }
+}
+
+...
+
+Orchid\Extension\Foo::bar(); // Hello!
+```
+
+#### Расширения в дистрибутиве
+**Asset**
+Обработка карты ресурсов, генерация подключений ресурсов в layout, а так же с шаблонами.
+
+**Cache**
+Временное файловое хранилище данных.
+
+**Crypta**
+Кодирование и декодирование строк, создание хешей.
+
+**FileSystem**
+Работа с файловой системой, получение списка папок и файлов, создание, перемещение и удаление.
+
+**Form**
+Создание форм в шаблонах (поддерживает элементы HTML5).
+
+**i18n**
+Реализация поддержки нескольких языков.
+
+**Session**
+Создание, редактирование и удаление сессий.
+
+**Str**
+Работа со строками, безопасное обрезание, склонение и др.
+
+## Модули
+Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, сервисы, задачи.
+```php
+class ModulePage extends Orchid\Entity\Module {
+    public static function initialize() {
+        // зададим правило обработки запросов
+        Router::bindClass("Page", "*");
+    }
+
+    public static function foo(){
+        echo "bar";
+    }
+}
+
+ModulePage::foo(); // "bar"
+```
+
+#### Модули в дистрибутиве
+ + `Main` - демонстрационный модуль
+
+### Конфигурации
+Класс `Configuration` удобной является обёрткой над `ini` и `php` файлами конфигураций.
+```php
+$config = Configuration::fromArray([
+    "debug" => true,
+]);
+// или
+$config = Configuration::fromFile("Main:ExampleConfig.php");
+
+$congig->get("debug"); // true
+```
+`ExampleConfig.php`
+```php
+<?
+return [
+    "debug" => true,
+];
+```
+
+#### Итератор
+Объект класса `Configuration` поддерживает итератор.
+```php
+$config = Configuration::fromArray([
+    [
+        "dsn" => "...",
+        ...
+        "role" => "master",
+    ],
+    [
+        "dsn" => "...",
+        ...
+        "role" => "slave",
+    ]
+]);
+
+foreach($config as $index => $data) {
+    echo $data["role"] . PHP_EOL;
+}
+```
+*Результат*
+```
+master
+slave
 ```
 
 ### База данных
@@ -164,16 +246,17 @@ Database::initialize([
 ```
 `Database` позволяет инициализировать соединение с несколькими базами данных, например работающими в режиме репликации.
 
-Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по умолчанию `master`):
+Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по-умолчанию `master`):
 ```php
-Database::initialize([
+// инициализация поддерживает класс Configuration
+Database::initialize(Configuration::fromArray([
     [
         "dsn"      => "mysql:dbname=base;host=localhost",
         "username" => "...",
         "password" => "...",
         "role"     => "slave",
     ]
-]);
+]));
 ```
 
 Кроме того можно задать опции инициализации `PDO`:
@@ -225,20 +308,23 @@ Memory::initialize([
 `Memory` позволяет производить подключение к одному или
 нескольким серверам с разделением на `master` и `slave`.
 
-Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по умолчанию `master`):
+Добавив параметр `role` можно указать чем является данный сервер `master` или `slave` (по-умолчанию `master`):
 ```php
-Memory::initialize([
+// инициализация поддерживает класс Configuration
+Memory::initialize(Configuration::fromArray([
     [
         "host"    => "localhost",
         "port"    => 11211,
         "role"    => "master",
     ]
-]);
+]));
 
 Memory::get($key, $default = false);
 Memory::set($key, $value, $expire = 0);
 Memory::delete($key);
 Memory::flush();
+Memory::getByTag($tag);
+Memory::deleteByTag($tag);
 ```
 
 ##### Префикс ключей
@@ -259,104 +345,11 @@ Memory::$disabled = true;
 при обращении к данным по этим ключам они будут браться из внутреннего буффера класса `Memory`:
 ```php
 Memory::$cachedKeys = [
-	"car:"
+    "car:"
 ];
 ```
 *При такой записи во внутренний буффер попадут ключи: `car:list`, `car:model` и другие начинающиеся с `car:`*
 
-### Задачи
-```php
-// добавление задачи
-Task::add("custometask", function(){
-    // код выполняемый здесь
-}, $priority = 0);
-
-// вызов задачи
-Task::trigger("custometask", $params=array());
-```
-Кроме того, можно использовать три системных имени задач:
- + `before` - выполняется до Роутинга;
- + `after`  - выполняется после Роутинга;
- + `shutdown` - выполняется перед завершением работы;
- 
-```php
-Task::add("after", function() {
-    switch(Response::$status){
-        case "404":
-            Response::$body = App::render("view/404.php");
-            break;
-        case "500":
-            Response::$body = App::render("view/500.php");
-            break;
-    }
-});
-```
-
-### Расширения
-При необходимости можно расширить функционал `Orchid` расширениями:
-```php
-class Foo extends Orchid\Entity\Extension {
-    public static function bar(){
-        return "Hello!";
-    }
-}
-
-Foo::bar(); // Hello!
-```
-
-#### Расширения в поставке
-**Cache**
-```php
-Cache::write($key, $value, $duration=-1);
-Cache::read($key, $default=null);
-Cache::delete($key);
-Cache::flush();
-```
-**Crypta**
-```php
-Crypta::encrypt($input);
-Crypta::decrypt($input);
-Crypta::hash($string);
-Crypta::check($string, $hashString);
-```
-**Session**
-```php
-Session::create($sessionName=null);
-Session::write($key, $value);
-Session::read($key, $default=null);
-Session::delete($key);
-Session::destroy();
-```
-**String**
-```php
-Str::start($needle, $haystack);
-Str::end($needle, $haystack);
-Str::truncate($string, $length, $append="...");
-Str::eos($count, $single, $double, $triple);
-Str::escape($input);
-Str::unEscape($input);
-Str::translate($input, $back = false);
-```
-
-## Модули
-Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, внешние сервисы, задачи.
-```php
-class ModulePage extends Orchid\Entity\Module {
-    public static function initialize() {
-        // зададим правило обработки запросов
-        Router::bindClass("Page", "*");
-    }
-
-    public static function foo(){
-        echo "bar";
-    }
-}
-
-ModulePage::foo(); // "bar"
-```
-
-#### Модули в поставке
- + `Main` - демонстрационный модуль
 
 ### Модели
 ```php
@@ -454,6 +447,48 @@ $valid->option("city")
 $result = $valid->validate();   // в случае успеха результат будет true
                                 // в противном случае будет возвращен массив
                                 // где ключ = поле, значение = причина
+```
+
+### Сервисы
+```php
+App::addService("db", function(){
+    // объект будет создан в момент первого доступа
+    $obj = new PDO(...);
+
+    return $obj;
+});
+
+App::getService("db")->query(...);
+```
+
+### Задачи
+```php
+// добавление задачи
+Task::add("custometask", function(){
+    // код выполняемый здесь
+}, $priority = 0);
+
+// вызов задачи
+Task::trigger("custometask", $params=array());
+```
+Кроме того, можно использовать три внутренних имени задач:
+ + `before` - выполняется до Роутинга;
+ + `after`  - выполняется после Роутинга;
+ + `shutdown` - выполняется перед завершением работы;
+
+```php
+Task::add("after", function() {
+    switch(Response::getStatus()){
+        case "404": {
+            Response::setContent(View::fetch("view/404.php"));
+            break;
+        }
+        case "500": {
+            Response::setContent(View::fetch("view/500.php"));
+            break;
+        }
+    }
+});
 ```
 
 ### Демоны

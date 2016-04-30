@@ -7,6 +7,7 @@ use Closure;
 trait Str {
 	/**
 	 * Экранирует строку
+	 *
 	 * @return Closure
 	 */
 	public function escape() {
@@ -23,6 +24,7 @@ trait Str {
 
 	/**
 	 * Проверяемое значение это E-Mail адрес
+	 *
 	 * @return Closure
 	 */
 	public function isEmail() {
@@ -33,6 +35,7 @@ trait Str {
 
 	/**
 	 * Проверяемое значение это IP адрес
+	 * 
 	 * @return Closure
 	 */
 	public function isIp() {

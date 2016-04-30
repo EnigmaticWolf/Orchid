@@ -7,6 +7,7 @@ use Closure;
 trait Type {
 	/**
 	 * Проверяемое значение должно быть пустое
+	 *
 	 * @return Closure
 	 */
 	public function isEmpty() {
@@ -17,6 +18,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение должно быть не пустое
+	 *
 	 * @return Closure
 	 */
 	public function isNotEmpty() {
@@ -27,6 +29,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение должно иметь тип Boolean
+	 *
 	 * @return Closure
 	 */
 	public function isBoolean() {
@@ -37,6 +40,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение должно быть числом
+	 *
 	 * @return Closure
 	 */
 	public function isNumeric() {
@@ -47,6 +51,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение должно быть строкой
+	 *
 	 * @return Closure
 	 */
 	public function isString() {
@@ -59,6 +64,7 @@ trait Type {
 	 * Проверяемое значение будет преобразовано в Boolean
 	 * Для значений "1", "true", "on" и "yes" - true
 	 * Для значений "0", "false", "off", "no" и "" - false
+	 *
 	 * @return Closure
 	 */
 	public function toBoolean() {
@@ -73,6 +79,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение будет преобразовано в Integer
+	 *
 	 * @return Closure
 	 */
 	public function toInteger() {
@@ -85,7 +92,9 @@ trait Type {
 
 	/**
 	 * Проверяемое значение будет преобразовано в toDouble
+	 *
 	 * @param int $precision точность округления
+	 *
 	 * @return Closure
 	 */
 	public function toDouble($precision = 0) {
@@ -98,6 +107,7 @@ trait Type {
 
 	/**
 	 * Проверяемое значение будет преобразовано в String
+	 * 
 	 * @return Closure
 	 */
 	public function toString() {

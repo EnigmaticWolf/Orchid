@@ -8,9 +8,11 @@ use RecursiveDirectoryIterator;
 class Cache {
 	/**
 	 * Записывает данные во временный файл
+	 *
 	 * @param string $key      ключ
 	 * @param mixed  $value    значение для записи
 	 * @param int    $duration время жизни файла (По умолчанию -1 - вечно)
+	 *
 	 * @return int|false количество байт записанных в случае успеха
 	 */
 	public static function write($key, $value, $duration = -1) {
@@ -24,8 +26,10 @@ class Cache {
 
 	/**
 	 * Читаемт данные из временного файла
+	 *
 	 * @param string $key     ключ
 	 * @param mixed  $default возвращаемое значение, если данных нет
+	 *
 	 * @return mixed
 	 */
 	public static function read($key, $default = null) {
@@ -47,7 +51,9 @@ class Cache {
 
 	/**
 	 * Удаляет временный файл
+	 *
 	 * @param string $key ключ
+	 *
 	 * @return boolean
 	 */
 	public static function delete($key) {
@@ -62,6 +68,7 @@ class Cache {
 
 	/**
 	 * Удаляет все временные файлы
+	 * 
 	 * @return boolean
 	 */
 	public static function flush() {
@@ -89,7 +96,9 @@ class Cache {
 
 	/**
 	 * Возвращает путь и название временного файла
+	 *
 	 * @param string $key
+	 *
 	 * @return string
 	 */
 	protected static function getCacheFilePath($key) {

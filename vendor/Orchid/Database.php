@@ -22,9 +22,9 @@ class Database {
 	/**
 	 * Инициализиует подключения
 	 *
-	 * @param Configuration $configs
+	 * @param $configs
 	 */
-	public static function initialize(Configuration $configs) {
+	public static function initialize($configs) {
 		$default = [
 			"dsn"      => "",
 			"username" => "",
