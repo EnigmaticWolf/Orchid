@@ -37,7 +37,7 @@ final class Daemon {
 			if (!pcntl_fork()) {
 				posix_setsid();
 				static::$pid = getmypid();
-				static::$pidFile = App::getBaseDir() . "/cache/" . static::$name . ".pid";
+				static::$pidFile = App::getBaseDir() . "/storage/cache/" . static::$name . ".pid";
 
 				if (!file_exists(static::$pidFile)) {
 					// запись pid в файл
@@ -45,9 +45,7 @@ final class Daemon {
 
 					// обработка завершения работы демона
 					register_shutdown_function(function () {
-						if (file_exists(Daemon::$pidFile)) {
-							unlink(Daemon::$pidFile);
-						}
+						unlink(Daemon::$pidFile);
 					});
 				} else {
 					echo "Daemon already running!" . PHP_EOL;
@@ -68,8 +66,8 @@ final class Daemon {
 	 */
 	public static function writeLog() {
 		if (PHP_SAPI == "cli") {
-			static::$log = App::getBaseDir() . "/cache/" . static::$name . ".log";
-			static::$logErr = App::getBaseDir() . "/cache/" . static::$name . "-error.log";
+			static::$log = App::getBaseDir() . "/storage/cache/" . static::$name . ".log";
+			static::$logErr = App::getBaseDir() . "/storage/cache/" . static::$name . "-error.log";
 
 			fclose(STDIN);
 			$GLOBALS["STDIN"] = fopen("/dev/null", "r");

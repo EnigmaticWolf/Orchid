@@ -132,8 +132,10 @@ class App {
 		if (isset($param["base_dir"])) {
 			static::$base_dir = $param["base_dir"];
 		} else {
-			if (isset($_SERVER["DOCUMENT_ROOT"])) {
+			if (!empty($_SERVER["DOCUMENT_ROOT"])) {
 				static::$base_dir = $_SERVER["DOCUMENT_ROOT"];
+			} elseif (defined("ORCHID")) {
+				static::$base_dir = ORCHID;
 			}
 		}
 
@@ -153,20 +155,6 @@ class App {
 			}
 		}
 
-		if (PHP_SAPI != "cli") {
-			// инициализиуем запрос
-			Request::initialize(
-				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
-				$_SERVER["REQUEST_METHOD"],
-				$_POST,
-				$_FILES,
-				$_COOKIE,
-				(isset($_SESSION) ? $_SESSION : [])
-			);
-		} else {
-			static::$args = array_slice($_SERVER["argv"], 1);
-		}
-
 		// дополнительный загрузшик
 		spl_autoload_register(function ($class) {
 			foreach (static::$autoload as $dir) {
@@ -180,41 +168,55 @@ class App {
 			}
 		});
 
-		// обработка исключений
-		set_exception_handler(function (Exception $ex) {
-			ob_end_clean();
+		if (PHP_SAPI != "cli") {
+			// инициализиуем запрос
+			Request::initialize(
+				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
+				$_SERVER["REQUEST_METHOD"],
+				$_POST,
+				$_FILES,
+				$_COOKIE,
+				(isset($_SESSION) ? $_SESSION : [])
+			);
 
-			if (static::$debug) {
-				$message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " . $ex->getFile() . " (at " . $ex->getLine() . " line)\nTrace:\n" . $ex->getTraceAsString();
-			} else {
-				$message = "Internal Error";
-			}
-
-			Response::create($message, Response::HTTP_INTERNAL_SERVER_ERROR, "txt");
-		});
-
-		// обработка заверщения работы
-		register_shutdown_function(function () {
-			if (($error = error_get_last()) && error_reporting() & $error["type"]) {
+			// обработка исключений
+			set_exception_handler(function (Exception $ex) {
 				ob_end_clean();
 
 				if (static::$debug) {
-					$message = "ERROR: " . $error["message"] . " (code " . $error["type"] . ")\nFile: " . $error["file"] . " (at " . $error["line"] . " line)";
+					$message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " . $ex->getFile() . " (at " . $ex->getLine() . " line)\nTrace:\n" . $ex->getTraceAsString();
 				} else {
 					$message = "Internal Error";
 				}
 
 				Response::create($message, Response::HTTP_INTERNAL_SERVER_ERROR, "txt");
-			} else {
-				if (Response::isOk() && !Response::getContent()) {
-					Response::setStatus(Response::HTTP_NOT_FOUND);
-					Response::setContent("Path not found");
-				}
-			}
+			});
 
-			Task::trigger("shutdown");
-			Response::send();
-		});
+			// обработка заверщения работы
+			register_shutdown_function(function () {
+				if (($error = error_get_last()) && error_reporting() & $error["type"]) {
+					ob_end_clean();
+
+					if (static::$debug) {
+						$message = "ERROR: " . $error["message"] . " (code " . $error["type"] . ")\nFile: " . $error["file"] . " (at " . $error["line"] . " line)";
+					} else {
+						$message = "Internal Error";
+					}
+
+					Response::create($message, Response::HTTP_INTERNAL_SERVER_ERROR, "txt");
+				} else {
+					if (Response::isOk() && !Response::getContent()) {
+						Response::setStatus(Response::HTTP_NOT_FOUND);
+						Response::setContent("Path not found");
+					}
+				}
+
+				Task::trigger("shutdown");
+				Response::send();
+			});
+		} else {
+			static::$args = array_slice($_SERVER["argv"], 1);
+		}
 	}
 
 	/**
