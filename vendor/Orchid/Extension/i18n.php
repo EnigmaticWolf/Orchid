@@ -37,7 +37,12 @@ namespace Orchid\Extension {
 		 */
 		public static function initialize($default = "ru") {
 			$lang = static::$force ? static::$force : Request::getClientLang($default);
-			$path = static::getLangFilePath(trim($lang));
+			// дириктория языковых файлов по-умолчанию
+			$path = App::getBaseDir() . "/storage/i18n/" . static::$prefix . trim($lang) . ".php";
+
+			if (($file = App::getPath("lang:" . static::$prefix . $lang . ".php")) !== false) {
+				$path = $file;
+			}
 
 			if (file_exists($path)) {
 				$ext = pathinfo($path);
@@ -60,24 +65,6 @@ namespace Orchid\Extension {
 					throw new FileNotFoundException("Не удалось найти файл языка");
 				}
 			}
-		}
-
-		/**
-		 * Возвращает путь и название языкового файла
-		 *
-		 * @param string $locale выбранный язык
-		 *
-		 * @return string
-		 */
-		protected static function getLangFilePath($locale) {
-			// директориия хранилища по-умолчанию
-			$path = App::getBaseDir() . "/storage/i18n/";
-
-			if (($lang = App::getPath("lang:")) !== false) {
-				$path = $lang;
-			}
-
-			return $path . static::$prefix . $locale . ".php";
 		}
 	}
 }
