@@ -7,7 +7,7 @@ abstract class Model {
 	 * Массив описания полей модели
 	 * @var array
 	 */
-	protected static $default = [];
+	protected static $field = [];
 
 	/**
 	 * Массив данных модели
@@ -16,7 +16,7 @@ abstract class Model {
 	protected $data = [];
 
 	public final function __construct(array $data = []) {
-		$this->setAll(array_merge(static::$default, $data));
+		$this->setAll(array_merge(static::$field, $data));
 	}
 
 	/**
@@ -26,7 +26,7 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function set($key, $value = null) {
-		if (array_key_exists($key, static::$default)) {
+		if (array_key_exists($key, static::$field)) {
 			$this->data[$key] = $value;
 		}
 
@@ -69,7 +69,7 @@ abstract class Model {
 	 * @return bool
 	 */
 	public function isEmpty() {
-		return static::$default === $this->data;
+		return static::$field === $this->data;
 	}
 
 	/**
@@ -78,7 +78,7 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function delete($key) {
-		$this->data[$key] = static::$default[$key];
+		$this->data[$key] = static::$field[$key];
 
 		return $this;
 	}
@@ -88,7 +88,7 @@ abstract class Model {
 	 * @return $this
 	 */
 	public function clear() {
-		$this->data = static::$default;
+		$this->data = static::$field;
 
 		return $this;
 	}

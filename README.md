@@ -166,7 +166,7 @@ Orchid\Extension\Foo::bar(); // Hello!
 Создание, редактирование и удаление сессий.
 
 **Str**
-Работа со строками, безопасное обрезание, склонение и др.
+Работа со строками, безопасное усечение текста, склонение и др.
 
 ## Модули
 Модули - это основной функционал `Orchid`, их методы глобально доступны, кроме того, они могут добавлять: правила роутинга, сервисы, задачи.
@@ -320,7 +320,7 @@ Memory::initialize(Configuration::fromArray([
 ]));
 
 Memory::get($key, $default = false);
-Memory::set($key, $value, $expire = 0);
+Memory::set($key, $value, $expire = 0, $tag = null);
 Memory::delete($key);
 Memory::flush();
 Memory::getByTag($tag);
@@ -354,18 +354,18 @@ Memory::$cachedKeys = [
 ### Модели
 ```php
 class Car extends Orchid\Entity\Model {
-    protected static $default = [
+    protected static $field = [
         "brand" => "",
         "model" => "",
         "color" => "",
     ];
 
     public function read(array $data = []) {
-        // выборка модели из внешнего хранилища
+        // выборка данных из внешнего хранилища
     }
 
     public function save() {
-        // вставка/обновление модели во внешнее хранилище
+        // вставка/обновление данных во внешнее хранилище
     }
 
     /**
@@ -441,7 +441,7 @@ $valid->attr("username")
 $valid->attr("email")
       ->addRule($valid->isEmail(), "Введённое значение не является валидным E-Mail адресом.");
 $valid->option("city")
-      ->addRule($valid->isSupportedCity(), "Простите, данный город не поодерживается.");
+      ->addRule($valid->isSupportedCity(), "Данный город не поддерживается.");
 
 // проверяем
 $result = $valid->validate();   // в случае успеха результат будет true
@@ -472,9 +472,9 @@ Task::add("custometask", function(){
 Task::trigger("custometask", $params=array());
 ```
 Кроме того, можно использовать три внутренних имени задач:
- + `before` - выполняется до Роутинга;
- + `after`  - выполняется после Роутинга;
- + `shutdown` - выполняется перед завершением работы;
+ + `before` - выполняется до роутинга;
+ + `after`  - выполняется после составления ответа;
+ + `shutdown` - выполняется после отправки ответа, перед завершением работы;
 
 ```php
 Task::add("after", function() {
