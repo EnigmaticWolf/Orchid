@@ -169,7 +169,7 @@ class App {
 		if (PHP_SAPI != "cli") {
 			// инициализиуем запрос
 			Request::initialize(
-				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
+				$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER['HTTP_HOST'] . ($_SERVER["SERVER_PORT"] == 80 ? "" : ":" . $_SERVER["SERVER_PORT"]) . $_SERVER['REQUEST_URI'],
 				$_SERVER["REQUEST_METHOD"],
 				$_POST,
 				$_FILES,
@@ -404,6 +404,18 @@ class App {
 	 */
 	public static function getBasePort() {
 		return static::$base_port;
+	}
+
+	/**
+	 * Возвращает ссылку
+	 *
+	 * @param  string $path
+	 * @param  string $app
+	 *
+	 * @return string
+	 */
+	public static function getUrl($path, $app = "") {
+		return Request::getUrl($app) . "/" . ltrim($path, "/");
 	}
 
 	/**
