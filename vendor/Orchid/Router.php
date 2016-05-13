@@ -4,7 +4,6 @@ namespace Orchid;
 
 use Closure;
 use RuntimeException;
-use Orchid\Entity\Exception\NoSuchMethodException;
 
 class Router {
 	/**
@@ -15,7 +14,7 @@ class Router {
 	protected static $route = [];
 
 	/**
-	 * Метод ссылка для метода bind объявляет Get роутинг
+	 * Метод-ссылка для метода bind объявляет Get роутинг
 	 *
 	 * @param      $path
 	 * @param      $callback
@@ -27,7 +26,7 @@ class Router {
 	}
 
 	/**
-	 * Метод ссылка для метода bind объявляет Post роутинг
+	 * Метод-ссылка для метода bind объявляет Post роутинг
 	 *
 	 * @param      $path
 	 * @param      $callback
@@ -48,46 +47,13 @@ class Router {
 	 * @param int     $priority
 	 */
 	public static function bind($path, $callback, $method = null, $condition = true, $priority = 0) {
-		if ((is_null($method) || Request::is($method)) && $condition) {
+		if ((is_null($method) || Request::isMethod($method)) && $condition) {
 			static::$route[] = [
 				"path"     => $path,
 				"callback" => $callback,
 				"priority" => $priority,
 			];
 		}
-	}
-
-	/**
-	 * Метод для привязки класса контроллера
-	 *
-	 * @param string $class
-	 * @param bool   $alias
-	 * @param null   $method
-	 * @param bool   $condition
-	 * @param int    $priority
-	 */
-	public static function bindClass($class, $alias = false, $method = null, $condition = true, $priority = 0) {
-		$clean = $alias ? $alias : trim(strtolower(str_replace("\\", "/", $class)), "\\");
-
-		static::bind("/" . $clean . "/*", function () use ($class, $clean) {
-			$part = explode("/", trim(str_replace($clean, "", Request::getPath()), "/"));
-			$action = isset($part[0]) ? $part[0] : "index";
-			$params = count($part) > 1 ? array_slice($part, 1) : [];
-
-			if (method_exists($class, $action)) {
-				return call_user_func_array([$class, $action], $params);
-			}
-
-			throw new NoSuchMethodException("Метод " . $action . " не найден в классе " . $class);
-		}, $method, $condition, $priority);
-
-		static::bind("/" . $clean, function () use ($class) {
-			if (method_exists($class, "index")) {
-				return call_user_func([$class, "index"]);
-			}
-
-			throw new NoSuchMethodException("Метод index не найден в классе " . $class);
-		}, $method, $condition, $priority);
 	}
 
 	/**
@@ -174,37 +140,5 @@ class Router {
 		}
 
 		throw new RuntimeException("Не удалось выполнить функцию");
-	}
-
-	/**
-	 * Перенаправляет на адрес
-	 *
-	 * @param  string $path
-	 * @param  string $app
-	 *
-	 * @return void
-	 */
-	public static function reroute($path, $app = "") {
-		if (strpos($path, "://") === false) {
-			if (substr($path, 0, 1) != "/") {
-				$path = "/" . $path;
-			}
-			$path = static::routeUrl($path, $app);
-		}
-
-		Response::setStatus(Response::HTTP_PERMANENTLY_REDIRECT);
-		Response::setHeader("Location", $path);
-	}
-
-	/**
-	 * Возвращает ссылку
-	 *
-	 * @param  string $path
-	 * @param  string $app
-	 *
-	 * @return string
-	 */
-	public static function routeUrl($path, $app = "") {
-		return Request::getUrl($app) . "/" . ltrim($path, "/");
 	}
 }

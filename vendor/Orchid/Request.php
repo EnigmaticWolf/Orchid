@@ -95,37 +95,26 @@ class Request {
 	 * @param array  $session
 	 */
 	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
-		// декодируем строку
-		$query = urldecode($query);
+		$parsed = parse_url(urldecode($query));
 
-		// записываем хост и порт
-		static::$host = parse_url($query, PHP_URL_HOST);
-		static::$port = parse_url($query, PHP_URL_PORT);
-
-		// заполняем URI
-		$uri = [];
-		foreach (explode("/", parse_url($query, PHP_URL_PATH)) as $part) {
-			if ($part) {
-				$uri[] = $part;
+		static::$host = isset($parsed["host"]) ? $parsed["host"] : $_SERVER['HTTP_HOST'];
+		static::$port = isset($parsed["port"]) ? $parsed["port"] : $_SERVER['SERVER_PORT'];
+		static::$uri = [];
+		if ($parsed["path"]) {
+			foreach (explode("/", $parsed["path"]) as $part) {
+				if ($part) {
+					static::$uri[] = $part;
+				}
 			}
 		}
-		static::$uri = $uri;
 		static::$method = $method;
-
-		// переписываем GET
-		parse_str(parse_url($query, PHP_URL_QUERY), $get);
-		static::$param = $get;
-
-		// проверяем php://input и объединяем с $_POST
-		if (Request::is("ajax")) {
-			if ($json = json_decode(@file_get_contents("php://input"), true)) {
-				$post = array_merge($post, $json);
-			}
+		static::$param = [];
+		if (isset($parsed["query"])) {
+			parse_str($parsed["query"], $get);
+			static::$param = $get;
 		}
 		static::$data = $post;
 		static::$file = $file;
-
-		// заполняем "печеньки" и сессию
 		static::$cookie = $cookie;
 		static::$session = $session;
 
@@ -135,67 +124,28 @@ class Request {
 				static::$headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
 			}
 		}
-
-		$_GET = $get;
-		$_POST = $post;
-		$_COOKIE = $cookie;
-		$_REQUEST = array_merge($get, $post, $cookie);
 	}
 
 	/**
-	 * @param $type
+	 * Это Ajax запрос
 	 *
-	 * @return bool|int
+	 * @return bool
 	 */
-	public static function is($type) {
-		switch (strtolower($type)) {
-			case "ajax": {
-				return (
-					(isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest") ||
-					(isset($_SERVER["CONTENT_TYPE"]) && stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false) ||
-					(isset($_SERVER["HTTP_CONTENT_TYPE"]) && stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false)
-				);
-			}
-			case "mobile": {
-				$mobileDevices = [
-					"midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", "portalmmm",
-					"sharp", "sie-", "sonyericsson", "symbian", "windows ce", "benq", "mda", "mot-",
-					"opera mini", "philips", "pocket pc", "sagem", "samsung", "sda", "sgh-", "vodafone",
-					"xda", "iphone", "ipod", "android",
-				];
+	public static function isAjax() {
+		return (
+			(isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest") ||
+			(isset($_SERVER["CONTENT_TYPE"]) && stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false) ||
+			(isset($_SERVER["HTTP_CONTENT_TYPE"]) && stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false)
+		);
+	}
 
-				return preg_match("/(" . implode("|", $mobileDevices) . ")/i", strtolower($_SERVER["HTTP_USER_AGENT"]));
-			}
-			case "head": {
-				return (strtolower(static::$method) == "head");
-			}
-			case "put": {
-				return (strtolower(static::$method) == "put");
-			}
-			case "post": {
-				return (strtolower(static::$method) == "post");
-			}
-			case "get": {
-				return (strtolower(static::$method) == "get");
-			}
-			case "delete": {
-				return (strtolower(static::$method) == "delete");
-			}
-			case "options": {
-				return (strtolower(static::$method) == "options");
-			}
-			case "trace": {
-				return (strtolower(static::$method) == "trace");
-			}
-			case "connect": {
-				return (strtolower(static::$method) == "connect");
-			}
-			case "secure": {
-				return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
-			}
-		}
-
-		return false;
+	/**
+	 * Это защищенное соединение (HTTPS)
+	 *
+	 * @return bool
+	 */
+	public static function isSecure() {
+		return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
 	}
 
 	/**
@@ -245,6 +195,17 @@ class Request {
 	 */
 	public static function getMethod() {
 		return static::$method;
+	}
+
+	/**
+	 * Проверяет текущий метод на соответствие указанному
+	 *
+	 * @param $method
+	 *
+	 * @return bool
+	 */
+	public static function isMethod($method) {
+		return (strtolower(static::$method) == $method);
 	}
 
 	/**
@@ -362,7 +323,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getScheme() {
-		return Request::is("ssl") ? "https" : "http";
+		return Request::isSecure() ? "https" : "http";
 	}
 
 	/**

@@ -483,6 +483,26 @@ class Response {
 	}
 
 	/**
+	 * Перенаправляет на адрес
+	 *
+	 * @param  string $path
+	 * @param  string $app
+	 *
+	 * @return void
+	 */
+	public static function redirect($path, $app = "") {
+		if (strpos($path, "://") === false) {
+			if (substr($path, 0, 1) != "/") {
+				$path = "/" . $path;
+			}
+			$path = App::getUrl($path, $app);
+		}
+
+		Response::setStatus(static::HTTP_PERMANENTLY_REDIRECT);
+		Response::setHeader("Location", $path);
+	}
+
+	/**
 	 * Проверяет был ли изменён ответ сравнивая заголовки: ETag, Last-Modified
 	 *
 	 * Если ответ небыл изменён, то статус будет изменён на 304, а ответ будет удалён
@@ -490,7 +510,7 @@ class Response {
 	 * @return bool
 	 */
 	public static function isNotModified() {
-		if (!Request::is(Request::METHOD_GET) && !Request::is(Request::METHOD_HEAD)) {
+		if (!Request::isMethod(Request::METHOD_GET) && !Request::isMethod(Request::METHOD_HEAD)) {
 			return false;
 		}
 
@@ -600,7 +620,7 @@ class Response {
 	 * @return mixed
 	 */
 	public static function isEmpty() {
-		return in_array(static::$statusCode, [204, 304]);
+		return in_array(static::$statusCode, [204, 304]); // RFC2616 10.3.6
 	}
 
 	/**
@@ -638,7 +658,7 @@ class Response {
 		}
 
 		// см. RFC2616 14.13
-		if (Request::is(Request::METHOD_HEAD)) {
+		if (Request::isMethod(Request::METHOD_HEAD)) {
 			$length = static::getHeader("Content-Length");
 			static::setContent(null);
 
