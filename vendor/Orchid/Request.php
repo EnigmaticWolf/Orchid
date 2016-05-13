@@ -97,8 +97,8 @@ class Request {
 	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
 		$parsed = parse_url(urldecode($query));
 
-		static::$host = isset($parsed["host"]) ? $parsed["host"] : $_SERVER['HTTP_HOST'];
-		static::$port = isset($parsed["port"]) ? $parsed["port"] : $_SERVER['SERVER_PORT'];
+		static::$host = isset($parsed["host"]) ? $parsed["host"] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null);
+		static::$port = isset($parsed["port"]) ? $parsed["port"] : (isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : null);
 		static::$uri = [];
 		if ($parsed["path"]) {
 			foreach (explode("/", $parsed["path"]) as $part) {
