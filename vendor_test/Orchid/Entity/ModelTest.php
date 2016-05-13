@@ -73,7 +73,7 @@ class ModelTest extends PHPUnit_Framework_TestCase {
 }
 
 class Car extends Model {
-	protected static $default = [
+	protected static $field = [
 		"mark"   => "",
 		"model"  => "",
 		"color"  => "",

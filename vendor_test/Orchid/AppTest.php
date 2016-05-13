@@ -41,4 +41,12 @@ class AppTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals("/vendor_test/Orchid/AppTest.php", App::pathToUrl(__FILE__));
 		$this->assertEquals("/vendor_test/Orchid/AppTest.php", App::pathToUrl("test:AppTest.php"));
 	}
+
+	public function testGetUrl() {
+		$this->assertEquals("http://domain.ru/", App::getUrl("/"));
+		$this->assertEquals("http://domain.ru/test", App::getUrl("/test"));
+
+		$this->assertEquals("http://other.domain.ru/", App::getUrl("/", "other"));
+		$this->assertEquals("http://other.domain.ru/test", App::getUrl("/test", "other"));
+	}
 }
