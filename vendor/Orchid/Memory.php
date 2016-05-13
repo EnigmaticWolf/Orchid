@@ -2,7 +2,7 @@
 
 namespace Orchid;
 
-use Orchid\Entity\Configuration;
+use Orchid\Entity\Config;
 use Orchid\Entity\Driver\Cache\Memcache;
 use Orchid\Entity\Exception\CacheException;
 
@@ -40,7 +40,7 @@ class Memory {
 	/**
 	 * Инициализиует подключения
 	 *
-	 * @param $configs
+	 * @param Config|array $configs
 	 *
 	 * @return void
 	 */

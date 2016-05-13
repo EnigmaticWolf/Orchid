@@ -4,7 +4,7 @@ namespace Orchid\Entity;
 
 use Closure;
 
-abstract class Validator {
+class Validator {
 	protected $data  = [];
 	protected $field = null;
 	protected $rule  = [];
@@ -75,5 +75,4 @@ abstract class Validator {
 
 		return $this->error ? $this->error : true;
 	}
-
 }

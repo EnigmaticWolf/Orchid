@@ -5,7 +5,7 @@ namespace Orchid;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Orchid\Entity\Configuration;
+use Orchid\Entity\Config;
 use Orchid\Entity\Exception\DatabaseException;
 
 class Database {
@@ -22,7 +22,7 @@ class Database {
 	/**
 	 * Инициализиует подключения
 	 *
-	 * @param $configs
+	 * @param Config|array $configs
 	 */
 	public static function initialize($configs) {
 		$default = [

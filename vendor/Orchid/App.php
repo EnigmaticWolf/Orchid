@@ -209,7 +209,7 @@ class App {
 					}
 				}
 
-				Task::trigger("shutdown");
+				Event::trigger("shutdown");
 				Response::send();
 			});
 		} else {
@@ -479,9 +479,9 @@ class App {
 		ob_start("ob_gzhandler");
 		ob_implicit_flush(false);
 
-		Task::trigger("before");
+		Event::trigger("before");
 		Response::create(Router::dispatch());
-		Task::trigger("after");
+		Event::trigger("after");
 	}
 
 	/**

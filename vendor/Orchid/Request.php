@@ -205,7 +205,7 @@ class Request {
 	 * @return bool
 	 */
 	public static function isMethod($method) {
-		return (strtolower(static::$method) == $method);
+		return (strtoupper(static::$method) == $method);
 	}
 
 	/**

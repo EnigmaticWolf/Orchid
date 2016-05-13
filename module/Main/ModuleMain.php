@@ -1,18 +1,18 @@
 <?php
 
 use Main\Controller\Main;
-use Orchid\Entity\Configuration;
+use Orchid\Entity\Config;
 use Orchid\Entity\Module;
 use Orchid\Router;
 
 class ModuleMain extends Module {
 	/**
-	 * @var Configuration
+	 * @var Config
 	 */
 	static $config = null;
 
 	public static function initialize() {
-		static::$config = Configuration::fromFile("Main:ExampleConfig.php");
+		static::$config = Config::fromFile("Main:ExampleConfig.php");
 
 		Router::get("/", function(){
 			return Main::index();

@@ -8,7 +8,7 @@ use RuntimeException;
 use Orchid\App;
 use Orchid\Entity\Exception\FileNotFoundException;
 
-final class Configuration implements ArrayAccess, Iterator {
+class Config implements ArrayAccess, Iterator {
 	protected $position = 0;
 	protected $array;
 
@@ -54,10 +54,6 @@ final class Configuration implements ArrayAccess, Iterator {
 	 * @throws RuntimeException
 	 */
 	protected function __construct(array $data) {
-		if (empty($data)) {
-			throw new RuntimeException("Переданный массив пуст");
-		}
-
 		$this->array = $data;
 	}
 

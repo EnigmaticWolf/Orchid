@@ -5,7 +5,7 @@ namespace Orchid\Entity;
 use RuntimeException;
 use Orchid\App;
 
-final class Daemon {
+class Daemon {
 	public static $name = "daemon";
 
 	protected static $pid     = null;

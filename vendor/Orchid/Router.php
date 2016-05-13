@@ -22,7 +22,7 @@ class Router {
 	 * @param int  $priority
 	 */
 	public static function get($path, $callback, $condition = true, $priority = 0) {
-		static::bind($path, $callback, "GET", $condition, $priority);
+		static::bind($path, $callback, Request::METHOD_GET, $condition, $priority);
 	}
 
 	/**
@@ -34,7 +34,7 @@ class Router {
 	 * @param int  $priority
 	 */
 	public static function post($path, $callback, $condition = true, $priority = 0) {
-		static::bind($path, $callback, "POST", $condition, $priority);
+		static::bind($path, $callback, Request::METHOD_POST, $condition, $priority);
 	}
 
 	/**
