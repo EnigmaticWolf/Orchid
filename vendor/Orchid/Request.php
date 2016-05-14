@@ -327,7 +327,7 @@ class Request {
 	}
 
 	/**
-	 * Возвращает префикс приложения
+	 * Возвращает субдомен
 	 *
 	 * Если текущее приложение public, то будет возвращена пустая строка
 	 *
@@ -335,7 +335,7 @@ class Request {
 	 *
 	 * @return string
 	 */
-	public static function getApp($app = "") {
+	public static function getSubdomain($app = "") {
 		if (($app = (!$app ? App::getApp() : $app)) && $app != "public") {
 			return $app . ".";
 		}
@@ -385,7 +385,7 @@ class Request {
 	 * @return string
 	 */
 	public static function getUrl($app = "", $withPath = false) {
-		$url = static::getScheme() . "://" . static::getApp($app) . static::getHost() . static::getPort();
+		$url = static::getScheme() . "://" . static::getSubdomain($app) . static::getHost() . static::getPort();
 
 		if ($withPath) {
 			$url .= Request::getPath();
