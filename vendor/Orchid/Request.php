@@ -210,6 +210,7 @@ class Request {
 	 * @param string $index
 	 *
 	 * @return array|mixed
+	 * @throws NullPointException
 	 */
 	public function getUri($index = "") {
 		if ($index !== "") {
@@ -229,6 +230,7 @@ class Request {
 	 * @param string $key
 	 *
 	 * @return array|mixed
+	 * @throws NullPointException
 	 */
 	public function getParam($key = "") {
 		if ($key) {
@@ -248,6 +250,7 @@ class Request {
 	 * @param string $key
 	 *
 	 * @return array|mixed
+	 * @throws NullPointException
 	 */
 	public function getData($key = "") {
 		if ($key) {
@@ -267,6 +270,7 @@ class Request {
 	 * @param string $key
 	 *
 	 * @return array|mixed
+	 * @throws NullPointException
 	 */
 	public function getFile($key = "") {
 		if ($key) {
