@@ -2,6 +2,8 @@
 
 namespace Orchid;
 
+use Orchid\Entity\Exception\NullPointException;
+
 class Request {
 	const METHOD_HEAD = "HEAD";
 	const METHOD_GET = "GET";
@@ -15,123 +17,157 @@ class Request {
 	const METHOD_CONNECT = "CONNECT";
 
 	/**
-	 * Хост
+	 * Flag is HTTPS
 	 *
-	 * @var string
+	 * @var bool
 	 */
-	protected static $host = "";
+	protected $secure = false;
 
 	/**
-	 * Порт
+	 * Request host
+	 *
+	 * @var array
+	 */
+	protected $host = [];
+
+	/**
+	 * Request port
 	 *
 	 * @var int
 	 */
-	protected static $port = 80;
+	protected $port = 0;
 
 	/**
-	 * Строка
-	 *
-	 * @var array
-	 */
-	protected static $uri = [];
-
-	/**
-	 * Метод
+	 * Request method
 	 *
 	 * @var string
 	 */
-	protected static $method = "";
+	protected $method = null;
 
 	/**
-	 * Параметры
+	 * Array of GET parameters
 	 *
 	 * @var array
 	 */
-	protected static $param = [];
+	protected $get = [];
 
 	/**
-	 * POST данные
+	 * Array of POST data
 	 *
 	 * @var array
 	 */
-	protected static $data = [];
+	protected $post = [];
 
 	/**
-	 * Загруженные файлы
+	 * Array of URI data
 	 *
 	 * @var array
 	 */
-	protected static $file = [];
+	protected $uri = [];
 
 	/**
-	 * Куки
+	 * Array of Cookie
 	 *
 	 * @var array
 	 */
-	protected static $cookie = [];
+	protected $cookie = [];
 
 	/**
-	 * Сессия
+	 * Array of headers
 	 *
 	 * @var array
 	 */
-	public static $session = [];
+	protected $headers = [];
 
 	/**
-	 * Массив заголовков
+	 * Request constructor.
 	 *
-	 * @var array
+	 * @param array $post
+	 * @param array $file
+	 * @param array $cookie
 	 */
-	public static $headers = [];
+	public function __construct($post = [], $file = [], $cookie = []) {
+		$this->secure = strtolower($_SERVER["REQUEST_SCHEME"]) == "https";
+		$this->host = $_SERVER['HTTP_HOST'];
+		$this->port = $_SERVER["SERVER_PORT"];
+		$this->method = strtoupper($_SERVER["REQUEST_METHOD"]);
 
-	/**
-	 * Подготавливает параметры запроса для дальнейшего использования
-	 *
-	 * @param string $query
-	 * @param string $method
-	 * @param array  $post
-	 * @param array  $file
-	 * @param array  $cookie
-	 * @param array  $session
-	 */
-	public static function initialize($query, $method = "GET", $post = [], $file = [], $cookie = [], $session = []) {
-		$parsed = parse_url(urldecode($query));
-
-		static::$host = isset($parsed["host"]) ? $parsed["host"] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null);
-		static::$port = isset($parsed["port"]) ? $parsed["port"] : (isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : null);
-		static::$uri = [];
-		if ($parsed["path"]) {
-			foreach (explode("/", $parsed["path"]) as $part) {
+		$url = parse_url($_SERVER['REQUEST_URI']);
+		if (isset($url["query"])) {
+			parse_str($url["query"], $this->get);
+		}
+		if (isset($url["path"])) {
+			foreach (explode("/", $url["path"]) as $part) {
 				if ($part) {
-					static::$uri[] = $part;
+					$this->uri[] = $part;
 				}
 			}
 		}
-		static::$method = $method;
-		static::$param = [];
-		if (isset($parsed["query"])) {
-			parse_str($parsed["query"], $get);
-			static::$param = $get;
-		}
-		static::$data = $post;
-		static::$file = $file;
-		static::$cookie = $cookie;
-		static::$session = $session;
 
-		// наполняем массив заголовков
+		$this->post = $post ? $post : $_POST;
+		$this->file = $file ? $file : $_FILES;
+		$this->cookie = $cookie ? $cookie : $_COOKIE;
+
+		// fill an array of headers
 		foreach ($_SERVER as $name => $value) {
 			if (substr($name, 0, 5) == "HTTP_") {
-				static::$headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
+				$this->headers[str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))))] = $value;
 			}
 		}
 	}
 
 	/**
-	 * Это Ajax запрос
+	 * Return client IP address
+	 *
+	 * @return null
+	 */
+	public static function getClientIp() {
+		$result = null;
+
+		switch (true) {
+			case isset($_SERVER["HTTP_X_FORWARDED_FOR"]): {
+				$result = $_SERVER["HTTP_X_FORWARDED_FOR"];
+				break;
+			}
+			case isset($_SERVER["HTTP_CLIENT_IP"]): {
+				$result = $_SERVER["HTTP_CLIENT_IP"];
+				break;
+			}
+			case isset($_SERVER["REMOTE_ADDR"]): {
+				$result = $_SERVER["REMOTE_ADDR"];
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Return method type
+	 *
+	 * @return string
+	 */
+	public function getMethod() {
+		return $this->method;
+	}
+
+	/**
+	 * Check request method
+	 *
+	 * @param $method
 	 *
 	 * @return bool
 	 */
-	public static function isAjax() {
+	public function isMethod($method) {
+		return $this->method == $method;
+	}
+
+	/**
+	 * Check AJAX request
+	 *
+	 * @return bool
+	 */
+	public function isAjax() {
 		return (
 			(isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest") ||
 			(isset($_SERVER["CONTENT_TYPE"]) && stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false) ||
@@ -140,257 +176,107 @@ class Request {
 	}
 
 	/**
-	 * Это защищенное соединение (HTTPS)
+	 * Check is secure request (HTTPS)
 	 *
 	 * @return bool
 	 */
-	public static function isSecure() {
-		return (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off");
+	public function isSecure() {
+		return $this->secure;
 	}
 
 	/**
-	 * Возвращает значение заголовка по ключу
+	 * Return header value by name or array of headers
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 * @throws NullPointException
+	 */
+	public function getHeader($name = "") {
+		if ($name) {
+			if (isset($this->headers[$name])) {
+				return $this->headers[$name];
+			}
+
+			throw new NullPointException("Header with key '" . $name . "' not found");
+		}
+
+		return $this->headers;
+	}
+
+	/**
+	 * Return uri by index or array of uri's
+	 *
+	 * @param string $index
+	 *
+	 * @return array|mixed
+	 */
+	public function getUri($index = "") {
+		if ($index !== "") {
+			if (isset($this->uri[$index])) {
+				return $this->uri[$index];
+			}
+
+			throw new NullPointException("Uri with index '" . $index . "' not found");
+		}
+
+		return $this->uri;
+	}
+
+	/**
+	 * Return GET parameter or get array
 	 *
 	 * @param string $key
 	 *
-	 * @return mixed
+	 * @return array|mixed
 	 */
-	public static function getHeader($key) {
-		return isset(static::$headers[$key]) ? static::$headers[$key] : null;
+	public function getParam($key = "") {
+		if ($key) {
+			if (isset($this->get[$key])) {
+				return $this->get[$key];
+			}
+
+			throw new NullPointException("GET parameter with key '" . $key . "' not found");
+		}
+
+		return $this->get;
 	}
 
 	/**
-	 * Возвращает весь список заголовков
-	 *
-	 * @return array
-	 */
-	public static function getHeaderList() {
-		return static::$headers;
-	}
-
-	/**
-	 * Возвращает значение из строки запроса по индексу
-	 *
-	 * @param int $index
-	 *
-	 * @return mixed
-	 */
-	public static function getUri($index) {
-		return isset(static::$uri[$index]) ? static::$uri[$index] : null;
-	}
-
-	/**
-	 * Возвращает весь список
-	 *
-	 * @return array
-	 */
-	public static function getUriList() {
-		return static::$uri;
-	}
-
-	/**
-	 * Возвращает текущий метод
-	 *
-	 * @return string
-	 */
-	public static function getMethod() {
-		return static::$method;
-	}
-
-	/**
-	 * Проверяет текущий метод на соответствие указанному
-	 *
-	 * @param $method
-	 *
-	 * @return bool
-	 */
-	public static function isMethod($method) {
-		return (strtoupper(static::$method) == $method);
-	}
-
-	/**
-	 * Возвращает GET параметр по ключу
+	 * Return POST data or post array
 	 *
 	 * @param string $key
 	 *
-	 * @return mixed
+	 * @return array|mixed
 	 */
-	public static function getParam($key) {
-		return isset(static::$param[$key]) ? static::$param[$key] : null;
+	public function getData($key = "") {
+		if ($key) {
+			if (isset($this->post[$key])) {
+				return $this->post[$key];
+			}
+
+			throw new NullPointException("POST data with key '" . $key . "' not found");
+		}
+
+		return $this->post;
 	}
 
 	/**
-	 * Возвращает весь список GET параметров
-	 *
-	 * @return array
-	 */
-	public static function getParamList() {
-		return static::$param;
-	}
-
-	/**
-	 * Возвращает POST параметр по ключу
+	 * Return FILE data or files array
 	 *
 	 * @param string $key
 	 *
-	 * @return mixed
+	 * @return array|mixed
 	 */
-	public static function getData($key) {
-		return isset(static::$data[$key]) ? static::$data[$key] : null;
-	}
-
-	/**
-	 * Возвращает весь список POST параметров
-	 *
-	 * @return array
-	 */
-	public static function getDataList() {
-		return static::$data;
-	}
-
-	/**
-	 * Возвращает массив с данными загруженного файла по ключу
-	 *
-	 * @param string $key
-	 *
-	 * @return array
-	 */
-	public static function getFile($key) {
-		return isset(static::$file[$key]) ? static::$file[$key] : null;
-	}
-
-	/**
-	 * Возвращает весь список загруженных файлов
-	 *
-	 * @return array
-	 */
-	public static function getAllFiles() {
-		return static::$file;
-	}
-
-	/**
-	 * Возвращает IP адрес клиента
-	 *
-	 * @return string|null
-	 */
-	public static function getClientIp() {
-		switch (true) {
-			case isset($_SERVER["HTTP_X_FORWARDED_FOR"]): {
-				return $_SERVER["HTTP_X_FORWARDED_FOR"];
+	public function getFile($key = "") {
+		if ($key) {
+			if (isset($this->file[$key])) {
+				return $this->file[$key];
 			}
-			case isset($_SERVER["HTTP_CLIENT_IP"]): {
-				return $_SERVER["HTTP_CLIENT_IP"];
-			}
-			case isset($_SERVER["REMOTE_ADDR"]): {
-				return $_SERVER["REMOTE_ADDR"];
-			}
+
+			throw new NullPointException("FILE with key '" . $key . "' not found");
 		}
 
-		return null;
-	}
-
-	/**
-	 * Возвращает наиболее подходящий язык браузера клиента из заданных в locale
-	 *
-	 * @param string $default по умолчанию русский
-	 *
-	 * @return string
-	 */
-	public static function getClientLang($default = "ru") {
-		if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) && ($list = strtolower($_SERVER["HTTP_ACCEPT_LANGUAGE"]))) {
-			if (preg_match_all("/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/", $list, $list)) {
-				$language = [];
-
-				foreach (array_combine($list[1], $list[2]) as $lang => $priority) {
-					$language[$lang] = (float)($priority ? $priority : 1);
-				}
-				arsort($language, SORT_NUMERIC);
-
-				foreach ($language as $lang => $priority) {
-					if (in_array($lang, App::getLocaleList())) {
-						return $lang;
-					}
-				}
-			}
-		}
-
-		return $default;
-	}
-
-	/**
-	 * Возвращает схему
-	 *
-	 * @return string
-	 */
-	public static function getScheme() {
-		return Request::isSecure() ? "https" : "http";
-	}
-
-	/**
-	 * Возвращает субдомен
-	 *
-	 * Если текущее приложение public, то будет возвращена пустая строка
-	 *
-	 * @param string $app принудительный выбор приложения
-	 *
-	 * @return string
-	 */
-	public static function getSubdomain($app = "") {
-		if (($app = (!$app ? App::getApp() : $app)) && $app != "public") {
-			return $app . ".";
-		}
-
-		return "";
-	}
-
-	/**
-	 * Возвращает базовое имя хоста
-	 *
-	 * @return mixed
-	 */
-	public static function getHost() {
-		return App::getBaseHost();
-	}
-
-	/**
-	 * Возвращает порт
-	 *
-	 * Если порт текущий 80, то будет возвращена пустая строка
-	 *
-	 * @return string
-	 */
-	public static function getPort() {
-		if (($port = App::getBasePort()) != 80) {
-			return ":" . $port;
-		}
-
-		return "";
-	}
-
-	/**
-	 * Возвращает путь
-	 *
-	 * @return string
-	 */
-	public static function getPath() {
-		return "/" . implode("/", static::$uri);
-	}
-
-	/**
-	 * Возвращает адрес страницы
-	 *
-	 * @param string $app
-	 * @param bool   $withPath вернуть адрес со строкой запроса
-	 *
-	 * @return string
-	 */
-	public static function getUrl($app = "", $withPath = false) {
-		$url = static::getScheme() . "://" . static::getSubdomain($app) . static::getHost() . static::getPort();
-
-		if ($withPath) {
-			$url .= Request::getPath();
-		}
-
-		return rtrim($url, "/");
+		return $this->file;
 	}
 }
