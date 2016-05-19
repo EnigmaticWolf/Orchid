@@ -4,11 +4,17 @@ namespace Orchid;
 
 use DateTime;
 use DateTimeZone;
+use InvalidArgumentException;
+use UnexpectedValueException;
+use Orchid\Entity\Exception\NullPointException;
 
 class Response {
+	// informational 1xx
 	const HTTP_CONTINUE = 100;
 	const HTTP_SWITCHING_PROTOCOLS = 101;
-	const HTTP_PROCESSING = 102;
+	const HTTP_PROCESSING = 102; // RFC2518
+
+	// successful 2xx
 	const HTTP_OK = 200;
 	const HTTP_CREATED = 201;
 	const HTTP_ACCEPTED = 202;
@@ -16,9 +22,11 @@ class Response {
 	const HTTP_NO_CONTENT = 204;
 	const HTTP_RESET_CONTENT = 205;
 	const HTTP_PARTIAL_CONTENT = 206;
-	const HTTP_MULTI_STATUS = 207;
-	const HTTP_ALREADY_REPORTED = 208;
-	const HTTP_IM_USED = 226;
+	const HTTP_MULTI_STATUS = 207; // RFC4918
+	const HTTP_ALREADY_REPORTED = 208; // RFC5842
+	const HTTP_IM_USED = 226; // RFC3229
+
+	// redirection 3xx
 	const HTTP_MULTIPLE_CHOICES = 300;
 	const HTTP_MOVED_PERMANENTLY = 301;
 	const HTTP_FOUND = 302;
@@ -27,7 +35,9 @@ class Response {
 	const HTTP_USE_PROXY = 305;
 	const HTTP_RESERVED = 306;
 	const HTTP_TEMPORARY_REDIRECT = 307;
-	const HTTP_PERMANENTLY_REDIRECT = 308;
+	const HTTP_PERMANENTLY_REDIRECT = 308; // RFC7238
+
+	// client error 4xx
 	const HTTP_BAD_REQUEST = 400;
 	const HTTP_UNAUTHORIZED = 401;
 	const HTTP_PAYMENT_REQUIRED = 402;
@@ -46,79 +56,33 @@ class Response {
 	const HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
 	const HTTP_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
 	const HTTP_EXPECTATION_FAILED = 417;
-	const HTTP_I_AM_A_TEAPOT = 418;
-	const HTTP_UNPROCESSABLE_ENTITY = 422;
-	const HTTP_LOCKED = 423;
-	const HTTP_FAILED_DEPENDENCY = 424;
-	const HTTP_RESERVED_FOR_WEBDAV_ADVANCED_COLLECTIONS_EXPIRED_PROPOSAL = 425;
-	const HTTP_UPGRADE_REQUIRED = 426;
-	const HTTP_PRECONDITION_REQUIRED = 428;
-	const HTTP_TOO_MANY_REQUESTS = 429;
-	const HTTP_REQUEST_HEADER_FIELDS_TOO_LARGE = 431;
+	const HTTP_I_AM_A_TEAPOT = 418; // RFC2324
+	const HTTP_MISDIRECTED_REQUEST = 421; // RFC7540
+	const HTTP_UNPROCESSABLE_ENTITY = 422; // RFC4918
+	const HTTP_LOCKED = 423;  // RFC4918
+	const HTTP_FAILED_DEPENDENCY = 424; // RFC4918
+	const HTTP_RESERVED_FOR_WEBDAV_ADVANCED_COLLECTIONS_EXPIRED_PROPOSAL = 425; // RFC2817
+	const HTTP_UPGRADE_REQUIRED = 426; // RFC2817
+	const HTTP_PRECONDITION_REQUIRED = 428; // RFC6585
+	const HTTP_TOO_MANY_REQUESTS = 429; // RFC6585
+	const HTTP_REQUEST_HEADER_FIELDS_TOO_LARGE = 431; // RFC6585
 	const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451;
+
+	// server error 5xx
 	const HTTP_INTERNAL_SERVER_ERROR = 500;
 	const HTTP_NOT_IMPLEMENTED = 501;
 	const HTTP_BAD_GATEWAY = 502;
 	const HTTP_SERVICE_UNAVAILABLE = 503;
 	const HTTP_GATEWAY_TIMEOUT = 504;
 	const HTTP_VERSION_NOT_SUPPORTED = 505;
-	const HTTP_VARIANT_ALSO_NEGOTIATES_EXPERIMENTAL = 506;
-	const HTTP_INSUFFICIENT_STORAGE = 507;
-	const HTTP_LOOP_DETECTED = 508;
-	const HTTP_NOT_EXTENDED = 510;
-	const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
+	const HTTP_VARIANT_ALSO_NEGOTIATES_EXPERIMENTAL = 506; // RFC2295
+	const HTTP_INSUFFICIENT_STORAGE = 507; // RFC4918
+	const HTTP_LOOP_DETECTED = 508; // RFC5842
+	const HTTP_NOT_EXTENDED = 510; // RFC2774
+	const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511; // RFC6585
 
 	/**
-	 * Массив заголовков ответа
-	 *
-	 * @var array
-	 */
-	public static $headers;
-
-	/**
-	 * Флаг выключающий кеширование ответа
-	 *
-	 * @var bool
-	 */
-	public static $nocache = false;
-
-	/**
-	 * Содержимое ответа
-	 *
-	 * @var string
-	 */
-	protected static $content;
-
-	/**
-	 * Тип содержимого
-	 *
-	 * @var string
-	 */
-	protected static $contentType;
-
-	/**
-	 * Код состояния ответа
-	 *
-	 * @var int
-	 */
-	protected static $statusCode;
-
-	/**
-	 * Текстовое представление кода состояния ответа
-	 *
-	 * @var string
-	 */
-	protected static $statusText;
-
-	/**
-	 * Кодировка ответа
-	 *
-	 * @var string
-	 */
-	protected static $charset = "UTF-8";
-
-	/**
-	 * Переводная таблица кодов статус
+	 * Status codes
 	 *
 	 * @var array
 	 */
@@ -186,126 +150,112 @@ class Response {
 	];
 
 	/**
-	 * Переводная таблица типов данных
+	 * Headers for the response
 	 *
 	 * @var array
 	 */
-	public static $mimeTypes = [
-		//Texts
-		"txt"    => "text/plain",
-		"ini"    => "text/ini",
-		"config" => "text/xml",
-
-		//WWW
-		"htm"    => "text/html",
-		"html"   => "text/html",
-		"tpl"    => "text/html",
-		"css"    => "text/css",
-		"less"   => "text/css",
-		"js"     => "application/x-javascript",
-		"json"   => "application/json",
-		"xml"    => "application/xml",
-		"swf"    => "application/x-shockwave-flash",
-
-		//Images
-		"jpe"    => "image/jpeg",
-		"jpg"    => "image/jpeg",
-		"jpeg"   => "image/jpeg",
-		"png"    => "image/png",
-		"bmp"    => "image/bmp",
-		"gif"    => "image/gif",
-		"tif"    => "image/tiff",
-		"tiff"   => "image/tiff",
-		"ico"    => "image/vnd.microsoft.icon",
-		"svg"    => "image/svg+xml",
-		"svgz"   => "image/svg+xml",
-
-		//Fonts
-		"eot"    => "application/vnd.ms-fontobject",
-		"ttf"    => "application/font-ttf",
-		"woff"   => "application/font-woff",
-
-		//Audio
-		"flac"   => "audio/x-flac",
-		"mp3"    => "audio/mpeg",
-		"wav"    => "audio/wav",
-		"wma"    => "audio/x-ms-wma",
-
-		//Video
-		"qt"     => "video/quicktime",
-		"mov"    => "video/quicktime",
-		"mkv"    => "video/mkv",
-		"mp4"    => "video/mp4",
-
-		//Archive
-		"7z"     => "application/x-7z-compressed",
-		"zip"    => "application/x-zip-compressed",
-		"rar"    => "application/x-rar-compressed",
-
-		//Application
-		"jar"    => "application/java-archive",
-		"java"   => "application/octet-stream",
-		"exe"    => "application/octet-stream",
-		"msi"    => "application/octet-stream",
-		"dll"    => "application/x-msdownload",
-	];
+	protected $header = [];
 
 	/**
-	 * Генерирует ответ
+	 * Response status code
 	 *
-	 * @param mixed  $content
+	 * @var int
+	 */
+	protected $statusCode;
+
+	/**
+	 * Response status text
+	 *
+	 * @var string
+	 */
+	protected $statusText;
+
+	/**
+	 * Response charset
+	 *
+	 * @var string
+	 */
+	protected $charset;
+
+	/**
+	 * Type of response content
+	 *
+	 * @var string
+	 */
+	protected $contentType;
+
+	/**
+	 * Response body
+	 *
+	 * @var string
+	 */
+	protected $body;
+
+	/**
+	 * Response constructor
+	 *
+	 * @param string $body
 	 * @param int    $status
 	 * @param string $mime
 	 * @param array  $headers
 	 */
-	public static function create($content = "", $status = 200, $mime = "html", array $headers = []) {
-		static::setContentType($mime);
-		static::setStatus($status);
-		static::setContent($content);
-
-		static::$headers = [];
+	public function __construct($body = "", $status = 200, $mime = "html", array $headers = []) {
 		foreach ($headers as $key => $value) {
-			static::setHeader($key, $value);
+			$this->setHeader($key, $value);
 		}
+
+		$this->setContent($body);
+		$this->setStatus($status);
+		$this->setCharset("UTF-8");
 	}
 
 	/**
-	 * Добавляет заголовок в массив заголовков ответа
+	 * Add header HTTP header
 	 *
-	 * @param string $key
-	 * @param mixed  $value
+	 * @param $key
+	 * @param $value
+	 *
+	 * @return $this
 	 */
-	public static function setHeader($key, $value) {
-		static::$headers[$key] = $value;
+	public function setHeader($key, $value) {
+		$this->header[$key] = $value;
+
+		return $this;
 	}
 
 	/**
-	 * Добавляет заголовок Date
+	 * Add the Date HTTP header with a DateTime instance
 	 *
 	 * @param DateTime $date
+	 *
+	 * @return $this
 	 */
-	public static function setHeaderDate(DateTime $date) {
+	public function setHeaderDate(DateTime $date) {
 		$date->setTimezone(new DateTimeZone("UTC"));
+		$this->setHeader("Date", $date->format("D, d M Y H:i:s") . " GMT");
 
-		static::setHeader("Date", $date->format("D, d M Y H:i:s") . " GMT");
+		return $this;
 	}
 
 	/**
-	 * Добавляет заголовок Expires
+	 * Add the Expires HTTP header with a DateTime instance
 	 *
 	 * @param DateTime $date
+	 *
+	 * @return $this
 	 */
-	public static function setHeaderExpires(DateTime $date) {
+	public function setHeaderExpires(DateTime $date) {
 		$date->setTimezone(new DateTimeZone("UTC"));
+		$this->setHeader("Expires", $date->format("D, d M Y H:i:s") . " GMT");
 
-		static::setHeader("Expires", $date->format("D, d M Y H:i:s") . " GMT");
+		return $this;
 	}
 
 	/**
-	 * Добавляет заголовок Cache-Control
+	 * Add the Cache-Control HTTP header
 	 *
-	 * Для установки правильного значения необходимо сложить вес необходимых аргументов
-	 * Вес и значения:
+	 * To set value requires sum of the weights necessary arguments
+	 * Weight and values:
 	 *  2   - public
 	 *  4   - private
 	 *  8   - no-cache
@@ -313,24 +263,24 @@ class Response {
 	 *  32  - must-revalidate
 	 *  64  - proxy-revalidate
 	 *  128 - no-transform
-	 *  256 - max-age=
-	 *  512 - s-maxage=
+	 *  256 - max-age=3600 (by default)
+	 *  512 - s-maxage=600 (by default)
 	 *
 	 * @param int $bitWeight
-	 * @param int $maxAge       время жизни для Cache-Control/max-age
-	 * @param int $sharedMaxAge время жизни для Cache-Control/s-maxage
+	 * @param int $maxAge       TTL Cache-Control/max-age
+	 * @param int $sharedMaxAge TTL Cache-Control/s-maxage
 	 */
 	public static function setHeaderCacheControl($bitWeight = 0, $maxAge = 3600, $sharedMaxAge = 600) {
 		$valuesByWeight = [
-			512 => "s-maxage=" . $sharedMaxAge,
-			256 => "max-age=" . $maxAge,
-			128 => "no-transform",
-			64  => "proxy-revalidate",
-			32  => "must-revalidate",
-			16  => "no-store",
-			8   => "no-cache",
-			4   => "private",
 			2   => "public",
+			4   => "private",
+			8   => "no-cache",
+			16  => "no-store",
+			32  => "must-revalidate",
+			64  => "proxy-revalidate",
+			128 => "no-transform",
+			256 => "max-age=" . $maxAge,
+			512 => "s-maxage=" . $sharedMaxAge,
 		];
 
 		$header = [];
@@ -344,181 +294,43 @@ class Response {
 	}
 
 	/**
-	 * Устанавливает состояние NotModified
+	 * Modifies the response so that it conforms to the rules defined for a 304 status code
+	 *
+	 * This sets the status, removes the body, and discards any headers
+	 * that MUST NOT be included in 304 responses
+	 *
+	 * @return $this
 	 */
-	public static function setHeaderNotModified() {
-		static::setStatus(Response::HTTP_NOT_MODIFIED);
-		static::setContent(null);
+	public function setHeaderNotModified() {
+		$this->setStatus(Response::HTTP_NOT_MODIFIED);
+		$this->setContent(null);
 
-		// удаляет заголовки которых быть недолжно
+		//  remove headers that MUST NOT be included with 304 Not Modified responses
 		foreach (["Allow", "Content-Encoding", "Content-Language", "Content-Length", "Content-MD5", "Content-Type", "Last-Modified"] as $header) {
-			static::deleteHeader($header);
-		}
-	}
-
-	/**
-	 * Возвращает значение заголовка по ключу
-	 *
-	 * @param $key
-	 *
-	 * @return mixed|null
-	 */
-	public static function getHeader($key) {
-		return isset(static::$headers[$key]) ? static::$headers[$key] : null;
-	}
-
-	/**
-	 * Возвращает весь список заголовков
-	 *
-	 * @return array
-	 */
-	public static function getAllHeaders() {
-		return static::$headers;
-	}
-
-	/**
-	 * Удаляет указанный заголовок
-	 *
-	 * @param $key
-	 */
-	public static function deleteHeader($key) {
-		unset(static::$headers[$key]);
-	}
-
-	/**
-	 * Устанавливает содержимое ответа
-	 *
-	 * Содержимое должно быть:
-	 *  - null
-	 *  - массиовом
-	 *  - строкой
-	 *  - числом
-	 *  - объектом с методом __toString
-	 *
-	 * @param mixed $content
-	 */
-	public static function setContent($content) {
-		if (is_array($content)) {
-			Response::setContentType("json");
-			$content = json_encode($content);
+			$this->deleteHeader($header);
 		}
 
-		if ($content === null || ($content && is_string($content) || is_numeric($content) || is_callable([$content, "__toString"]))) {
-			static::setHeader("Content-Length", mb_strlen($content));
-			static::$content = $content;
-		}
+		return $this;
 	}
 
 	/**
-	 * Возвращает содержимое ответа
+	 * Determines if the Response validators (ETag, Last-Modified) match
+	 * a conditional value specified in the Request
 	 *
-	 * @return mixed
-	 */
-	public static function getContent() {
-		return static::$content;
-	}
-
-	/**
-	 * Устанавливает тип содержимого ответа
-	 *
-	 * @param $contentType
-	 */
-	public static function setContentType($contentType) {
-		static::$contentType = isset(static::$mimeTypes[$contentType]) ? static::$mimeTypes[$contentType] : "text/plain";
-	}
-
-	/**
-	 * Возвращает тип содержимого ответа
-	 *
-	 * @return string
-	 */
-	public static function getContentType() {
-		return static::$contentType;
-	}
-
-	/**
-	 * Устанавливает код состояния ответа
-	 *
-	 * @param $status
-	 */
-	public static function setStatus($status) {
-		static::$statusCode = $status;
-		static::$statusText = isset(static::$statusTexts[$status]) ? static::$statusTexts[$status] : "unknown";
-	}
-
-	/**
-	 * Возвращает код состояния ответа
-	 *
-	 * @return mixed
-	 */
-	public static function getStatus() {
-		return static::$statusCode;
-	}
-
-	/**
-	 * Возвращает текстовое представление кода состояния ответа
-	 *
-	 * @return mixed
-	 */
-	public static function getStatusText() {
-		return static::$statusText;
-	}
-
-	/**
-	 * Устанавливает кодировку ответа
-	 *
-	 * @param string $charset
-	 */
-	public static function setCharset($charset) {
-		static::$charset = $charset;
-	}
-
-	/**
-	 * Возвращает кодировку ответа
-	 *
-	 * @return string mixed
-	 */
-	public static function getCharset() {
-		return static::$charset;
-	}
-
-	/**
-	 * Перенаправляет на адрес
-	 *
-	 * @param  string $path
-	 * @param  string $app
-	 *
-	 * @return void
-	 */
-	public static function redirect($path, $app = "") {
-		if (strpos($path, "://") === false) {
-			if (substr($path, 0, 1) != "/") {
-				$path = "/" . $path;
-			}
-			$path = App::getUrl($path, $app);
-		}
-
-		Response::setStatus(static::HTTP_PERMANENTLY_REDIRECT);
-		Response::setHeader("Location", $path);
-	}
-
-	/**
-	 * Проверяет был ли изменён ответ сравнивая заголовки: ETag, Last-Modified
-	 *
-	 * Если ответ небыл изменён, то статус будет изменён на 304, а ответ будет удалён
+	 * @param Request $request
 	 *
 	 * @return bool
 	 */
-	public static function isNotModified() {
-		if (!Request::isMethod(Request::METHOD_GET) && !Request::isMethod(Request::METHOD_HEAD)) {
+	public static function isNotModified(Request $request) {
+		if (!$request->isMethod(Request::METHOD_GET) && !$request->isMethod(Request::METHOD_HEAD)) {
 			return false;
 		}
 
 		$notModified = false;
 		$lastModified = static::getHeader("Last-Modified");
-		$modifiedSince = Request::getHeader("If-Modified-Since");
+		$modifiedSince = $request->getHeader("If-Modified-Since");
 
-		if ($etags = Request::getHeader("If-None-Match")) {
+		if ($etags = $request->getHeader("If-None-Match")) {
 			$notModified = static::getHeader("ETag") == $etags;
 		}
 
@@ -534,152 +346,321 @@ class Response {
 	}
 
 	/**
-	 * Код ответа задан с ошибкой
+	 * Return header by key or array of headers
+	 *
+	 * @param string $key
+	 *
+	 * @return array|mixed
+	 * @throws NullPointException
+	 */
+	public function getHeader($key = "") {
+		if ($key) {
+			if (isset($this->header[$key])) {
+				return $this->header[$key];
+			}
+
+			throw new NullPointException("Header with key '" . $key . "' not found");
+		}
+
+		return $this->header;
+	}
+
+	/**
+	 * Return true if header is defined
+	 *
+	 * @param string $key
 	 *
 	 * @return bool
 	 */
-	public static function isInvalid() {
-		return static::$statusCode < 100 || static::$statusCode >= 600;
+	public function hasHeader($key) {
+		return isset($this->header[$key]);
 	}
 
 	/**
-	 * Является ли ответ информативным?
+	 * Remove a header
+	 *
+	 * @param $key
+	 *
+	 * @return $this
+	 */
+	public function deleteHeader($key) {
+		unset($this->header[$key]);
+
+		return $this;
+	}
+
+	/**
+	 * Set the content
+	 *
+	 * Valid types are strings, numbers, null, and objects that implement a __toString() method
+	 *
+	 * @param string|null $body
+	 *
+	 * @return $this
+	 * @throws UnexpectedValueException
+	 */
+	public function setContent($body) {
+		if ($body === null || ($body && is_string($body) || is_numeric($body) || is_callable([$body, "__toString"]))) {
+			$this->setHeader("Content-Length", mb_strlen($body));
+			$this->body = $body;
+
+			return $this;
+		}
+
+		throw new UnexpectedValueException("The Response content must be a string or object implementing __toString(), " . gettype($body) . " given");
+	}
+
+	/**
+	 * Return current content
+	 *
+	 * @return string Content
+	 */
+	public function getContent() {
+		return $this->body;
+	}
+
+	/**
+	 * Set status code
+	 *
+	 * @param int $code
+	 *
+	 * @return $this
+	 * @throws InvalidArgumentException
+	 */
+	public function setStatus($code) {
+		if ($code >= 100 || $code < 600) {
+			$this->statusCode = $code;
+			$this->statusText = isset(static::$statusTexts[$code]) ? static::$statusTexts[$code] : "unknown";
+
+			return $this;
+		}
+
+		throw new InvalidArgumentException("The HTTP status code " . $code . " is not valid");
+	}
+
+	/**
+	 * Return status code
+	 *
+	 * @return int
+	 */
+	public function getStatus() {
+		return $this->statusCode;
+	}
+
+	/**
+	 * Set charset
+	 *
+	 * @param $charset
+	 *
+	 * @return $this
+	 */
+	public function setCharset($charset) {
+		$this->charset = $charset;
+
+		return $this;
+	}
+
+	/**
+	 * Return charset
+	 *
+	 * @return string
+	 */
+	public function getCharset() {
+		return $this->charset;
+	}
+
+	/**
+	 * Is response informative?
 	 *
 	 * @return bool
 	 */
-	public static function isInformational() {
-		return static::$statusCode >= 100 && static::$statusCode < 200;
+	public function isInformational() {
+		return $this->statusCode >= 100 && $this->statusCode < 200;
 	}
 
 	/**
-	 * Является ли ответ успешным?
+	 * Is response successful?
 	 *
 	 * @return bool
 	 */
-	public static function isSuccessful() {
-		return static::$statusCode >= 200 && static::$statusCode < 300;
+	public function isSuccessful() {
+		return $this->statusCode >= 200 && $this->statusCode < 300;
 	}
 
 	/**
-	 * Является ли ответ перенаправлением?
+	 * Is the response a redirect?
 	 *
 	 * @return bool
 	 */
-	public static function isRedirection() {
-		return static::$statusCode >= 300 && static::$statusCode < 400;
+	public function isRedirection() {
+		return $this->statusCode >= 300 && $this->statusCode < 400;
 	}
 
 	/**
-	 * Есть ли ошибка клиента?
+	 * Is there a client error?
 	 *
 	 * @return bool
 	 */
-	public static function isClientError() {
-		return static::$statusCode >= 400 && static::$statusCode < 500;
+	public function isClientError() {
+		return $this->statusCode >= 400 && $this->statusCode < 500;
 	}
 
 	/**
-	 * Есть ли серверная ошибка?
+	 * Was there a server side error?
 	 *
 	 * @return bool
 	 */
-	public static function isServerError() {
-		return static::$statusCode >= 500 && static::$statusCode < 600;
+	public function isServerError() {
+		return $this->statusCode >= 500 && $this->statusCode < 600;
 	}
 
 	/**
-	 * Является ли ответ OK?
+	 * Is the response OK?
 	 *
 	 * @return bool
 	 */
-	public static function isOk() {
-		return static::$statusCode === 200;
+	public function isOk() {
+		return 200 === $this->statusCode;
 	}
 
 	/**
-	 * Является ли ответ Запрещено?
+	 * Is the response forbidden?
 	 *
 	 * @return bool
 	 */
-	public static function isForbidden() {
-		return static::$statusCode === 403;
+	public function isForbidden() {
+		return 403 === $this->statusCode;
 	}
 
 	/**
-	 * Является ли ответ ошибкой Не найден?
+	 * Is the response a not found error?
 	 *
 	 * @return bool
 	 */
-	public static function isNotFound() {
-		return static::$statusCode === 404;
+	public function isNotFound() {
+		return 404 === $this->statusCode;
 	}
 
 	/**
-	 * Является ли ответ пустым?
+	 * Is the response a redirect of some form?
 	 *
-	 * @return mixed
+	 * @param string $location
+	 *
+	 * @return bool
 	 */
-	public static function isEmpty() {
-		return in_array(static::$statusCode, [204, 304]); // RFC2616 10.3.6
+	public function isRedirect($location = null) {
+		return in_array($this->statusCode, [201, 301, 302, 303, 307, 308]) && (null === $location ? : $location == $this->header["Location"]);
 	}
 
 	/**
-	 * Отправляет ответ клиенту
+	 * Is the response empty?
+	 *
+	 * @return bool
 	 */
-	public static function send() {
+	public function isEmpty() {
+		return in_array($this->statusCode, [204, 304]);
+	}
+
+	/**
+	 * Send data to client
+	 *
+	 * @return $this
+	 */
+	public function send() {
 		if (!headers_sent()) {
 			static::sendHeaders();
 			static::sendContent();
 		}
+
+		return $this;
 	}
 
 	/**
-	 * Отправляет заголовки
+	 * Sends HTTP headers
 	 */
-	protected static function sendHeaders() {
-		// дата
-		if (!isset(static::$headers["Date"])) {
-			static::setHeaderDate(DateTime::createFromFormat("U", time()));
-		}
-		// тип и кодировка
-		if (!isset(static::$headers["Content-Type"])) {
-			static::setHeader("Content-Type", static::$contentType . "; charset=" . static::$charset);
+	protected function sendHeaders() {
+		// headers already sent
+		if (headers_sent()) {
+			return;
 		}
 
-		// если ответ информационный, перенаправление или пуст
-		if (static::isInformational() || static::isRedirection() || static::isEmpty()) {
-			static::setContent(null);
-			static::deleteHeader("Content-Type");
-			static::deleteHeader("Content-Length");
+		// date
+		if (!$this->hasHeader("Date")) {
+			$this->setHeaderDate(DateTime::createFromFormat("U", time()));
 		}
 
-		if (static::getHeader("Transfer-Encoding")) {
-			static::deleteHeader("Content-Length");
+		// headers
+		foreach ($this->header as $key => $value) {
+			header($key . ": " . $value, false, $this->statusCode);
 		}
 
-		// см. RFC2616 14.13
-		if (Request::isMethod(Request::METHOD_HEAD)) {
-			$length = static::getHeader("Content-Length");
-			static::setContent(null);
+		// status
+		header("HTTP/1.1 " . $this->statusCode . " " . $this->statusText, true, $this->statusCode);
+	}
 
-			if ($length) {
-				static::setHeader("Content-Length", $length);
+	/**
+	 * Print body content
+	 */
+	protected function sendContent() {
+		echo $this->body;
+	}
+
+	/**
+	 * Prepares Response before it is sent to the client
+	 *
+	 * @param Request $request
+	 *
+	 * @return $this
+	 */
+	public function prepare(Request $request) {
+		if ($this->isInformational() || $this->isRedirection() || $this->isEmpty()) {
+			$this->setContent(null);
+			$this->deleteHeader("Content-Type");
+			$this->deleteHeader("Content-Length");
+		} else {
+			// content-type based on the Request
+			if (!$this->hasHeader("Content-Type")) {
+				$mime = $request->getRequestFormat();
+
+				if (null !== $mime) {
+					$this->setHeader("Content-Type", $mime . "; charset=" . $this->charset);
+				}
+			}
+
+			// fix Content-Length
+			if ($this->hasHeader("Transfer-Encoding")) {
+				$this->deleteHeader("Content-Length");
+			}
+
+			if ($request->isMethod(Request::METHOD_HEAD)) {
+				// RFC2616 14.13
+				$length = $this->hasHeader("Content-Length");
+				$this->setContent(null);
+				if ($length) {
+					$this->setHeader("Content-Length", $length);
+				}
 			}
 		}
 
-		// заголовки
-		foreach (static::$headers as $key => $value) {
-			header($key . ": " . $value, false, static::$statusCode);
+		if (isset($this->header["Transfer-Encoding"])) {
+			$this->deleteHeader("Content-Length");
 		}
 
-		// статус
-		header(sprintf("HTTP/1.1 %s %s", static::$statusCode, static::$statusText), true, static::$statusCode);
+		return $this;
 	}
 
 	/**
-	 * Отправляет содержимое ответа
+	 * Return Response as an HTTP string
+	 *
+	 * @return string
 	 */
-	protected static function sendContent() {
-		echo static::$content;
+	public function __toString() {
+		$ret = "HTTP/1.1 " . $this->statusCode . " " . $this->statusText . "\r\n";
+
+		foreach ($this->header as $key => $value) {
+			$ret .= $key . ": " . $value . "\r\n";
+		}
+
+		return $ret . "\r\n" . $this->getContent();
 	}
 }

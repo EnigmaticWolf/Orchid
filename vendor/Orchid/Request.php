@@ -2,8 +2,6 @@
 
 namespace Orchid;
 
-use Orchid\Entity\Exception\NullPointException;
-
 class Request {
 	const METHOD_HEAD = "HEAD";
 	const METHOD_GET = "GET";
@@ -15,6 +13,73 @@ class Request {
 	const METHOD_OPTIONS = "OPTIONS";
 	const METHOD_TRACE = "TRACE";
 	const METHOD_CONNECT = "CONNECT";
+
+	/**
+	 * @var array
+	 */
+	protected static $formats = [
+		//Texts
+		"txt"    => ["text/plain"],
+		"ini"    => ["text/ini"],
+		"config" => ["text/xml"],
+
+		//WWW
+		"htm"    => ["text/html", "application/xhtml+xml"],
+		"html"   => ["text/html", "application/xhtml+xml"],
+		"tpl"    => ["text/html", "application/xhtml+xml"],
+		"css"    => ["text/css"],
+		"less"   => ["text/css"],
+		"js"     => ["application/javascript", "application/x-javascript", "text/javascript"],
+		"json"   => ["application/json", "application/x-json"],
+		"xml"    => ["text/xml", "application/xml", "application/x-xml"],
+		"swf"    => ["application/x-shockwave-flash"],
+		"rdf"    => ["application/rdf+xml"],
+		"atom"   => ["application/atom+xml"],
+		"rss"    => ["application/rss+xml"],
+		"form"   => ["application/x-www-form-urlencoded"],
+
+		//Images
+		"jpe"    => ["image/jpeg"],
+		"jpg"    => ["image/jpeg"],
+		"jpeg"   => ["image/jpeg"],
+		"png"    => ["image/png"],
+		"bmp"    => ["image/bmp"],
+		"gif"    => ["image/gif"],
+		"tif"    => ["image/tiff"],
+		"tiff"   => ["image/tiff"],
+		"ico"    => ["image/vnd.microsoft.icon"],
+		"svg"    => ["image/svg+xml"],
+		"svgz"   => ["image/svg+xml"],
+
+		//Fonts
+		"eot"    => ["application/vnd.ms-fontobject"],
+		"ttf"    => ["application/font-ttf"],
+		"woff"   => ["application/font-woff"],
+
+		//Audio
+		"flac"   => ["audio/x-flac"],
+		"mp3"    => ["audio/mpeg"],
+		"wav"    => ["audio/wav"],
+		"wma"    => ["audio/x-ms-wma"],
+
+		//Video
+		"qt"     => ["video/quicktime"],
+		"mov"    => ["video/quicktime"],
+		"mkv"    => ["video/mkv"],
+		"mp4"    => ["video/mp4"],
+
+		//Archive
+		"7z"     => ["application/x-7z-compressed"],
+		"zip"    => ["application/x-zip-compressed"],
+		"rar"    => ["application/x-rar-compressed"],
+
+		//Application
+		"jar"    => ["application/java-archive"],
+		"java"   => ["application/octet-stream"],
+		"exe"    => ["application/octet-stream"],
+		"msi"    => ["application/octet-stream"],
+		"dll"    => ["application/x-msdownload"],
+	];
 
 	/**
 	 * Flag is HTTPS
@@ -80,7 +145,7 @@ class Request {
 	protected $headers = [];
 
 	/**
-	 * Request constructor.
+	 * Request constructor
 	 *
 	 * @param array $post
 	 * @param array $file
@@ -117,29 +182,68 @@ class Request {
 	}
 
 	/**
+	 * Get mime type associated with format
+	 *
+	 * @param $format
+	 *
+	 * @return string
+	 */
+	public function getMimeType($format) {
+		return isset(static::$formats[$format]) ? static::$formats[$format][0] : null;
+	}
+
+	/**
+	 * Get mime types associated with format
+	 *
+	 * @param $format
+	 *
+	 * @return array
+	 */
+	public static function getMimeTypes($format) {
+		return isset(static::$formats[$format]) ? static::$formats[$format] : [];
+	}
+
+	/**
+	 * Get request format by header Accept
+	 *
+	 * @param string $default
+	 *
+	 * @return mixed|string
+	 */
+	public function getRequestFormat($default = "text/html") {
+		preg_match_all("~(?<type>(?:\w+|\*)\/(?:\w+|\*))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i", $this->getHeader("Accept"), $list);
+
+		$data = [];
+		foreach (array_combine($list["type"], $list["q"]) as $key => $priority) {
+			$data[$key] = (float)($priority ? $priority : 1);
+		}
+		arsort($data, SORT_NUMERIC);
+
+		return $data ? key($data) : $default;
+	}
+
+	/**
 	 * Return client IP address
 	 *
 	 * @return null
 	 */
 	public static function getClientIp() {
-		$result = null;
-
 		switch (true) {
 			case isset($_SERVER["HTTP_X_FORWARDED_FOR"]): {
-				$result = $_SERVER["HTTP_X_FORWARDED_FOR"];
+				return $_SERVER["HTTP_X_FORWARDED_FOR"];
 				break;
 			}
 			case isset($_SERVER["HTTP_CLIENT_IP"]): {
-				$result = $_SERVER["HTTP_CLIENT_IP"];
+				return $_SERVER["HTTP_CLIENT_IP"];
 				break;
 			}
 			case isset($_SERVER["REMOTE_ADDR"]): {
-				$result = $_SERVER["REMOTE_ADDR"];
+				return $_SERVER["REMOTE_ADDR"];
 				break;
 			}
 		}
 
-		return $result;
+		return null;
 	}
 
 	/**
@@ -188,17 +292,17 @@ class Request {
 	 * Return header value by name or array of headers
 	 *
 	 * @param string $name
+	 * @param mixed  $default
 	 *
 	 * @return mixed
-	 * @throws NullPointException
 	 */
-	public function getHeader($name = "") {
+	public function getHeader($name = "", $default = null) {
 		if ($name) {
 			if (isset($this->headers[$name])) {
 				return $this->headers[$name];
 			}
 
-			throw new NullPointException("Header with key '" . $name . "' not found");
+			return $default;
 		}
 
 		return $this->headers;
@@ -208,17 +312,17 @@ class Request {
 	 * Return uri by index or array of uri's
 	 *
 	 * @param string $index
+	 * @param mixed  $default
 	 *
 	 * @return array|mixed
-	 * @throws NullPointException
 	 */
-	public function getUri($index = "") {
+	public function getUri($index = "", $default = null) {
 		if ($index !== "") {
 			if (isset($this->uri[$index])) {
 				return $this->uri[$index];
 			}
 
-			throw new NullPointException("Uri with index '" . $index . "' not found");
+			return $default;
 		}
 
 		return $this->uri;
@@ -228,17 +332,17 @@ class Request {
 	 * Return GET parameter or get array
 	 *
 	 * @param string $key
+	 * @param mixed  $default
 	 *
 	 * @return array|mixed
-	 * @throws NullPointException
 	 */
-	public function getParam($key = "") {
+	public function getParam($key = "", $default = null) {
 		if ($key) {
 			if (isset($this->get[$key])) {
 				return $this->get[$key];
 			}
 
-			throw new NullPointException("GET parameter with key '" . $key . "' not found");
+			return $default;
 		}
 
 		return $this->get;
@@ -248,17 +352,17 @@ class Request {
 	 * Return POST data or post array
 	 *
 	 * @param string $key
+	 * @param mixed  $default
 	 *
 	 * @return array|mixed
-	 * @throws NullPointException
 	 */
-	public function getData($key = "") {
+	public function getData($key = "", $default = null) {
 		if ($key) {
 			if (isset($this->post[$key])) {
 				return $this->post[$key];
 			}
 
-			throw new NullPointException("POST data with key '" . $key . "' not found");
+			return $default;
 		}
 
 		return $this->post;
@@ -268,17 +372,17 @@ class Request {
 	 * Return FILE data or files array
 	 *
 	 * @param string $key
+	 * @param mixed  $default
 	 *
 	 * @return array|mixed
-	 * @throws NullPointException
 	 */
-	public function getFile($key = "") {
+	public function getFile($key = "", $default = null) {
 		if ($key) {
 			if (isset($this->file[$key])) {
 				return $this->file[$key];
 			}
 
-			throw new NullPointException("FILE with key '" . $key . "' not found");
+			return $default;
 		}
 
 		return $this->file;
