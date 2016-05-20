@@ -6,37 +6,69 @@ use Closure;
 
 class Event {
 	/**
-	 * Хранилище созданных обработчиков
+	 * Array of event callable
+	 *
 	 * @var array
 	 */
-	protected static $event = [];
+	protected $events = [];
 
 	/**
-	 * Добавляет обработчик события
+	 * Bind callable listen event
 	 *
-	 * @param  string        $name     имя события
-	 * @param  Closure|array $callback функция или массив указывающий на метод
-	 * @param  int           $priority приоритет
+	 * @param string  $name
+	 * @param Closure $callable
+	 * @param int     $priority
+	 *
+	 * @return $this
 	 */
-	public static function add($name, $callback, $priority = 0) {
-		static::$event[$name][] = ["callback" => $callback, "priority" => $priority];
+	public function on($name, $callable, $priority = 0) {
+		$this->events[$name][] = ["callable" => $callable, "priority" => $priority];
+
+		return $this;
 	}
 
 	/**
-	 * Запускает выполнение события с возможностью передачи параметров
+	 * Remove previously-bound callable
 	 *
-	 * @param  string $name   имя события
-	 * @param  array  $params передаваемые параметры
+	 * @param string $name
+	 *
+	 * @return $this
 	 */
-	public static function trigger($name, $params = []) {
-		if (!empty(static::$event[$name])) {
-			arsort(static::$event[$name], SORT_NUMERIC);
+	public function off($name) {
+		unset($this->events[$name]);
 
-			foreach (static::$event[$name] as $ev) {
-				if (is_callable($ev["callback"])) {
-					call_user_func_array($ev["callback"], $params);
+		return $this;
+	}
+
+	/**
+	 * Trigger callables
+	 *
+	 * @param string $name
+	 * @param array  $params
+	 *
+	 * @return $this
+	 */
+	public function trigger($name, $params = []) {
+		if (!empty($this->events[$name])) {
+			usort($this->events[$name], [$this, "compare"]);
+
+			foreach ($this->events[$name] as $ev) {
+				if (is_callable($ev["callable"])) {
+					call_user_func_array($ev["callable"], $params);
 				}
 			}
 		}
+
+		return $this;
+	}
+
+	/**
+	 * @param $a
+	 * @param $b
+	 *
+	 * @return mixed
+	 */
+	protected function compare($a, $b) {
+		return $b["priority"] - $a["priority"];
 	}
 }

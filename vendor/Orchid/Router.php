@@ -4,7 +4,6 @@ namespace Orchid;
 
 use Closure;
 use RuntimeException;
-use SplPriorityQueue;
 
 class Router {
 	/**
@@ -12,11 +11,7 @@ class Router {
 	 *
 	 * @var array
 	 */
-	protected $routes;
-
-	public function __construct() {
-		$this->routes = new SplPriorityQueue();
-	}
+	protected $routes = [];
 
 	/**
 	 * Bind GET request to route
@@ -55,14 +50,12 @@ class Router {
 	 * @return $this
 	 */
 	public function bind($pattern, $callable, $method = Request::METHOD_GET, $priority = 0) {
-		$this->routes->insert(
-			[
-				"method"   => strtoupper($method),
-				"pattern"  => $pattern,
-				"callback" => $callable,
-			],
-			$priority
-		);
+		$this->routes[] = [
+			"method"   => strtoupper($method),
+			"pattern"  => $pattern,
+			"callback" => $callable,
+			"priority" => $priority,
+		];
 
 		return $this;
 	}
@@ -80,14 +73,13 @@ class Router {
 		$pathname = $request->getPathname();
 		$uri = $request->getUri();
 
-		$found = false;
+		$found = null;
 		$param = [];
 
 		if ($this->routes) {
-			$this->routes->top();
-			while ($this->routes->valid()) {
-				$route = $this->routes->current();
+			usort($this->routes, [$this, "compare"]);
 
+			foreach ($this->routes as $route) {
 				if ($route["method"] == $method) {
 					if ($route["pattern"] === $pathname) {
 						$found = $route["callback"];
@@ -138,7 +130,6 @@ class Router {
 					}
 				}
 
-				$this->routes->next();
 			}
 		}
 
@@ -147,5 +138,15 @@ class Router {
 		}
 
 		throw new RuntimeException("Не удалось выполнить функцию");
+	}
+
+	/**
+	 * @param $a
+	 * @param $b
+	 *
+	 * @return mixed
+	 */
+	protected function compare($a, $b) {
+		return $b["priority"] - $a["priority"];
 	}
 }
