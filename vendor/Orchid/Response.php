@@ -154,7 +154,7 @@ class Response {
 	 *
 	 * @var array
 	 */
-	protected $header = [];
+	protected $headers = [];
 
 	/**
 	 * Response status code
@@ -218,7 +218,7 @@ class Response {
 	 * @return $this
 	 */
 	public function setHeader($key, $value) {
-		$this->header[$key] = $value;
+		$this->headers[$key] = $value;
 
 		return $this;
 	}
@@ -355,14 +355,14 @@ class Response {
 	 */
 	public function getHeader($key = "") {
 		if ($key) {
-			if (isset($this->header[$key])) {
-				return $this->header[$key];
+			if (isset($this->headers[$key])) {
+				return $this->headers[$key];
 			}
 
 			throw new NullPointException("Header with key '" . $key . "' not found");
 		}
 
-		return $this->header;
+		return $this->headers;
 	}
 
 	/**
@@ -373,7 +373,7 @@ class Response {
 	 * @return bool
 	 */
 	public function hasHeader($key) {
-		return isset($this->header[$key]);
+		return isset($this->headers[$key]);
 	}
 
 	/**
@@ -384,7 +384,7 @@ class Response {
 	 * @return $this
 	 */
 	public function deleteHeader($key) {
-		unset($this->header[$key]);
+		unset($this->headers[$key]);
 
 		return $this;
 	}
@@ -549,7 +549,7 @@ class Response {
 	 * @return bool
 	 */
 	public function isRedirect($location = null) {
-		return in_array($this->statusCode, [201, 301, 302, 303, 307, 308]) && (null === $location ? : $location == $this->header["Location"]);
+		return in_array($this->statusCode, [201, 301, 302, 303, 307, 308]) && (null === $location ? : $location == $this->headers["Location"]);
 	}
 
 	/**
@@ -590,7 +590,7 @@ class Response {
 		}
 
 		// headers
-		foreach ($this->header as $key => $value) {
+		foreach ($this->headers as $key => $value) {
 			header($key . ": " . $value, false, $this->statusCode);
 		}
 
@@ -642,7 +642,7 @@ class Response {
 			}
 		}
 
-		if (isset($this->header["Transfer-Encoding"])) {
+		if ($this->hasHeader("Transfer-Encoding")) {
 			$this->deleteHeader("Content-Length");
 		}
 
@@ -657,7 +657,7 @@ class Response {
 	public function __toString() {
 		$ret = "HTTP/1.1 " . $this->statusCode . " " . $this->statusText . "\r\n";
 
-		foreach ($this->header as $key => $value) {
+		foreach ($this->headers as $key => $value) {
 			$ret .= $key . ": " . $value . "\r\n";
 		}
 
