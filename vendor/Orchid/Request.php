@@ -329,6 +329,15 @@ class Request {
 	}
 
 	/**
+	 * Return current pathname
+	 *
+	 * @return string
+	 */
+	public function getPathname() {
+		return "/" . implode("/", $this->uri);
+	}
+
+	/**
 	 * Return GET parameter or get array
 	 *
 	 * @param string $key

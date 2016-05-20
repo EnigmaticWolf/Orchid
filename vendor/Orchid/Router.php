@@ -4,139 +4,138 @@ namespace Orchid;
 
 use Closure;
 use RuntimeException;
+use SplPriorityQueue;
 
 class Router {
 	/**
-	 * Хранилище объявленных роутов
+	 * Array of route rules
 	 *
 	 * @var array
 	 */
-	protected static $route = [];
+	protected $routes;
 
-	/**
-	 * Метод-ссылка для метода bind объявляет Get роутинг
-	 *
-	 * @param      $path
-	 * @param      $callback
-	 * @param bool $condition
-	 * @param int  $priority
-	 */
-	public static function get($path, $callback, $condition = true, $priority = 0) {
-		static::bind($path, $callback, Request::METHOD_GET, $condition, $priority);
+	public function __construct() {
+		$this->routes = new SplPriorityQueue();
 	}
 
 	/**
-	 * Метод-ссылка для метода bind объявляет Post роутинг
+	 * Bind GET request to route
 	 *
-	 * @param      $path
-	 * @param      $callback
-	 * @param bool $condition
-	 * @param int  $priority
-	 */
-	public static function post($path, $callback, $condition = true, $priority = 0) {
-		static::bind($path, $callback, Request::METHOD_POST, $condition, $priority);
-	}
-
-	/**
-	 * Метод для объявления роутинга
-	 *
-	 * @param string  $path
-	 * @param Closure $callback
-	 * @param string  $method
-	 * @param bool    $condition
+	 * @param string  $pattern
+	 * @param Closure $callable
 	 * @param int     $priority
 	 */
-	public static function bind($path, $callback, $method = null, $condition = true, $priority = 0) {
-		if ((is_null($method) || Request::isMethod($method)) && $condition) {
-			static::$route[] = [
-				"path"     => $path,
-				"callback" => $callback,
-				"priority" => $priority,
-			];
-		}
+	public function get($pattern, $callable, $priority = 0) {
+		$this->bind($pattern, $callable, Request::METHOD_GET, $priority);
 	}
 
 	/**
-	 * Метод для перебора объявленных роутингов
+	 * Bind POST request to route
 	 *
-	 * @return mixed|false
-	 */
-	public static function dispatch() {
-		$found = false;
-
-		if (static::$route) {
-			$path = Request::getPath();
-
-			arsort(static::$route, SORT_NUMERIC);
-			foreach (static::$route as $route) {
-				$param = [];
-
-				if ($route["path"] === $path) {
-					$found = static::route($route["callback"], $param);
-					break;
-				}
-
-				/* #\.html$#  */
-				if (substr($route["path"], 0, 1) == "#" && substr($route["path"], -1) == "#") {
-					if (preg_match($route["path"], $path, $match)) {
-						$param[":capture"] = array_slice($match, 1);
-						$found = static::route($route["callback"], $param);
-						break;
-					}
-				}
-
-				/* /example/* */
-				if (strpos($route["path"], "*") !== false) {
-					$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["path"], "#")) . "#";
-					if (preg_match($pattern, $path, $match)) {
-						$param[":arg"] = array_slice($match, 1);
-						$found = static::route($route["callback"], $param);
-						break;
-					}
-				}
-
-				/* /example/:id */
-				if (strpos($route["path"], ":") !== false) {
-					$part_p = explode("/", $route["path"]);
-					array_shift($part_p);
-
-					$uri = Request::getUriList();
-					if (count($uri) == count($part_p)) {
-						$matched = true;
-						foreach ($part_p as $index => $part) {
-							if (":" === substr($part, 0, 1)) {
-								$param[substr($part, 1)] = $uri[$index];
-								continue;
-							}
-							if ($uri[$index] != $part_p[$index]) {
-								$matched = false;
-								break;
-							}
-						}
-						if ($matched) {
-							$found = static::route($route["callback"], $param);
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		return $found;
-	}
-
-	/**
-	 * Выполняет указанный контроллер
-	 *
+	 * @param string  $pattern
 	 * @param Closure $callable
-	 * @param array   $param
+	 * @param int     $priority
+	 */
+	public function post($pattern, $callable, $priority = 0) {
+		$this->bind($pattern, $callable, Request::METHOD_POST, $priority);
+	}
+
+	/**
+	 * Bind request to route
+	 *
+	 * @param string  $pattern
+	 * @param Closure $callable
+	 * @param string  $method
+	 * @param int     $priority
+	 */
+	public function bind($pattern, $callable, $method = Request::METHOD_GET, $priority = 0) {
+		$this->routes->insert(
+			[
+				"method"   => strtoupper($method),
+				"pattern"  => $pattern,
+				"callback" => $callable,
+			],
+			$priority
+		);
+	}
+
+	/**
+	 * Dispatch route
+	 *
+	 * @param Request $request
 	 *
 	 * @return mixed
 	 * @throws RuntimeException
 	 */
-	protected static function route($callable, $param = []) {
-		if (is_callable($callable)) {
-			return call_user_func_array($callable, $param);
+	public function dispatch(Request $request) {
+		$method = $request->getMethod();
+		$pathname = $request->getPathname();
+		$uri = $request->getUri();
+
+		$found = false;
+		$param = [];
+
+		if ($this->routes) {
+			$this->routes->top();
+			while ($this->routes->valid()) {
+				$route = $this->routes->current();
+
+				if ($route["method"] == $method) {
+					if ($route["pattern"] === $pathname) {
+						$found = $route["callback"];
+						break;
+					}
+
+					/* #\.html$#  */
+					if (substr($route["pattern"], 0, 1) == "#" && substr($route["pattern"], -1) == "#") {
+						if (preg_match($route["pattern"], $pathname, $match)) {
+							$param[":capture"] = array_slice($match, 1);
+							$found = $route["callback"];
+							break;
+						}
+					}
+
+					/* /example/* */
+					if (strpos($route["pattern"], "*") !== false) {
+						$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["pattern"], "#")) . "#";
+						if (preg_match($pattern, $pathname, $match)) {
+							$param[":arg"] = array_slice($match, 1);
+							$found = $route["callback"];
+							break;
+						}
+					}
+
+					/* /example/:id */
+					if (strpos($route["pattern"], ":") !== false) {
+						$parts = explode("/", $route["pattern"]);
+						array_shift($parts);
+
+						if (count($uri) == count($parts)) {
+							$matched = true;
+							foreach ($parts as $index => $part) {
+								if (":" === substr($part, 0, 1)) {
+									$param[substr($part, 1)] = $uri[$index];
+									continue;
+								}
+								if ($uri[$index] != $parts[$index]) {
+									$matched = false;
+									break;
+								}
+							}
+							if ($matched) {
+								$found = $route["callback"];
+								break;
+							}
+						}
+					}
+				}
+
+				$this->routes->next();
+			}
+		}
+
+		if ($found) {
+			return call_user_func_array($found, $param);
 		}
 
 		throw new RuntimeException("Не удалось выполнить функцию");
