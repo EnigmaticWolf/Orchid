@@ -7,35 +7,46 @@ use Orchid\Entity\Exception\FileNotFoundException;
 
 class View {
 	/**
-	 * Адрес файла с общим шаблоном
+	 * Global layout template path
 	 *
 	 * @var string
 	 */
 	public static $layout = "view:layout.php";
 
 	/**
-	 * Адрес файла шаблона
+	 * Current template path
 	 *
 	 * @var string
 	 */
 	protected $file;
 
 	/**
-	 * Массив данных передваваемых в шаблон
+	 * Array of data for current template
 	 *
 	 * @var array
 	 */
 	protected $data;
 
 	/**
-	 * Массив глобальных данных передваваемых во все шаблоны
+	 * Array of global data for global & current templates
 	 *
 	 * @var array
 	 */
 	protected static $globalData = [];
 
 	/**
-	 * Задаёт глобальные переменные для всех View
+	 * View constructor
+	 *
+	 * @param       $file
+	 * @param array $data
+	 */
+	public function __construct($file, array $data = []) {
+		$this->file = $file;
+		$this->data = $data;
+	}
+
+	/**
+	 * Set global data passed to the view as properties
 	 *
 	 * @param string $key
 	 * @param mixed  $value
@@ -51,30 +62,7 @@ class View {
 	}
 
 	/**
-	 * Создаёт объект View
-	 *
-	 * @param string $file
-	 * @param array  $data
-	 */
-	protected function __construct($file, array $data = []) {
-		$this->file = $file;
-		$this->data = $data;
-	}
-
-	/**
-	 * Возвращает новый объект View
-	 *
-	 * @param string $file
-	 * @param array  $data
-	 *
-	 * @return View
-	 */
-	public static function create($file, array $data = []) {
-		return new View($file, $data);
-	}
-
-	/**
-	 * Задаёт переменные для текущего View
+	 * Set data passed to the view as properties
 	 *
 	 * @param string $key
 	 * @param mixed  $value
@@ -94,7 +82,14 @@ class View {
 	}
 
 	/**
-	 * Отрисовывает объект View
+	 * Render the template, all dynamically set properties
+	 * will be available inside the view file as variables
+	 *
+	 * <code>
+	 * $view = new View("path/to/file/template.php");
+	 * $view->set("title", "Page title");
+	 * echo $view->render();
+	 * </code>
 	 *
 	 * @return string
 	 */
@@ -114,6 +109,8 @@ class View {
 	}
 
 	/**
+	 * Render the template
+	 *
 	 * @param string $_file
 	 * @param array  $_data
 	 *
@@ -136,6 +133,6 @@ class View {
 			return ob_get_clean();
 		}
 
-		throw new FileNotFoundException("Не удалось найти файл шаблона");
+		throw new FileNotFoundException("Could not find the template file");
 	}
 }
