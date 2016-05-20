@@ -137,7 +137,7 @@ class Router {
 			return call_user_func_array($found, $param);
 		}
 
-		throw new RuntimeException("Не удалось выполнить функцию");
+		throw new RuntimeException("Failed to find and execute the function");
 	}
 
 	/**
