@@ -210,7 +210,7 @@ class Response {
 	}
 
 	/**
-	 * Add header HTTP header
+	 * Set header HTTP header
 	 *
 	 * @param $key
 	 * @param $value
@@ -224,7 +224,7 @@ class Response {
 	}
 
 	/**
-	 * Add the Date HTTP header with a DateTime instance
+	 * Set the Date HTTP header with a DateTime instance
 	 *
 	 * @param DateTime $date
 	 *
@@ -238,7 +238,7 @@ class Response {
 	}
 
 	/**
-	 * Add the Expires HTTP header with a DateTime instance
+	 * Set the Expires HTTP header with a DateTime instance
 	 *
 	 * @param DateTime $date
 	 *
@@ -252,7 +252,7 @@ class Response {
 	}
 
 	/**
-	 * Add the Cache-Control HTTP header
+	 * Set the Cache-Control HTTP header
 	 *
 	 * To set value requires sum of the weights necessary arguments
 	 * Weight and values:
