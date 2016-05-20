@@ -338,7 +338,7 @@ class Request {
 	}
 
 	/**
-	 * Return GET parameter or get array
+	 * Return GET parameter for key or get array
 	 *
 	 * @param string $key
 	 * @param mixed  $default
@@ -358,7 +358,7 @@ class Request {
 	}
 
 	/**
-	 * Return POST data or post array
+	 * Return POST data for key or post array
 	 *
 	 * @param string $key
 	 * @param mixed  $default
@@ -378,7 +378,7 @@ class Request {
 	}
 
 	/**
-	 * Return FILE data or files array
+	 * Return FILE for key or files array
 	 *
 	 * @param string $key
 	 * @param mixed  $default
@@ -395,5 +395,25 @@ class Request {
 		}
 
 		return $this->file;
+	}
+
+	/**
+	 * Return COOKIE data for key or files array
+	 *
+	 * @param string $key
+	 * @param mixed  $default
+	 *
+	 * @return array|mixed
+	 */
+	public function getCookie($key = "", $default = null) {
+		if ($key) {
+			if (isset($this->cookie[$key])) {
+				return $this->cookie[$key];
+			}
+
+			return $default;
+		}
+
+		return $this->cookie;
 	}
 }
