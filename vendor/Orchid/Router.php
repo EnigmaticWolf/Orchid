@@ -24,9 +24,11 @@ class Router {
 	 * @param string  $pattern
 	 * @param Closure $callable
 	 * @param int     $priority
+	 *
+	 * @return $this
 	 */
 	public function get($pattern, $callable, $priority = 0) {
-		$this->bind($pattern, $callable, Request::METHOD_GET, $priority);
+		return $this->bind($pattern, $callable, Request::METHOD_GET, $priority);
 	}
 
 	/**
@@ -35,9 +37,11 @@ class Router {
 	 * @param string  $pattern
 	 * @param Closure $callable
 	 * @param int     $priority
+	 *
+	 * @return $this
 	 */
 	public function post($pattern, $callable, $priority = 0) {
-		$this->bind($pattern, $callable, Request::METHOD_POST, $priority);
+		return $this->bind($pattern, $callable, Request::METHOD_POST, $priority);
 	}
 
 	/**
@@ -47,6 +51,8 @@ class Router {
 	 * @param Closure $callable
 	 * @param string  $method
 	 * @param int     $priority
+	 *
+	 * @return $this
 	 */
 	public function bind($pattern, $callable, $method = Request::METHOD_GET, $priority = 0) {
 		$this->routes->insert(
@@ -57,6 +63,8 @@ class Router {
 			],
 			$priority
 		);
+
+		return $this;
 	}
 
 	/**
