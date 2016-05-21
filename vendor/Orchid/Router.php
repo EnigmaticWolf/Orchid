@@ -4,8 +4,19 @@ namespace Orchid;
 
 use Closure;
 use RuntimeException;
+use Orchid\Entity\Exception\NoSuchMethodException;
 
 class Router {
+	/**
+	 * @var App
+	 */
+	protected $app;
+
+	/**
+	 * @var Request
+	 */
+	protected $request;
+
 	/**
 	 * Array of route rules
 	 *
@@ -14,11 +25,21 @@ class Router {
 	protected $routes = [];
 
 	/**
+	 * Router constructor
+	 *
+	 * @param App $app
+	 */
+	public function __construct(App $app) {
+		$this->app = $app;
+		$this->request = $app->request();
+	}
+
+	/**
 	 * Bind GET request to route
 	 *
-	 * @param string  $pattern
-	 * @param Closure $callable
-	 * @param int     $priority
+	 * @param string         $pattern
+	 * @param Closure|string $callable
+	 * @param int            $priority
 	 *
 	 * @return $this
 	 */
@@ -29,9 +50,9 @@ class Router {
 	/**
 	 * Bind POST request to route
 	 *
-	 * @param string  $pattern
-	 * @param Closure $callable
-	 * @param int     $priority
+	 * @param string         $pattern
+	 * @param Closure|string $callable
+	 * @param int            $priority
 	 *
 	 * @return $this
 	 */
@@ -42,10 +63,10 @@ class Router {
 	/**
 	 * Bind request to route
 	 *
-	 * @param string  $pattern
-	 * @param Closure $callable
-	 * @param string  $method
-	 * @param int     $priority
+	 * @param string         $pattern
+	 * @param Closure|string $callable
+	 * @param string         $method
+	 * @param int            $priority
 	 *
 	 * @return $this
 	 */
@@ -63,10 +84,15 @@ class Router {
 	/**
 	 * Dispatch route
 	 *
+	 * Runs the appropriate action
+	 * It will execute the before() method before the action
+	 * and after() method after the action finishes
+	 *
 	 * @param Request $request
 	 *
 	 * @return mixed
 	 * @throws RuntimeException
+	 * @throws NoSuchMethodException
 	 */
 	public function dispatch(Request $request) {
 		$method = $request->getMethod();
@@ -135,7 +161,34 @@ class Router {
 		}
 
 		if ($found) {
-			return call_user_func_array($found, $params);
+			if (is_object($found)) {
+				return call_user_func($found, $this->app, $params);
+			}
+			if (is_string($found)) {
+				$controller = new $found($this->app);
+				$action = $this->request->getUri(0, "index");
+				$result = null;
+
+				if (method_exists($controller, "before")) {
+					call_user_func([$controller, "before"], $action);
+				}
+
+				if ($controller->execute) {
+					if (method_exists($controller, $action)) {
+						$result = call_user_func([$controller, $action], $params);
+					} else {
+						throw new NoSuchMethodException("Method '" . $action . "' doesn't exist in " . get_class());
+					}
+				}
+
+				if ($controller->execute) {
+					if (method_exists($controller, "after")) {
+						call_user_func([$controller, "after"], $action);
+					}
+				}
+
+				return $result;
+			}
 		}
 
 		throw new RuntimeException("Failed to find and execute the function");

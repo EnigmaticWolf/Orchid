@@ -1,11 +1,10 @@
 <?php
 
 use Orchid\App;
-use Orchid\Extension\i18n;
 
 define("ORCHID", __DIR__);
 
-// PSR совместимый загрузщик основных файлов
+// PSR-compatible bootloader key files
 spl_autoload_register(function ($class) {
 	$class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";
 
@@ -16,7 +15,7 @@ spl_autoload_register(function ($class) {
 	}
 });
 
-// функция для отладки в Debug
+// function for debugging
 function pre(...$args) {
 	echo "<pre>";
 	foreach ($args as $obj) {
@@ -25,20 +24,10 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-// инициализация приложения
-App::initialize([
-	"locale" => ["ru", "en"],
-]);
+$app = App::getInstance();
 
-// подключение модулей
-App::loadModule([
+$app->loadModule([
 	ORCHID . "/module",
 ]);
 
-// принудительная смена языка
-if (isset($_REQUEST["lang"])) {
-	i18n::$force = $_REQUEST["lang"];
-}
-
-// инициализация расширения интернационализации
-i18n::initialize();
+return $app;

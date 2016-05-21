@@ -456,7 +456,7 @@ class Response {
 			return $this;
 		}
 
-		throw new InvalidArgumentException("The HTTP status code " . $code . " is not valid");
+		throw new InvalidArgumentException("The HTTP status code '" . $code . "'' is not valid");
 	}
 
 	/**
