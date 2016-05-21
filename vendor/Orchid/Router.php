@@ -53,7 +53,7 @@ class Router {
 		$this->routes[] = [
 			"method"   => strtoupper($method),
 			"pattern"  => $pattern,
-			"callback" => $callable,
+			"callable" => $callable,
 			"priority" => $priority,
 		];
 
@@ -82,7 +82,7 @@ class Router {
 			foreach ($this->routes as $route) {
 				if ($route["method"] == $method) {
 					if ($route["pattern"] === $pathname) {
-						$found = $route["callback"];
+						$found = $route["callable"];
 						break;
 					}
 
@@ -90,7 +90,7 @@ class Router {
 					if (substr($route["pattern"], 0, 1) == "#" && substr($route["pattern"], -1) == "#") {
 						if (preg_match($route["pattern"], $pathname, $match)) {
 							$params[":capture"] = array_slice($match, 1);
-							$found = $route["callback"];
+							$found = $route["callable"];
 							break;
 						}
 					}
@@ -100,7 +100,7 @@ class Router {
 						$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["pattern"], "#")) . "#";
 						if (preg_match($pattern, $pathname, $match)) {
 							$params[":arg"] = array_slice($match, 1);
-							$found = $route["callback"];
+							$found = $route["callable"];
 							break;
 						}
 					}
@@ -123,14 +123,15 @@ class Router {
 								}
 							}
 							if ($matched) {
-								$found = $route["callback"];
+								$found = $route["callable"];
 								break;
 							}
 						}
 					}
 				}
-
 			}
+		} else {
+			throw new RuntimeException("Route list is empty");
 		}
 
 		if ($found) {
