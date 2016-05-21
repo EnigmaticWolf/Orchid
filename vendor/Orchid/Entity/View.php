@@ -31,7 +31,7 @@ class View {
 	 *
 	 * @var string
 	 */
-	public static $layout = "view:layout.php";
+	public static $layout;
 
 	/**
 	 * View constructor
