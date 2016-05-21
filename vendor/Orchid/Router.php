@@ -74,7 +74,7 @@ class Router {
 		$uri = $request->getUri();
 
 		$found = null;
-		$param = [];
+		$params = [];
 
 		if ($this->routes) {
 			usort($this->routes, [$this, "compare"]);
@@ -89,7 +89,7 @@ class Router {
 					/* #\.html$#  */
 					if (substr($route["pattern"], 0, 1) == "#" && substr($route["pattern"], -1) == "#") {
 						if (preg_match($route["pattern"], $pathname, $match)) {
-							$param[":capture"] = array_slice($match, 1);
+							$params[":capture"] = array_slice($match, 1);
 							$found = $route["callback"];
 							break;
 						}
@@ -99,7 +99,7 @@ class Router {
 					if (strpos($route["pattern"], "*") !== false) {
 						$pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["pattern"], "#")) . "#";
 						if (preg_match($pattern, $pathname, $match)) {
-							$param[":arg"] = array_slice($match, 1);
+							$params[":arg"] = array_slice($match, 1);
 							$found = $route["callback"];
 							break;
 						}
@@ -114,7 +114,7 @@ class Router {
 							$matched = true;
 							foreach ($parts as $index => $part) {
 								if (":" === substr($part, 0, 1)) {
-									$param[substr($part, 1)] = $uri[$index];
+									$params[substr($part, 1)] = $uri[$index];
 									continue;
 								}
 								if ($uri[$index] != $parts[$index]) {
@@ -134,7 +134,7 @@ class Router {
 		}
 
 		if ($found) {
-			return call_user_func_array($found, $param);
+			return call_user_func_array($found, $params);
 		}
 
 		throw new RuntimeException("Failed to find and execute the function");

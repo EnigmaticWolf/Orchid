@@ -2,17 +2,9 @@
 
 namespace Orchid\Entity;
 
-use Orchid\App;
 use Orchid\Entity\Exception\FileNotFoundException;
 
 class View {
-	/**
-	 * Global layout template path
-	 *
-	 * @var string
-	 */
-	public static $layout = "view:layout.php";
-
 	/**
 	 * Current template path
 	 *
@@ -33,6 +25,13 @@ class View {
 	 * @var array
 	 */
 	protected static $globalData = [];
+
+	/**
+	 * Global layout template path
+	 *
+	 * @var string
+	 */
+	public static $layout = "view:layout.php";
 
 	/**
 	 * View constructor
@@ -126,7 +125,7 @@ class View {
 			extract(View::$globalData, EXTR_SKIP);
 		}
 
-		if ($_file = App::getPath($_file)) {
+		if ($_file && file_exists($_file)) {
 			ob_start();
 			require $_file;
 
