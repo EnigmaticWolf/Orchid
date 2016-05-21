@@ -5,7 +5,6 @@ namespace Orchid\Entity;
 use ArrayAccess;
 use Iterator;
 use RuntimeException;
-use Orchid\App;
 use Orchid\Entity\Exception\FileNotFoundException;
 
 class Config implements ArrayAccess, Iterator {
@@ -21,7 +20,7 @@ class Config implements ArrayAccess, Iterator {
 	 * @throws FileNotFoundException
 	 */
 	public static function fromFile($path) {
-		if ($path = App::getPath($path)) {
+		if (file_exists($path)) {
 			$ext = pathinfo($path);
 
 			switch ($ext["extension"]) {
