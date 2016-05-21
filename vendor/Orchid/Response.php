@@ -196,17 +196,34 @@ class Response {
 	 *
 	 * @param string $body
 	 * @param int    $status
-	 * @param string $mime
 	 * @param array  $headers
 	 */
-	public function __construct($body = "", $status = 200, $mime = "html", array $headers = []) {
-		foreach ($headers as $key => $value) {
-			$this->setHeader($key, $value);
-		}
-
+	public function __construct($body = null, $status = 200, array $headers = []) {
 		$this->setContent($body);
 		$this->setStatus($status);
 		$this->setCharset("UTF-8");
+
+		foreach ($headers as $key => $value) {
+			$this->setHeader($key, $value);
+		}
+	}
+
+	/**
+	 * Create Response
+	 *
+	 * <code>
+	 * return Response::create($body, 200)
+	 *                  ->setHeaderCacheControl(10);
+	 * </code>
+	 *
+	 * @param string $body
+	 * @param int    $status
+	 * @param array  $headers
+	 *
+	 * @return static
+	 */
+	public static function create($body = null, $status = 200, array $headers = []) {
+		return new static($body, $status, $headers);
 	}
 
 	/**
@@ -269,8 +286,10 @@ class Response {
 	 * @param int $bitWeight
 	 * @param int $maxAge       TTL Cache-Control/max-age
 	 * @param int $sharedMaxAge TTL Cache-Control/s-maxage
+	 *
+	 * @return $this
 	 */
-	public static function setHeaderCacheControl($bitWeight = 0, $maxAge = 3600, $sharedMaxAge = 600) {
+	public function setHeaderCacheControl($bitWeight = 0, $maxAge = 3600, $sharedMaxAge = 600) {
 		$valuesByWeight = [
 			2   => "public",
 			4   => "private",
@@ -290,7 +309,9 @@ class Response {
 			}
 		}
 
-		static::setHeader("Cache-Control", implode(" ", array_reverse($header)));
+		$this->setHeader("Cache-Control", implode(" ", array_reverse($header)));
+
+		return $this;
 	}
 
 	/**
@@ -400,7 +421,7 @@ class Response {
 	 * @throws UnexpectedValueException
 	 */
 	public function setContent($body) {
-		if ($body === null || ($body && is_string($body) || is_numeric($body) || is_callable([$body, "__toString"]))) {
+		if ($body === null || ($body && (is_string($body) || is_numeric($body))) || is_callable([$body, "__toString"])) {
 			$this->setHeader("Content-Length", mb_strlen($body));
 			$this->body = $body;
 
