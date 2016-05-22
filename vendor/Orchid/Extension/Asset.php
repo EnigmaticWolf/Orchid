@@ -20,7 +20,7 @@ class Asset {
 	 * @return null|string
 	 */
 	public static function render() {
-		$request = \Orchid\App::getInstance()->request();
+		$request = App::getInstance()->request();
 		$include = [];
 
 		if (static::$map) {
