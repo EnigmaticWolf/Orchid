@@ -2,17 +2,18 @@
 
 use Orchid\Entity\Daemon;
 
-// подключаем файл начальной загрузки
 require_once(__DIR__ . "/../bootstrap.php");
 
-Daemon::$name = "Demo";
+$daemon = new Daemon(\Orchid\App::getInstance(), "Demo");
 
-// разделяем рабочий процесс
-Daemon::forkProcess();
+// share workflow
+$daemon->forkProcess();
 
-// пишем логи в файл
-Daemon::writeLog();
+// write logs to a file
+$daemon->writeLog();
 
 for($i = 0; $i < 10; $i++){
 	echo $i . " \n\r";
+
+	sleep(1);
 }

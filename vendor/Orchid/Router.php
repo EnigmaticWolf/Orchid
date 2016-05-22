@@ -31,7 +31,6 @@ class Router {
 	 */
 	public function __construct(App $app) {
 		$this->app = $app;
-		$this->request = $app->request();
 	}
 
 	/**
@@ -93,9 +92,9 @@ class Router {
 	 * @throws NoSuchMethodException
 	 */
 	public function dispatch() {
-		$method = $this->request->getMethod();
-		$pathname = $this->request->getPathname();
-		$uri = $this->request->getUri();
+		$method = $this->app->request()->getMethod();
+		$pathname = $this->app->request()->getPathname();
+		$uri = $this->app->request()->getUri();
 
 		$found = null;
 		$params = [];
