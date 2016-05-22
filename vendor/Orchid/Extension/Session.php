@@ -4,7 +4,7 @@ namespace Orchid\Extension;
 
 class Session {
 	/**
-	 * Создаёт новую сессию с заданным именем
+	 * Create new session with the given name
 	 *
 	 * @param string $name
 	 */
@@ -16,20 +16,20 @@ class Session {
 	}
 
 	/**
-	 * Записывает данные в текущую сессию
+	 * Writes the data in the current session
 	 *
-	 * @param string $key   ключевое слово
-	 * @param string $value значение для записи
+	 * @param string $key
+	 * @param string $value
 	 */
 	public static function write($key, $value) {
 		$_SESSION[$key] = $value;
 	}
 
 	/**
-	 * Возвращает данные из текущей сессии по заданному ключу
+	 * Return data from the current session of the given key
 	 *
-	 * @param string $key     ключевое слово
-	 * @param string $default значение для записи
+	 * @param string $key
+	 * @param string $default
 	 *
 	 * @return Mixed
 	 */
@@ -42,16 +42,16 @@ class Session {
 	}
 
 	/**
-	 * Удаляет данные из текущей сессии по заданному ключу
+	 * Removes data from the current session of the given key
 	 *
-	 * @param string $key ключевое слово
+	 * @param string $key
 	 */
 	public static function delete($key) {
 		unset($_SESSION[$key]);
 	}
 
 	/**
-	 * Уничтожает текущую сессию
+	 * Destroys the current session
 	 */
 	public static function destroy() {
 		session_destroy();

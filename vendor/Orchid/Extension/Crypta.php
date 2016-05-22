@@ -6,36 +6,36 @@ use Orchid\App;
 
 class Crypta {
 	/**
-	 * Зашифровать переданную строку
+	 * Encrypt transmitted string
 	 *
-	 * @param string $input строка которая будет зашифрованна
+	 * @param string $input
 	 *
-	 * @return string зашифрованная строка
+	 * @return string
 	 */
 	public static function encrypt($input) {
 		return base64_encode(static::crypt($input));
 	}
 
 	/**
-	 * Расшифровать переданную строку
+	 * Decrypt passed string
 	 *
-	 * @param string $input строка которая будет расшифрованна
+	 * @param string $input
 	 *
-	 * @return string расшифрованная строка
+	 * @return string
 	 */
 	public static function decrypt($input) {
 		return static::crypt(base64_decode($input));
 	}
 
 	/**
-	 * Вспомогательный метод для работы со строкой строку
+	 * Helper method to work with a string line
 	 *
-	 * @param string $input строка
+	 * @param string $input
 	 *
-	 * @return string обработанная строка
+	 * @return string
 	 */
 	protected static function crypt($input) {
-		$salt = md5(App::getSecret());
+		$salt = md5(App::getInstance()->getSecret());
 		$len = mb_strlen($input);
 		$gamma = "";
 		$n = $len > 100 ? 8 : 2;
@@ -47,14 +47,14 @@ class Crypta {
 	}
 
 	/**
-	 * Сгенерировать хешсумму для строки
+	 * Generate hash sum for a row
 	 *
-	 * @param string $string строка из которой получить хешсумму
+	 * @param string $string
 	 *
-	 * @return string хешсумма 140 символов
+	 * @return string
 	 */
 	public static function hash($string) {
-		$salt = substr(hash("whirlpool", uniqid(rand() . App::getSecret(), true)), 0, 12);
+		$salt = substr(hash("whirlpool", uniqid(rand() . App::getInstance()->getSecret(), true)), 0, 12);
 		$hash = hash("whirlpool", $salt . $string);
 		$saltPos = (mb_strlen($string) >= mb_strlen($hash) ? mb_strlen($hash) : mb_strlen($string));
 
@@ -62,10 +62,10 @@ class Crypta {
 	}
 
 	/**
-	 * Проверить строку на соответствие хешсумме
+	 * Check string against the hash sum
 	 *
-	 * @param string $string     проаеряемая строка
-	 * @param string $hashString хешсумма
+	 * @param string $string
+	 * @param string $hashString
 	 *
 	 * @return Boolean
 	 */

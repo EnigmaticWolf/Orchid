@@ -164,6 +164,20 @@ class App {
 	}
 
 	/**
+	 * Set value for key
+	 *
+	 * @param $key
+	 * @param $value
+	 *
+	 * @return $this
+	 */
+	public function set($key, $value) {
+		$this->config[$key] = $value;
+
+		return $this;
+	}
+
+	/**
 	 * Return request
 	 *
 	 * @return Request
@@ -453,6 +467,21 @@ class App {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Return path list by shortcut
+	 *
+	 * @param $shortcut
+	 *
+	 * @return array
+	 */
+	public function pathList($shortcut) {
+		if (isset($this->paths[$shortcut])) {
+			return $this->paths[$shortcut];
+		}
+
+		return [];
 	}
 
 	/**

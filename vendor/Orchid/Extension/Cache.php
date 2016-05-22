@@ -2,23 +2,22 @@
 
 namespace Orchid\Extension;
 
-use Orchid\App;
 use RecursiveDirectoryIterator;
+use Orchid\App;
 
-/* todo переписать */
 class Cache {
 	/**
-	 * Записывает данные во временный файл
+	 * Writes data to a temporary file
 	 *
-	 * @param string $key      ключ
-	 * @param mixed  $value    значение для записи
-	 * @param int    $duration время жизни файла (По умолчанию -1 - вечно)
+	 * @param string $key
+	 * @param mixed  $value
+	 * @param int    $expire
 	 *
-	 * @return int|false количество байт записанных в случае успеха
+	 * @return int|false
 	 */
-	public static function write($key, $value, $duration = -1) {
+	public static function write($key, $value, $expire = -1) {
 		$data = [
-			"expire" => ($duration >= 0) ? (is_string($duration) ? strtotime($duration) : time() + $duration) : $duration,
+			"expire" => ($expire >= 0) ? (is_string($expire) ? strtotime($expire) : time() + $expire) : $expire,
 			"value"  => serialize($value),
 		];
 
@@ -26,10 +25,10 @@ class Cache {
 	}
 
 	/**
-	 * Читает данные из временного файла
+	 * Reads data from the temporary file
 	 *
-	 * @param string $key     ключ
-	 * @param mixed  $default возвращаемое значение, если данных нет
+	 * @param string $key
+	 * @param mixed  $default
 	 *
 	 * @return mixed
 	 */
@@ -50,9 +49,9 @@ class Cache {
 	}
 
 	/**
-	 * Удаляет временный файл
+	 * Removes the temporary file
 	 *
-	 * @param string $key ключ
+	 * @param string $key
 	 *
 	 * @return boolean
 	 */
@@ -67,15 +66,17 @@ class Cache {
 	}
 
 	/**
-	 * Удаляет все временные файлы
-	 * 
+	 * Delete all temporary files
+	 *
 	 * @return boolean
 	 */
 	public static function flush() {
-		// директориия хранилища по-умолчанию
-		$path = App::getBaseDir() . "/storage/cache";
+		$app = App::getInstance();
 
-		if (($dir = App::getPath("cache:")) !== false) {
+		// directory is the default repository
+		$path = $app->getBaseDir() . "/storage/cache";
+
+		if (($dir = (string)$app->path("cache:")) !== false) {
 			$path = $dir;
 		}
 
@@ -96,20 +97,22 @@ class Cache {
 	}
 
 	/**
-	 * Возвращает путь и название временного файла
+	 * Returns the path and the name of the temporary file
 	 *
 	 * @param string $key
 	 *
 	 * @return string
 	 */
 	protected static function getCacheFilePath($key) {
-		// директориия хранилища по-умолчанию
-		$path = App::getBaseDir() . "/storage/cache/";
+		$app = App::getInstance();
 
-		if (($dir = App::getPath("cache:")) !== false) {
+		// directory is the default repository
+		$path = $app->getBaseDir() . "/storage/cache/";
+
+		if (($dir = (string)$app->path("cache:")) !== false) {
 			$path = $dir;
 		}
 
-		return $path . md5(App::getSecret() . ":" . $key) . ".cache";
+		return $path . md5($app->getSecret() . ":" . $key) . ".cache";
 	}
 }

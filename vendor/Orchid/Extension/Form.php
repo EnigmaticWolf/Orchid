@@ -28,7 +28,8 @@ namespace Orchid\Extension;
  */
 class Form {
 	/**
-	 * Массив поддерживаемых типов
+	 * An array of supported types
+	 *
 	 * @var array
 	 */
 	protected static $type = [
@@ -43,8 +44,8 @@ class Form {
 	];
 
 	/**
-	 * @param string $type тип поля
-	 * @param array  $args [name, data]
+	 * @param string $type
+	 * @param array  $args
 	 *
 	 * @return $this|mixed|null|string
 	 */
@@ -64,9 +65,9 @@ class Form {
 	}
 
 	/**
-	 * @param string $name   имя поля
-	 * @param array  $option массив значений выбора
-	 * @param array  $data   массив дополнительных атрибутов
+	 * @param string $name
+	 * @param array  $option
+	 * @param array  $data
 	 *
 	 * @return string
 	 */
@@ -101,7 +102,7 @@ class Form {
 		];
 		$form = "";
 
-		// определяем тип требуемой формы
+		// determine the type of the required form
 		switch ($data["type"]) {
 			case "textarea": {
 				$attr = [
@@ -144,7 +145,7 @@ class Form {
 				break;
 			}
 			default: {
-				// выделяем конкретно тип
+				// select a specific type
 				switch ($data["type"]) {
 					case "radio":
 					case "checkbox": {
@@ -210,7 +211,7 @@ class Form {
 	}
 
 	/**
-	 * Вспомогательный метод для генерации аттрибутов и свойств
+	 * Method for generating an auxiliary attributes and properties
 	 *
 	 * @param array $data
 	 * @param array $exclude
@@ -220,7 +221,7 @@ class Form {
 	protected static function getAttr(array &$data = [], array $exclude = []) {
 		$attr = [];
 
-		// подставление значения
+		// substituted values
 		switch (strtolower($data['method'])) {
 			case "get": {
 				if (isset($_GET[$data["name"]])) {

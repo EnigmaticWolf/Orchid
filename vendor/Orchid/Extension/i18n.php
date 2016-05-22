@@ -4,43 +4,57 @@ namespace Orchid\Extension {
 
 	use Orchid\App;
 	use Orchid\Entity\Exception\FileNotFoundException;
-	use Orchid\Request;
 
 	class i18n {
 		/**
-		 * Префикс языкового файла
-		 *
-		 * @var string
+		 * @var App
 		 */
-		public static $prefix = "";
+		protected $app;
 
 		/**
-		 * Принудительный выбор языка
-		 *
-		 * @var string
-		 */
-		public static $force = null;
-
-		/**
-		 * Буфферное хранилище языкового файла
+		 * Buffer storage of the language file
 		 *
 		 * @var array
 		 */
 		public static $locale = [];
 
 		/**
-		 * Инициализирует языковую систему
+		 * i18n constructor
 		 *
-		 * @param string $default язык по-умолчанию
+		 * @param App    $app
+		 * @param string $default
+		 * @param string $force
+		 */
+		public function __construct(App $app, $default = "ru", $force = null) {
+			$this->app = $app;
+
+			if ($force) {
+				$locale = $force;
+			} else {
+				$locale = $app->request()->getLanguage($default);
+			}
+
+			if (!in_array($locale, $app->get("locale", []))) {
+				$locale = $default;
+			}
+
+			static::$locale = $this->load($locale);
+		}
+
+		/**
+		 * Load language file for specified local
 		 *
+		 * @param $locale
+		 *
+		 * @return array|mixed
 		 * @throws FileNotFoundException
 		 */
-		public static function initialize($default = "ru") {
-			$lang = static::$force ? static::$force : Request::getClientLang($default);
-			// дириктория языковых файлов по-умолчанию
-			$path = App::getBaseDir() . "/storage/i18n/" . static::$prefix . trim($lang) . ".php";
+		protected function load($locale) {
+			// default path
+			$path = $this->app->getBaseDir() . "/storage/i18n/" . trim($locale) . ".php";
 
-			if (($file = App::getPath("lang:" . static::$prefix . $lang . ".php")) !== false) {
+			// check for dynamic path
+			if (($file = $this->app->path("lang:" . $locale . ".php")) !== false) {
 				$path = $file;
 			}
 
@@ -49,22 +63,17 @@ namespace Orchid\Extension {
 
 				switch ($ext["extension"]) {
 					case "ini": {
-						static::$locale = parse_ini_file($path, true);
+						return parse_ini_file($path, true);
 						break;
 					}
 					case "php": {
-						static::$locale = require_once $path;
+						return require_once $path;
 						break;
 					}
 				}
-			} else {
-				if (static::$force != $default) {
-					static::$force = $default;
-					static::initialize();
-				} else {
-					throw new FileNotFoundException("Не удалось найти файл языка");
-				}
 			}
+
+			throw new FileNotFoundException("Could not find a language file");
 		}
 	}
 }
@@ -75,7 +84,7 @@ namespace {
 
 	class L {
 		/**
-		 * Возвращает интернационализированный текст для указанного ключа
+		 * Returns internationalized text for the specified key
 		 *
 		 * @param $key
 		 *

@@ -4,10 +4,10 @@ namespace Orchid\Extension;
 
 class Str {
 	/**
-	 * Возвращает true если строчка начинается с указанного символа
+	 * Return true if the string starts with the specified character
 	 *
-	 * @param string $needle   искомый символ
-	 * @param string $haystack строка
+	 * @param string $needle
+	 * @param string $haystack
 	 *
 	 * @return Boolean;
 	 */
@@ -16,10 +16,10 @@ class Str {
 	}
 
 	/**
-	 * Возвращает true если строчка заканчивается указанным символом
+	 * Return true if the string ends with the specified character
 	 *
-	 * @param string $needle   искомый символ
-	 * @param string $haystack строка
+	 * @param string $needle
+	 * @param string $haystack
 	 *
 	 * @return Boolean;
 	 */
@@ -33,11 +33,11 @@ class Str {
 	}
 
 	/**
-	 * Безопасно обрезать строку до указанного значения, без потери последнего слова
+	 * It is safe to truncate to the specified value, without losing the last word
 	 *
-	 * @param   string $string строка
-	 * @param   int    $length необходимая длинна
-	 * @param   string $append символы в конце строки
+	 * @param   string $string
+	 * @param   int    $length
+	 * @param   string $append
 	 *
 	 * @return  string
 	 */
@@ -55,12 +55,12 @@ class Str {
 	}
 
 	/**
-	 * Склонить слово в зависимости от числа
+	 * Slope of the word, depending on the number
 	 *
-	 * @param int    $count количество
-	 * @param string $one   слово
-	 * @param string $two   слово
-	 * @param string $five  слово
+	 * @param int    $count
+	 * @param string $one
+	 * @param string $two
+	 * @param string $five
 	 *
 	 * @return string
 	 */
@@ -77,7 +77,7 @@ class Str {
 	}
 
 	/**
-	 * Преобразовать арабское число в римское
+	 * Convert Arabic number to Roman
 	 *
 	 * @param $int
 	 *
@@ -110,9 +110,9 @@ class Str {
 	}
 
 	/**
-	 * Заэкранировать строку или массив строк
+	 * Escape a string or an array of strings
 	 *
-	 * @param string|array $input входящая строка
+	 * @param string|array $input
 	 *
 	 * @return string;
 	 */
@@ -129,9 +129,9 @@ class Str {
 	}
 
 	/**
-	 * Убирать экранирование в строке или массив строк
+	 * Remove the screening in a row or an array of strings
 	 *
-	 * @param string|array $input входящая строка
+	 * @param string|array $input
 	 *
 	 * @return string;
 	 */
@@ -148,7 +148,7 @@ class Str {
 	}
 
 	/**
-	 * Транслитерировать строку
+	 * Transliterate a russian string
 	 *
 	 * @param string $input
 	 * @param bool   $back
@@ -172,7 +172,7 @@ class Str {
 	}
 
 	/**
-	 * Возвращает строковое представление размера данных
+	 * Returns a string representation of the data size
 	 *
 	 * @param int $size
 	 *
