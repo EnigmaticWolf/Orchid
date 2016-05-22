@@ -3,20 +3,28 @@
 namespace Orchid\Entity;
 
 use Closure;
+use RuntimeException;
 
-class Validator {
+abstract class Validator {
 	protected $data  = [];
 	protected $field = null;
 	protected $rule  = [];
 	protected $error = [];
 
+	/**
+	 * Validator constructor
+	 *
+	 * @param array $data
+	 */
 	public function __construct(array &$data) {
 		$this->data = &$data;
 	}
 
 	/**
-	 * Выбирает обязательное поле для валидации
+	 * Select required field validation
+	 *
 	 * @param string $field
+	 *
 	 * @return $this
 	 */
 	public function attr($field) {
@@ -26,8 +34,10 @@ class Validator {
 	}
 
 	/**
-	 * Выбирает НЕобязательное поле для валидации
+	 * Select not required (optional) field validation
+	 *
 	 * @param string $field
+	 *
 	 * @return $this
 	 */
 	public function option($field) {
@@ -41,10 +51,13 @@ class Validator {
 	}
 
 	/**
-	 * Добавляет к выбранному полю правило валидации
+	 * Adds to selected field validation rule
+	 *
 	 * @param Closure $validator
 	 * @param string  $message
+	 *
 	 * @return $this
+	 * @throws RuntimeException
 	 */
 	public function addRule($validator, $message = "") {
 		if ($this->field) {
@@ -52,13 +65,16 @@ class Validator {
 				"validator" => $validator,
 				"message"   => $message,
 			];
+		} else {
+			throw new RuntimeException("The field was not selected");
 		}
 
 		return $this;
 	}
 
 	/**
-	 * Выполняет операции валидации полей по заданным правилам
+	 * Performs validation on the fields specified rules
+	 * 
 	 * @return array|bool
 	 */
 	public function validate() {

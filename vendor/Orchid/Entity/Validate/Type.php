@@ -6,7 +6,7 @@ use Closure;
 
 trait Type {
 	/**
-	 * Проверяемое значение должно быть пустое
+	 * Checked value should be empty
 	 *
 	 * @return Closure
 	 */
@@ -17,7 +17,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение должно быть не пустое
+	 * Checked value should not be empty
 	 *
 	 * @return Closure
 	 */
@@ -28,7 +28,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение должно иметь тип Boolean
+	 * Checked value should be of type Boolean
 	 *
 	 * @return Closure
 	 */
@@ -39,7 +39,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение должно быть числом
+	 * Checked value should be a number
 	 *
 	 * @return Closure
 	 */
@@ -50,7 +50,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение должно быть строкой
+	 * Checked value should be a string
 	 *
 	 * @return Closure
 	 */
@@ -61,9 +61,9 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение будет преобразовано в Boolean
-	 * Для значений "1", "true", "on" и "yes" - true
-	 * Для значений "0", "false", "off", "no" и "" - false
+	 * Checked value will be converted to a Boolean
+	 * For values of "1", "true", "on" and "yes" - true
+	 * For values of "0", "false", "off", "no" and "" - false
 	 *
 	 * @return Closure
 	 */
@@ -78,7 +78,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение будет преобразовано в Integer
+	 * Checked value will be converted to an Integer
 	 *
 	 * @return Closure
 	 */
@@ -91,9 +91,9 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение будет преобразовано в toDouble
+	 * Checked value will be converted to toDouble
 	 *
-	 * @param int $precision точность округления
+	 * @param int $precision rounding precision
 	 *
 	 * @return Closure
 	 */
@@ -106,7 +106,7 @@ trait Type {
 	}
 
 	/**
-	 * Проверяемое значение будет преобразовано в String
+	 * Checked value will be converted to a String
 	 * 
 	 * @return Closure
 	 */

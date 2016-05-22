@@ -6,7 +6,7 @@ use Closure;
 
 trait Str {
 	/**
-	 * Экранирует строку
+	 * Escapes a string
 	 *
 	 * @return Closure
 	 */
@@ -23,7 +23,7 @@ trait Str {
 	}
 
 	/**
-	 * Проверяемое значение это E-Mail адрес
+	 * Checked value is the E-Mail address
 	 *
 	 * @return Closure
 	 */
@@ -34,7 +34,7 @@ trait Str {
 	}
 
 	/**
-	 * Проверяемое значение это IP адрес
+	 * Checked value is the IP address
 	 * 
 	 * @return Closure
 	 */

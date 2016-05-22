@@ -5,13 +5,13 @@ namespace Orchid\Entity\Validate;
 use Closure;
 
 trait Base {
-	public static $DATE_RU = "d.m.Y"; // формат даты Русский (ГОСТ Р 6.30-2003 (п. 3.11))
-	public static $DATE_EN = "d-m-Y"; // формат даты Английский
-	public static $DATE_US = "m-d-Y"; // формат даты США
-	public static $DATE_DB = "Y-m-d"; // формат даты баз данных (ISO 8601)
+	public static $DATE_RU = "d.m.Y"; // Russian date format (ГОСТ Р 6.30-2003 (п. 3.11))
+	public static $DATE_EN = "d-m-Y"; // English date format
+	public static $DATE_US = "m-d-Y"; // US date format
+	public static $DATE_DB = "Y-m-d"; // data bases date format (ISO 8601)
 
 	/**
-	 * Проверяемое значение будет преобразовано в дату в указанном формате
+	 * Checked value will be converted to a date in the specified format
 	 *
 	 * @param string $format
 	 *
@@ -30,8 +30,8 @@ trait Base {
 	}
 
 	/**
-	 * Проверяемое значение должно быть больше или равно указанному
-	 * В случае если проверяемое значение - строка, проверяется длинна строки
+	 * Checked value should be greater than or equal to the specified
+	 * In case if the value - the string length of the string is checked
 	 *
 	 * @param int $min
 	 *
@@ -51,8 +51,8 @@ trait Base {
 	}
 
 	/**
-	 * Проверяемое значение должно быть меньше или равно указанному
-	 * В случае если проверяемое значение - строка, проверяется длинна строки
+	 * Checked must be less than or equal to the specified
+	 * In case if the value - the string length of the string is checked
 	 *
 	 * @param int $max
 	 *
