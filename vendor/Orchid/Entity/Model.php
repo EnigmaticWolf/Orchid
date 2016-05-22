@@ -2,27 +2,39 @@
 
 namespace Orchid\Entity;
 
+use Orchid\App;
+
 abstract class Model {
 	/**
-	 * Массив описания полей модели
+	 * @var App
+	 */
+	protected $app;
+
+	/**
+	 * Array of fields describing the model
+	 *
 	 * @var array
 	 */
 	protected static $field = [];
 
 	/**
-	 * Массив данных модели
+	 * Model data array
+	 *
 	 * @var array
 	 */
 	protected $data = [];
 
 	public final function __construct(array $data = []) {
+		$this->app = App::getInstance();
 		$this->setAll(array_merge(static::$field, $data));
 	}
 
 	/**
-	 * Устанавливает значение для ключа
+	 * Set the value for a key
+	 *
 	 * @param $key
 	 * @param $value
+	 *
 	 * @return $this
 	 */
 	public function set($key, $value = null) {
@@ -34,8 +46,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Устанавливает значения для всех ключей
+	 * Set the values for all keys
+	 *
 	 * @param array $data
+	 *
 	 * @return $this
 	 */
 	public function setAll(array $data) {
@@ -47,8 +61,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Получает значение по ключу
+	 * Return the value for a key
+	 *
 	 * @param $key
+	 *
 	 * @return mixed
 	 */
 	public function get($key) {
@@ -56,8 +72,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Проверяет наличие ключа
+	 * Checks for key exists
+	 *
 	 * @param $key
+	 *
 	 * @return bool
 	 */
 	public function exist($key) {
@@ -65,7 +83,8 @@ abstract class Model {
 	}
 
 	/**
-	 * Проверяет пустая ли модель
+	 * Checks whether the model is empty
+	 *
 	 * @return bool
 	 */
 	public function isEmpty() {
@@ -73,8 +92,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Восстанавливает значение ключа по умолчанию
+	 * Restores the default value for key
+	 *
 	 * @param $key
+	 *
 	 * @return $this
 	 */
 	public function delete($key) {
@@ -84,7 +105,8 @@ abstract class Model {
 	}
 
 	/**
-	 * Восстанавливает значения модели по умолчанию
+	 * Restores the default model data
+	 *
 	 * @return $this
 	 */
 	public function clear() {
@@ -94,7 +116,8 @@ abstract class Model {
 	}
 
 	/**
-	 * Возвращает модель в виде Массива
+	 * Returns model as array
+	 *
 	 * @return array
 	 */
 	public function toArray() {
