@@ -31,5 +31,3 @@ $app = new App([
 $app->loadModule([
 	ORCHID . "/module",
 ]);
-
-return $app;

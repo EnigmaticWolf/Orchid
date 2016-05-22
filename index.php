@@ -2,7 +2,9 @@
 
 use Orchid\Extension\Str;
 
-$app = require_once("bootstrap.php");
+require_once("bootstrap.php");
+
+$app = \Orchid\App::getInstance();
 
 // add tasks outputting time and memory in the response header
 $app->event()->on("shutdown", function () use ($app) {
