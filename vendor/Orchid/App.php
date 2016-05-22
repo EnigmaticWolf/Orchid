@@ -123,7 +123,7 @@ class App {
 	}
 
 	/**
-	 * Get App instance
+	 * Return App instance
 	 *
 	 * @param array $config
 	 *
@@ -137,6 +137,22 @@ class App {
 		}
 
 		return $app;
+	}
+
+	/**
+	 * Return value from internal config
+	 *
+	 * @param string $key
+	 * @param mixed  $default
+	 *
+	 * @return mixed
+	 */
+	public function get($key, $default = null) {
+		if (!empty($this->config[$key])) {
+			return $this->config[$key];
+		}
+
+		return $default;
 	}
 
 	/**
@@ -230,28 +246,38 @@ class App {
 	}
 
 	/**
-	 * Get value from internal config
-	 *
-	 * @param string $key
-	 * @param mixed  $default
-	 *
-	 * @return mixed
-	 */
-	public function get($key, $default = null) {
-		if (isset($this->config[$key])) {
-			return $this->config[$key];
-		}
-
-		return $default;
-	}
-
-	/**
 	 * Return debug flag
 	 *
 	 * @return bool
 	 */
 	public function isDebug() {
 		return $this->get("debug", true);
+	}
+
+	/**
+	 * Return current app name
+	 *
+	 * @return string
+	 */
+	public function getApp() {
+		return $this->get("app.name", "public");
+	}
+
+	/**
+	 * Set app name
+	 *
+	 * @param $name
+	 *
+	 * @return bool
+	 */
+	public function setApp($name) {
+		if (in_array($name, $this->get("app.list", []))) {
+			$this->config["app.name"] = $name;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public function loadModule(array $folders) {
@@ -290,6 +316,60 @@ class App {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Return array of loaded modules
+	 *
+	 * @return array
+	 */
+	public function getModules() {
+		return $this->get("module.list", []);
+	}
+
+	/**
+	 * Return secret word
+	 *
+	 * @return string
+	 */
+	public function getSecret() {
+		return $this->get("secret", "secret");
+	}
+
+	/**
+	 * Return CLI args
+	 *
+	 * @return array
+	 */
+	public function getArgs() {
+		return $this->get("args", []);
+	}
+
+	/**
+	 * Return base dir
+	 *
+	 * @return string
+	 */
+	public function getBaseDir() {
+		return $this->get("base_dir");
+	}
+
+	/**
+	 * Return base host name
+	 *
+	 * @return string
+	 */
+	public function getBaseHost() {
+		return $this->get("base_host");
+	}
+
+	/**
+	 * Return base port num
+	 *
+	 * @return int
+	 */
+	public function getBasePort() {
+		return (int)$this->get("base_port");
 	}
 
 	/**
@@ -383,7 +463,7 @@ class App {
 	protected $closures = [];
 
 	/**
-	 * Adds closure
+	 * Add closure
 	 *
 	 * @param string  $name
 	 * @param Closure $callable
@@ -410,7 +490,7 @@ class App {
 	}
 
 	/**
-	 * It returns the result of the work closure
+	 * Return the result of the work closure
 	 *
 	 * @param string $name
 	 * @param array  ...$param
