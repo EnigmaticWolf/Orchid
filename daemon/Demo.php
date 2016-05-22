@@ -14,6 +14,4 @@ $daemon->writeLog();
 
 for($i = 0; $i < 10; $i++){
 	echo $i . " \n\r";
-
-	sleep(1);
 }
