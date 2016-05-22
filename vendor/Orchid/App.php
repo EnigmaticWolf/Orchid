@@ -156,7 +156,7 @@ class App {
 	 * @return mixed
 	 */
 	public function get($key, $default = null) {
-		if (!isset($this->config[$key])) {
+		if (isset($this->config[$key])) {
 			return $this->config[$key];
 		}
 
