@@ -36,8 +36,7 @@ class App {
 		if (static::$instance) {
 			return static::$instance;
 		}
-
-		$self = $this;
+		static::$instance = $self = $this;
 
 		$this->config = array_merge_recursive([
 			"debug"       => true,
@@ -212,13 +211,19 @@ class App {
 	/**
 	 * Return database
 	 *
+	 * @param array $configs
+	 *
 	 * @return Database
 	 */
-	public function database() {
+	public function database(array $configs = []) {
 		static $database;
 
 		if (!$database) {
-			$database = new Database();
+			if (!$configs) {
+				$configs = $this->get("database", []);
+			}
+
+			$database = new Database($this, $configs);
 		}
 
 		return $database;
@@ -227,13 +232,19 @@ class App {
 	/**
 	 * Return memory
 	 *
+	 * @param array $configs
+	 *
 	 * @return Memory
 	 */
-	public function memory() {
+	public function memory(array $configs = []) {
 		static $memory;
 
 		if (!$memory) {
-			$memory = new Memory();
+			if (!$configs) {
+				$configs = $this->get("memory", []);
+			}
+
+			$memory = new Memory($this, $configs);
 		}
 
 		return $memory;

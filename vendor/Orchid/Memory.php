@@ -2,103 +2,117 @@
 
 namespace Orchid;
 
-use Orchid\Entity\Config;
+use RuntimeException;
 use Orchid\Entity\Driver\Cache\Memcache;
 use Orchid\Entity\Exception\CacheException;
 
 class Memory {
 	/**
-	 * Запрещает чтение из внешнего хранилища
+	 * Prevents reading from external storage
+	 *
 	 * @var bool
 	 */
-	public static $disabled = false;
+	public $disabled = false;
 
 	/**
-	 * Префикс ключей
+	 * Prefix keys
+	 *
 	 * @var string
 	 */
-	public static $prefix = "";
+	public $prefix = "";
 
 	/**
-	 * Список ключей которые будут сохраняться в буффер
-	 * @var array
-	 */
-	public static $cachedKeys = [];
-
-	/**
-	 * Внутреннее хранилище
-	 * @var array
-	 */
-	protected static $buffer = [];
-
-	/**
-	 * Массив объектов соединений с внешними хранилищами
-	 * @var array
-	 */
-	protected static $instance = [];
-
-	/**
-	 * Инициализиует подключения
+	 * List of keys that are stored in the buffer
 	 *
-	 * @param Config|array $configs
-	 *
-	 * @return void
+	 * @var array
 	 */
-	public static function initialize($configs) {
-		$default = [
-			"driver"  => "memcache",
-			"host"    => "",
-			"port"    => null,
-			"timeout" => 10,
-			"role"    => "master",
-		];
+	public $cachedKeys = [];
 
-		foreach ($configs as $index => $config) {
-			$key = "memory:" . $index;
-			$config = array_merge($default, $config);
+	/**
+	 * Internal storage
+	 *
+	 * @var array
+	 */
+	protected $buffer = [];
 
-			switch (strtolower($config["driver"])) {
-				case "memcache": {
-					App::addClosure($key, function () use ($config) {
-						return new Memcache(
-							$config["host"],
-							$config["port"],
-							$config["timeout"]
-						);
-					});
+	/**
+	 * Array of connections with external storage
+	 *
+	 * @var array
+	 */
+	protected $instance = [];
 
-					break;
+	/**
+	 * Memory constructor
+	 *
+	 * @param App   $app
+	 * @param array $configs
+	 *
+	 * @throws RuntimeException
+	 * @throws CacheException
+	 */
+	public function __construct(App $app, array $configs) {
+		$this->app = $app;
+
+		if ($configs) {
+			$default = [
+				"driver"  => "memcache",
+				"host"    => "",
+				"port"    => "",
+				"timeout" => 10,
+				"role"    => "master",
+			];
+
+			$keyHash = "memory:" . spl_object_hash($this) . ":";
+			foreach ($configs as $index => $config) {
+				$key = $keyHash . $index;
+				$config = array_merge($default, $config);
+
+				switch (strtolower($config["driver"])) {
+					case "memcache": {
+						$app->addClosure($key, function () use ($config) {
+							return new Memcache(
+								$config["host"],
+								$config["port"],
+								$config["timeout"]
+							);
+						});
+
+						break;
+					}
 				}
-			}
 
-			static::$instance[strtolower($config["role"]) == "master" ? "master" : "slave"][] = $key;
+				$this->instance[strtolower($config["role"]) == "master" ? "master" : "slave"][] = $key;
+			}
+		} else {
+			throw new RuntimeException("There are no settings to connect to the memory");
 		}
 	}
 
 	/**
-	 * Открывает и возвращает соединение с внешним хранилищем
+	 * Opens and returns a connection to external storage
 	 *
 	 * @param bool $use_master
 	 *
 	 * @return Memcache
 	 * @throws CacheException
 	 */
-	public static function getInstance($use_master = false) {
+	public function getInstance($use_master = false) {
 		$pool = [];
 		$role = $use_master ? "master" : "slave";
 
 		switch (true) {
-			case !empty(static::$instance[$role]): {
-				$pool = static::$instance[$role];
+			case !empty($this->instance[$role]): {
+				$pool = $this->instance[$role];
 				break;
 			}
-			case !empty(static::$instance["master"]): {
-				$pool = static::$instance["master"];
+			case !empty($this->instance["master"]): {
+				$pool = $this->instance["master"];
 				$role = "master";
 				break;
 			}
-			case !empty(static::$instance["slave"]): {
-				$pool = static::$instance["slave"];
+			case !empty($this->instance["slave"]): {
+				$pool = $this->instance["slave"];
 				$role = "slave";
 				break;
 			}
@@ -106,44 +120,44 @@ class Memory {
 
 		if ($pool) {
 			if (is_array($pool)) {
-				return static::$instance[$role] = App::getClosure($pool[array_rand($pool)]);
+				return $this->instance[$role] = $this->app->getClosure($pool[array_rand($pool)]);
 			} else {
 				return $pool;
 			}
 		}
 
-		throw new CacheException("Не удалось установить подключение");
+		throw new CacheException("Unable to establish connection");
 	}
 
 	/**
-	 * Генерирует ключ и возвращает его
+	 * Generate key
 	 *
-	 * @param $key
+	 * @param string $key
 	 *
 	 * @return string
 	 */
-	public static function getKey($key) {
-		return static::$prefix ? static::$prefix . ":" . $key : $key;
+	public function getKey($key) {
+		return $this->prefix ? $this->prefix . ":" . $key : $key;
 	}
 
 	/**
-	 * Производит чтение ключа из внешнего хранилища и возвращает значение
+	 * Return value from external storage
 	 *
 	 * @param string $key
 	 * @param mixed  $default
 	 *
 	 * @return mixed
 	 */
-	public static function get($key, $default = false) {
-		if (!static::$disabled) {
-			if (isset(static::$buffer[$key])) {
-				$value = static::$buffer[$key];
+	public function get($key, $default = false) {
+		if (!$this->disabled) {
+			if (isset($this->buffer[$key])) {
+				$value = $this->buffer[$key];
 			} else {
-				$value = static::getInstance(false)->get($key);
+				$value = $this->getInstance(false)->get($this->getKey($key));
 
-				foreach (static::$cachedKeys as $k) {
+				foreach ($this->cachedKeys as $k) {
 					if (strpos($key, $k) === 0) {
-						static::$buffer[$key] = $value;
+						$this->buffer[$key] = $value;
 					}
 				}
 			}
@@ -155,7 +169,7 @@ class Memory {
 	}
 
 	/**
-	 * Записывает значение для ключа во внешнее хранилище
+	 * Writes a value to external storage
 	 *
 	 * @param string $key
 	 * @param mixed  $value
@@ -164,58 +178,59 @@ class Memory {
 	 *
 	 * @return bool
 	 */
-	public static function set($key, $value, $expire = 0, $tag = null) {
-		if (isset(static::$cachedKeys[$key])) {
-			unset(static::$buffer[$key]);
+	public function set($key, $value, $expire = 0, $tag = null) {
+		if (isset($this->cachedKeys[$key])) {
+			unset($this->buffer[$key]);
 		}
 
-		return static::getInstance(true)->set($key, $value, $expire, $tag);
+		return $this->getInstance(true)->set($this->getKey($key), $value, $expire, $tag);
 	}
 
 	/**
-	 * Удаляет указанный ключ из внешнего хранилища
+	 * Removes specified key from external storage
 	 *
 	 * @param string $key
 	 *
 	 * @return bool
 	 */
-	public static function delete($key) {
-		if (isset(static::$cachedKeys[$key])) {
-			unset(static::$buffer[$key]);
+	public function delete($key) {
+		if (isset($this->cachedKeys[$key])) {
+			unset($this->buffer[$key]);
 		}
 
-		return static::getInstance(true)->delete($key);
+		return $this->getInstance(true)->delete($this->getKey($key));
 	}
 
 	/**
-	 * Удаляет все ключи из внешнего хранилища
+	 * Remove all keys from external storage
+	 *
 	 * @return bool
 	 */
-	public static function flush() {
-		static::$buffer = [];
+	public function flush() {
+		$this->buffer = [];
 
-		return static::getInstance(true)->flush();
+		return $this->getInstance(true)->flush();
 	}
 
 	/**
-	 * Достаёт значения по указанному тегу
+	 * Return values for a given tag
 	 *
 	 * @param string $tag
 	 *
 	 * @return array
 	 */
-	public static function getByTag($tag) {
-		return static::getInstance(false)->getByTag($tag);
+	public function getByTag($tag) {
+		return $this->getInstance(false)->getByTag($this->getKey($tag));
 	}
 
 	/**
-	 * Удаляет значения по указанному тегу
+	 * Deletes values for a given tag
 	 *
 	 * @param string $tag
 	 *
 	 * @return bool
 	 */
-	public static function deleteByTag($tag) {
-		return static::getInstance(true)->deleteByTag($tag);
+	public function deleteByTag($tag) {
+		return $this->getInstance(true)->deleteByTag($this->getKey($tag));
 	}
 }

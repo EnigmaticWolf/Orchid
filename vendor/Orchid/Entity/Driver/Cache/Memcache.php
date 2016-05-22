@@ -3,13 +3,12 @@
 namespace Orchid\Entity\Driver\Cache;
 
 use Orchid\Entity\Exception\CacheException;
-use Orchid\Memory;
 
 class Memcache {
 	protected $connection = null;
 
 	/**
-	 * Создаёт подключение к серверу внешнего хранилища
+	 * Create connection to the external storage server
 	 *
 	 * @param string $host
 	 * @param int    $port
@@ -21,28 +20,28 @@ class Memcache {
 		$this->connection = new \Memcache;
 
 		if (!$this->connection->connect($host, $port, $timeout)) {
-			throw new CacheException("Подключение к серверу кэша не удалось");
+			throw new CacheException("Connecting to a cache server was unable");
 		}
 	}
 
 	/**
-	 * Производит чтение ключа из внешнего хранилища и возвращает значение
+	 * Return value from external storage and returns
 	 *
 	 * @param string $key
 	 *
 	 * @return mixed
 	 */
 	public function get($key) {
-		return $this->connection->get(Memory::getKey($key));
+		return $this->connection->get($key);
 	}
 
 	/**
-	 * Записывает значение для ключа во внешнее хранилище
+	 * Writes a value to an external storage key
 	 *
-	 * @param string      $key
-	 * @param mixed       $value
-	 * @param int         $expire
-	 * @param string|null $tag
+	 * @param string $key
+	 * @param mixed  $value
+	 * @param int    $expire
+	 * @param string $tag
 	 *
 	 * @return bool
 	 */
@@ -53,22 +52,23 @@ class Memcache {
 			$this->set($tag, array_unique($tags));
 		}
 
-		return $this->connection->set(Memory::getKey($key), $value, MEMCACHE_COMPRESSED, $expire);
+		return $this->connection->set($key, $value, MEMCACHE_COMPRESSED, $expire);
 	}
 
 	/**
-	 * Удаляет указанный ключ из внешнего хранилища
+	 * Removes specified key from the external storage
 	 *
 	 * @param string $key
 	 *
 	 * @return bool
 	 */
 	public function delete($key) {
-		return $this->connection->delete(Memory::getKey($key));
+		return $this->connection->delete($key);
 	}
 
 	/**
-	 * Удаляет все ключи из внешнего хранилища
+	 * Remove all keys from an external storage
+	 *
 	 * @return bool
 	 */
 	public function flush() {
@@ -76,7 +76,7 @@ class Memcache {
 	}
 
 	/**
-	 * Достаёт значения по указанному тегу
+	 * Return values for a given tag
 	 *
 	 * @param string $tag
 	 *
@@ -95,7 +95,7 @@ class Memcache {
 	}
 
 	/**
-	 * Удаляет значения по указанному тегу
+	 * Deletes values for a given tag
 	 *
 	 * @param string $tag
 	 *

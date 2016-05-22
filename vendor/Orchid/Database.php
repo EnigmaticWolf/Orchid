@@ -5,11 +5,19 @@ namespace Orchid;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Orchid\Entity\Config;
+use RuntimeException;
 use Orchid\Entity\Exception\DatabaseException;
 
 class Database {
-	protected static $connection = [
+	/**
+	 * @var App
+	 */
+	protected $app;
+
+	/**
+	 * @var array
+	 */
+	protected $connection = [
 		"master" => [],
 		"slave"  => [],
 	];
@@ -17,67 +25,78 @@ class Database {
 	/**
 	 * @var PDO
 	 */
-	protected static $lastConnection = null;
+	protected $lastConnection = null;
 
 	/**
-	 * Инициализиует подключения
+	 * Database constructor
 	 *
-	 * @param Config|array $configs
+	 * @param App   $app
+	 * @param array $configs
+	 *
+	 * @throws RuntimeException
+	 * @throws DatabaseException
 	 */
-	public static function initialize($configs) {
-		$default = [
-			"dsn"      => "",
-			"username" => "",
-			"password" => "",
-			"options"  => [],
-			"role"     => "master",
-		];
+	public function __construct(App $app, array $configs) {
+		$this->app = $app;
 
-		foreach ($configs as $index => $config) {
-			$key = "database:" . $index;
-			$config = array_merge($default, $config);
+		if ($configs) {
+			$default = [
+				"dsn"      => "",
+				"username" => "",
+				"password" => "",
+				"options"  => [],
+				"role"     => "master",
+			];
 
-			App::addClosure($key, function () use ($config) {
-				try {
-					return new PDO(
-						$config["dsn"],
-						$config["username"],
-						$config["password"],
-						$config["options"]
-					);
-				} catch (PDOException $ex) {
-					throw new DatabaseException("Cоединение с сервером базы данных завершилась неудачно (" . $ex->getMessage() . ")", 0, $ex);
-				}
-			});
+			$keyHash = "database:" . spl_object_hash($this) . ":";
+			foreach ($configs as $index => $config) {
+				$key = $keyHash . $index;
+				$config = array_merge($default, $config);
 
-			static::$connection[$config["role"] == "master" ? "master" : "slave"][] = $key;
+				$app->addClosure($key, function () use ($config) {
+					try {
+						return new PDO(
+							$config["dsn"],
+							$config["username"],
+							$config["password"],
+							$config["options"]
+						);
+					} catch (PDOException $ex) {
+						throw new DatabaseException("The connection to the database server fails (" . $ex->getMessage() . ")", 0, $ex);
+					}
+				});
+
+				$this->connection[$config["role"] == "master" ? "master" : "slave"][] = $key;
+			}
+		} else {
+			throw new RuntimeException("There are no settings to connect to the database");
 		}
 	}
 
 	/**
-	 * Возвращает объект PDO
+	 * Returns PDO object
 	 *
 	 * @param bool $use_master
 	 *
 	 * @return PDO
 	 * @throws DatabaseException
 	 */
-	public static function getInstance($use_master = false) {
+	public function getInstance($use_master = false) {
 		$pool = [];
 		$role = $use_master ? "master" : "slave";
 
 		switch (true) {
-			case !empty(static::$connection[$role]): {
-				$pool = static::$connection[$role];
+			case !empty($this->connection[$role]): {
+				$pool = $this->connection[$role];
 				break;
 			}
-			case !empty(static::$connection["master"]): {
-				$pool = static::$connection["master"];
+			case !empty($this->connection["master"]): {
+				$pool = $this->connection["master"];
 				$role = "master";
 				break;
 			}
-			case !empty(static::$connection["slave"]): {
-				$pool = static::$connection["slave"];
+			case !empty($this->connection["slave"]): {
+				$pool = $this->connection["slave"];
 				$role = "slave";
 				break;
 			}
@@ -85,40 +104,40 @@ class Database {
 
 		if ($pool) {
 			if (is_array($pool)) {
-				return static::$connection[$role] = App::getClosure($pool[array_rand($pool)]);
+				return $this->connection[$role] = $this->app->getClosure($pool[array_rand($pool)]);
 			} else {
 				return $pool;
 			}
 		}
 
-		throw new DatabaseException("Не удалось установить подключение");
+		throw new DatabaseException("Unable to establish connection");
 	}
 
 	/**
-	 * Подготавливает и выполняет запрос к базе данных
+	 * Prepares and executes a database query
 	 *
-	 * @param string     $query
-	 * @param array      $params
-	 * @param bool|false $use_master
+	 * @param string $query
+	 * @param array  $params
+	 * @param bool   $use_master
 	 *
 	 * @return PDOStatement
 	 */
-	public static function query($query, array $params = [], $use_master = false) {
-		// получаем соединение
-		static::$lastConnection = static::getInstance(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
+	public function query($query, array $params = [], $use_master = false) {
+		// obtain connection
+		$this->lastConnection = $this->getInstance(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
 
-		$stm = static::$lastConnection->prepare($query);
+		$stm = $this->lastConnection->prepare($query);
 		$stm->execute($params);
 
 		return $stm;
 	}
 
 	/**
-	 * Возвращает ID последней вставленной строки
-	 * 
+	 * Returns the ID of the last inserted row
+	 *
 	 * @return string
 	 */
-	public static function lastInsertId() {
-		return static::$lastConnection->lastInsertId();
+	public function lastInsertId() {
+		return $this->lastConnection->lastInsertId();
 	}
 }
