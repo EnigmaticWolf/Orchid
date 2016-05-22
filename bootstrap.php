@@ -24,7 +24,9 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-$app = App::getInstance();
+$app = new App([
+	/* config params here */
+]);
 
 $app->loadModule([
 	ORCHID . "/module",

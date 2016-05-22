@@ -21,11 +21,22 @@ class App {
 	protected $paths = [];
 
 	/**
+	 * Instance of class App
+	 *
+	 * @var App
+	 */
+	protected static $instance;
+
+	/**
 	 * App constructor
 	 *
 	 * @param array $config
 	 */
-	protected function __construct(array $config = []) {
+	public function __construct(array $config = []) {
+		if (static::$instance) {
+			return static::$instance;
+		}
+
 		$self = $this;
 
 		$this->config = array_merge_recursive([
@@ -120,23 +131,21 @@ class App {
 		} else {
 			$this->config["args"] = array_slice($_SERVER["argv"], 1);
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Return App instance
 	 *
-	 * @param array $config
-	 *
 	 * @return App
 	 */
-	public static function getInstance(array $config = []) {
-		static $app;
-
-		if (!$app) {
-			$app = new static($config);
+	public static function getInstance() {
+		if (static::$instance) {
+			return static::$instance;
 		}
 
-		return $app;
+		throw new RuntimeException("Instance of class App was not created");
 	}
 
 	/**
@@ -280,12 +289,22 @@ class App {
 		return false;
 	}
 
+	/**
+	 * Load modules from specified folders
+	 *
+	 * @param array $folders
+	 *
+	 * @return $this
+	 * @throws FileNotFoundException
+	 * @throws NoSuchMethodException
+	 * @throws RuntimeException
+	 */
 	public function loadModule(array $folders) {
 		foreach ($folders as $folder) {
 			foreach (new DirectoryIterator($folder) as $element) {
 				if (!$element->isDot() && ($element->isDir() || $element->isFile() && $element->getExtension() == "php")) {
 					$dir = $element->getRealPath();
-					$class = $element->getBasename(".php");
+					$name = $class = $element->getBasename(".php");
 
 					if (!is_file($dir)) {
 						$this->path($class, $dir);
@@ -301,13 +320,20 @@ class App {
 						throw new FileNotFoundException("Could not find specified file");
 					}
 
-					if (method_exists($class, "initialize")) {
-						call_user_func([$class, "initialize"], $this);
+					// check exists and parent class
+					if (class_exists($class) && is_subclass_of($class, 'Orchid\\Entity\\Module')) {
+
+						// check have method initialize
+						if (method_exists($class, "initialize")) {
+							call_user_func([$class, "initialize"], $this);
+						} else {
+							throw new NoSuchMethodException("Initialize method is not found in class '" . $class . "'");
+						}
 					} else {
-						throw new NoSuchMethodException("Initialize method is not found in class '" . $class . "'");
+						throw new RuntimeException("Class '" . $class . "' not found or is not a subclass of 'Orchid\\Entity\\Module'");
 					}
 
-					$this->config["module.list"][] = $class;
+					$this->config["module.list"][] = $name;
 				}
 			}
 
