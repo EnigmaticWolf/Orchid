@@ -2,8 +2,14 @@
 
 namespace Page;
 
+use Orchid\App;
 use Orchid\Entity\Module;
 
+/**
+ * Class ModulePage has only static methods
+ * 
+ * @package Page
+ */
 class ModulePage extends Module {
 	/**
 	 * Initialize module
