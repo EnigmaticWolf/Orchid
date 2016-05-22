@@ -641,7 +641,7 @@ class Response {
 		} else {
 			// content-type based on the Request
 			if (!$this->hasHeader("Content-Type")) {
-				$mime = $request->getRequestFormat();
+				$mime = $request->getFormat();
 
 				if (null !== $mime) {
 					$this->setHeader("Content-Type", $mime . "; charset=" . $this->charset);

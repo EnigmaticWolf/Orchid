@@ -182,7 +182,7 @@ class Request {
 	}
 
 	/**
-	 * Get mime type associated with format
+	 * Return mime type associated with format
 	 *
 	 * @param $format
 	 *
@@ -193,7 +193,7 @@ class Request {
 	}
 
 	/**
-	 * Get mime types associated with format
+	 * Return mime types associated with format
 	 *
 	 * @param $format
 	 *
@@ -204,17 +204,36 @@ class Request {
 	}
 
 	/**
-	 * Get request format by header Accept
+	 * Return request format by header Accept
 	 *
 	 * @param string $default
 	 *
 	 * @return mixed|string
 	 */
-	public function getRequestFormat($default = "text/html") {
+	public function getFormat($default = "text/html") {
 		preg_match_all("~(?<type>(?:\w+|\*)\/(?:\w+|\*))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i", $this->getHeader("Accept"), $list);
 
 		$data = [];
 		foreach (array_combine($list["type"], $list["q"]) as $key => $priority) {
+			$data[$key] = (float)($priority ? $priority : 1);
+		}
+		arsort($data, SORT_NUMERIC);
+
+		return $data ? key($data) : $default;
+	}
+
+	/**
+	 * Return request language by header Accept-Language
+	 *
+	 * @param string $default
+	 *
+	 * @return mixed|string
+	 */
+	public function getLanguage($default = "ru") {
+		preg_match_all("~(?<lang>\w+(?:\-\w+|))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i", $this->getHeader("Accept-Language"), $list);
+
+		$data = [];
+		foreach (array_combine($list["lang"], $list["q"]) as $key => $priority) {
 			$data[$key] = (float)($priority ? $priority : 1);
 		}
 		arsort($data, SORT_NUMERIC);
