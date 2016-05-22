@@ -444,12 +444,23 @@ class App {
 		return $path && ("/" == $path[0] || "\\" == $path[0] || (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" && ("\\" == $path[2] || "/" == $path[2])));
 	}
 
+	/**
+	 * Run Application
+	 *
+	 * @return $this
+	 * @throws NoSuchMethodException
+	 */
 	public function run() {
 		@ob_start("ob_gzhandler");
 		@ob_implicit_flush(false);
 
+		// trigger before route event
 		$this->event()->trigger("before");
-		$this->response()->setContent($this->router()->dispatch($this->request()));
+
+		// route and set response content
+		$this->response()->setContent($this->router()->dispatch());
+
+		// trigger after route event
 		$this->event()->trigger("after");
 
 		return $this;

@@ -88,16 +88,14 @@ class Router {
 	 * It will execute the before() method before the action
 	 * and after() method after the action finishes
 	 *
-	 * @param Request $request
-	 *
 	 * @return mixed
 	 * @throws RuntimeException
 	 * @throws NoSuchMethodException
 	 */
-	public function dispatch(Request $request) {
-		$method = $request->getMethod();
-		$pathname = $request->getPathname();
-		$uri = $request->getUri();
+	public function dispatch() {
+		$method = $this->request->getMethod();
+		$pathname = $this->request->getPathname();
+		$uri = $this->request->getUri();
 
 		$found = null;
 		$params = [];
