@@ -30,10 +30,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Set the value for a key
+	 * Set value for a key
 	 *
-	 * @param $key
-	 * @param $value
+	 * @param string $key
+	 * @param mixed  $value
 	 *
 	 * @return $this
 	 */
@@ -46,7 +46,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Set the values for all keys
+	 * Set values for all keys
 	 *
 	 * @param array $data
 	 *
@@ -61,9 +61,9 @@ abstract class Model {
 	}
 
 	/**
-	 * Return the value for a key
+	 * Return value for a key
 	 *
-	 * @param $key
+	 * @param string $key
 	 *
 	 * @return mixed
 	 */
@@ -74,7 +74,7 @@ abstract class Model {
 	/**
 	 * Checks for key exists
 	 *
-	 * @param $key
+	 * @param string $key
 	 *
 	 * @return bool
 	 */
@@ -92,9 +92,9 @@ abstract class Model {
 	}
 
 	/**
-	 * Restores the default value for key
+	 * Restores default value for key
 	 *
-	 * @param $key
+	 * @param string $key
 	 *
 	 * @return $this
 	 */
@@ -105,7 +105,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Restores the default model data
+	 * Restores default model data
 	 *
 	 * @return $this
 	 */
