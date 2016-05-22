@@ -13,11 +13,6 @@ class Router {
 	protected $app;
 
 	/**
-	 * @var Request
-	 */
-	protected $request;
-
-	/**
 	 * Array of route rules
 	 *
 	 * @var array
@@ -163,7 +158,7 @@ class Router {
 			}
 			if (is_string($found)) {
 				$controller = new $found($this->app);
-				$action = $this->request->getUri(0, "index");
+				$action = $this->app->request()->getUri(0, "index");
 				$result = null;
 
 				if (method_exists($controller, "before")) {
