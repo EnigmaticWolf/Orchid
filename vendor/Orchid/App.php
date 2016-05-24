@@ -431,7 +431,7 @@ class App {
 	 * $app->path("cache", ORCHID . "/storage/cache");
 	 *
 	 * // get path for file
-	 * $app->path("cache:someone.cache");
+	 * $app->path("cache:filename.cache");
 	 * </code>
 	 *
 	 * @param $shortcut

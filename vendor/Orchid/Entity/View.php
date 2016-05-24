@@ -85,6 +85,7 @@ class View {
 	 * will be available inside the view file as variables
 	 *
 	 * <code>
+	 * View::$layout = "path/to/file/layout.php";
 	 * $view = new View("path/to/file/template.php");
 	 * $view->set("title", "Page title");
 	 * echo $view->render();

@@ -10,7 +10,7 @@ abstract class Module {
 	 *
 	 * @param App $app
 	 */
-	public static function initialize($app) {
-		// init code here
+	public static function initialize(App $app) {
+		// init module code here
 	}
 }
