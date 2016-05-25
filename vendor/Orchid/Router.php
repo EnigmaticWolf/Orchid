@@ -31,6 +31,17 @@ class Router {
 	/**
 	 * Bind GET request to route
 	 *
+	 * Example:
+	 * <code>
+	 * $router->get("/", function() {
+	 *  return "this is GET Request";
+	 * }, $priority = 10);
+	 * // or
+	 * $router->get("/", "\\Namespace\\ClassName", $priority = 10);
+	 * </code>
+	 *
+	 * @see Router::bind
+	 *
 	 * @param string         $pattern
 	 * @param Closure|string $callable
 	 * @param int            $priority
@@ -44,6 +55,17 @@ class Router {
 	/**
 	 * Bind POST request to route
 	 *
+	 * Example:
+	 * <code>
+	 * $router->post("/", function() {
+	 *  return "this is POST Request";
+	 * }, $priority = 10);
+	 * // or
+	 * $router->post("/", "\\Namespace\\ClassName", $priority = 10);
+	 * </code>
+	 *
+	 * @see Router::bind
+	 *
 	 * @param string         $pattern
 	 * @param Closure|string $callable
 	 * @param int            $priority
@@ -56,6 +78,36 @@ class Router {
 
 	/**
 	 * Bind request to route
+	 *
+	 * Example:
+	 * <code>
+	 * $router->bind("/", function() {
+	 *  return "this is GET or POST Request";
+	 * }, Request::METHOD_GET, $priority = 10);
+	 * // or
+	 * $router->bind("/", "\\Namespace\\ClassName", $priority = 10);
+	 * </code>
+	 *
+	 * Params example:
+	 * <code>
+	 * $router->get("/news/:date/:id", function($params) {
+	 *  return $params["date"]."-".$params["id"];
+	 * }, Request::METHOD_GET, $priority = 10);
+	 * </code>
+	 *
+	 * Mask example:
+	 * <code>
+	 * $router->post("/file/*", function($params) {
+	 *  return $params[":arg"];
+	 * }, Request::METHOD_GET, $priority = 10);
+	 * </code>
+	 *
+	 * Regex example:
+	 * <code>
+	 * $router->bind("#/page/(about|contact)#", function($params) {
+	 *  return implode("\n", $params[":capture"]);
+	 * }, Request::METHOD_GET, $priority = 10);
+	 * </code>
 	 *
 	 * @param string         $pattern
 	 * @param Closure|string $callable

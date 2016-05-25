@@ -36,8 +36,8 @@ class View {
 	/**
 	 * View constructor
 	 *
-	 * @param       $file
-	 * @param array $data
+	 * @param string $file
+	 * @param array  $data
 	 */
 	public function __construct($file, array $data = []) {
 		$this->file = $file;
@@ -85,13 +85,16 @@ class View {
 	 * will be available inside the view file as variables
 	 *
 	 * <code>
-	 * View::$layout = "path/to/file/layout.php";
-	 * $view = new View("path/to/file/template.php");
+	 * View::$layout = "path/to/file"; // global template
+	 * $view = new View("path/to/file");
 	 * $view->set("title", "Page title");
 	 * echo $view->render();
 	 * </code>
 	 *
+	 * @see View::fetch
+	 *
 	 * @return string
+	 * @throws FileNotFoundException
 	 */
 	public function render() {
 		if (!empty($this->file)) {
@@ -103,6 +106,7 @@ class View {
 
 	/**
 	 * @return string
+	 * @throws FileNotFoundException
 	 */
 	public function __toString() {
 		return $this->render();
@@ -110,6 +114,13 @@ class View {
 
 	/**
 	 * Render the template
+	 *
+	 * <code>
+	 * View::fetch(
+	 *  $this->path("path/to/file"), [
+	 *   "hello" => "Hello World!",
+	 * ]);
+	 * </code>
 	 *
 	 * @param string $_file
 	 * @param array  $_data
