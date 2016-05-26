@@ -221,7 +221,7 @@ class Router {
 					if (method_exists($controller, $action)) {
 						$result = call_user_func([$controller, $action], $params);
 					} else {
-						throw new NoSuchMethodException("Method '" . $action . "' doesn't exist in '" . get_class($controller) ."'");
+						throw new NoSuchMethodException("Method '" . $action . "' doesn't exist in " . get_class($controller) . "'");
 					}
 				}
 
