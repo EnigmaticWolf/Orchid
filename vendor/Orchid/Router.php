@@ -116,7 +116,7 @@ class Router {
 	 *
 	 * @return $this
 	 */
-	public function bind($pattern, $callable, $method = Request::METHOD_GET, $priority = 0) {
+	public function bind($pattern, $callable, $method = null, $priority = 0) {
 		$this->routes[] = [
 			"method"   => strtoupper($method),
 			"pattern"  => $pattern,
@@ -150,7 +150,7 @@ class Router {
 			usort($this->routes, [$this, "compare"]);
 
 			foreach ($this->routes as $route) {
-				if ($route["method"] == $method) {
+				if ($route["method"] == $method || !$route["method"]) {
 					if ($route["pattern"] === $pathname) {
 						$found = $route["callable"];
 						break;
