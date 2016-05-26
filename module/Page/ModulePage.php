@@ -16,7 +16,7 @@ class ModulePage extends Module {
 	 *
 	 * @param App $app
 	 */
-	public static function initialize($app) {
+	public static function initialize(App $app) {
 		$app->router()
 			->get("/*", "\\Page\\Controller\\Main");
 	}
