@@ -4,7 +4,7 @@ use Orchid\Entity\Daemon;
 
 require_once(__DIR__ . "/../bootstrap.php");
 
-$daemon = new Daemon(\Orchid\App::getInstance(), "Demo");
+$daemon = new Daemon("Demo");
 
 // share workflow
 $daemon->forkProcess();

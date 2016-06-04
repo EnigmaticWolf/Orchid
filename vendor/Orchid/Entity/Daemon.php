@@ -4,6 +4,7 @@ namespace Orchid\Entity;
 
 use RuntimeException;
 use Orchid\App;
+use Orchid\Entity\Exception\FileNotFoundException;
 
 class Daemon {
 	/**
@@ -24,77 +25,84 @@ class Daemon {
 	protected $log;
 	protected $logErr;
 
-	public function __construct(App $app, $name) {
-		$this->app = $app;
-		$this->name = $name;
+	/**
+	 * Daemon constructor.
+	 *
+	 * @param string $name
+	 *
+	 * @throws RuntimeException
+	 */
+	public function __construct($name = "Daemon") {
+		if (PHP_SAPI == "cli") {
+			$this->app = App::getInstance();
+			$this->name = $name;
+		} else {
+			throw new RuntimeException("This method is available only in Daemon");
+		}
 	}
 
 	/**
 	 * Starts the execution of a demon
 	 *
-	 * @param string $daemon
+	 * @param string $file
 	 * @param array  $args
-	 * @param string $path
 	 *
 	 * @return string
+	 * @throws FileNotFoundException
 	 */
-	public function run($daemon, array $args = [], $path = "/daemon/") {
-		return system("php " . $this->app->getBaseDir() . $path . $daemon . ".php " . implode(" ", $args) . " > /dev/null &");
+	public static function run($file, array $args = []) {
+		if (file_exists($file)) {
+			return system("php " . $file . " " . implode(" ", $args) . " > /dev/null &");
+		}
+
+		throw new FileNotFoundException("This method is available only in Daemon");
 	}
 
 	/**
 	 * Disables the workflow from the console to create a child process
 	 * Note: when using this method, can run only one instance
-	 *
-	 * @throws RuntimeException
 	 */
 	public function forkProcess() {
-		if (PHP_SAPI == "cli") {
-			if (!pcntl_fork()) {
-				posix_setsid();
-				$this->pid = getmypid();
-				$this->pidFile = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".pid";
+		if (!pcntl_fork()) {
+			posix_setsid();
+			$this->pid = getmypid();
+			$this->pidFile = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".pid";
 
-				if (!file_exists($this->pidFile)) {
-					// write pid to file
-					file_put_contents($this->pidFile, $this->pid);
+			if (!file_exists($this->pidFile)) {
+				// write pid to file
+				file_put_contents($this->pidFile, $this->pid);
 
-					// daemon shutdown processing
-					register_shutdown_function(function () {
-						unlink($this->pidFile);
-					});
-				} else {
-					echo "Daemon already running!" . PHP_EOL;
-					exit(SIG_ERR);
-				}
+				// daemon shutdown processing
+				register_shutdown_function(function () {
+					unlink($this->pidFile);
+				});
 			} else {
-				exit(SIG_DFL);
+				echo "Daemon already running!" . PHP_EOL;
+				exit(SIG_ERR);
 			}
 		} else {
-			throw new RuntimeException("This method is available only in Daemon");
+			exit(SIG_DFL);
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Switch to the output process entry in the log file
-	 *
-	 * @throws RuntimeException
 	 */
 	public function writeLog() {
-		if (PHP_SAPI == "cli") {
-			$this->log = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".log";
-			$this->logErr = $this->app->getBaseDir() . "/storage/log/" . $this->name . "-error.log";
+		$this->log = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".log";
+		$this->logErr = $this->app->getBaseDir() . "/storage/log/" . $this->name . "-error.log";
 
-			fclose(STDIN);
-			$GLOBALS["STDIN"] = fopen("/dev/null", "r");
+		fclose(STDIN);
+		$GLOBALS["STDIN"] = fopen("/dev/null", "r");
 
-			fclose(STDOUT);
-			$GLOBALS["STDOUT"] = fopen($this->log, "ab");
+		fclose(STDOUT);
+		$GLOBALS["STDOUT"] = fopen($this->log, "ab");
 
-			fclose(STDERR);
-			$GLOBALS["STDERR"] = fopen($this->logErr, "ab");
-		} else {
-			throw new RuntimeException("This method is available only in Daemon");
-		}
+		fclose(STDERR);
+		$GLOBALS["STDERR"] = fopen($this->logErr, "ab");
+
+		return $this;
 	}
 }
