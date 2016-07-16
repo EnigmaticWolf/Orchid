@@ -326,6 +326,9 @@ class App {
 	 */
 	public function loadModule(array $folders) {
 		foreach ($folders as $folder) {
+			// add folder to autoload
+			$this->config["autoload"][] = $folder;
+
 			foreach (new DirectoryIterator($folder) as $element) {
 				if (!$element->isDot() && ($element->isDir() || $element->isFile() && $element->getExtension() == "php")) {
 					$dir = $element->getRealPath();
@@ -361,9 +364,6 @@ class App {
 					$this->config["module.list"][] = $name;
 				}
 			}
-
-			// add folder to autoload
-			$this->config["autoload"][] = $folder;
 		}
 
 		return $this;
