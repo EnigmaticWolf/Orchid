@@ -3,7 +3,7 @@ Orchid Framework
 
 #### Requirements
 * Nginx
-* PHP >= 5.6
+* PHP >= 7.0
 * PDO (not necessary)
 * Memcache (not necessary)
 

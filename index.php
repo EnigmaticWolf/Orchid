@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Orchid\Extension\Str;
 
 require_once("bootstrap.php");

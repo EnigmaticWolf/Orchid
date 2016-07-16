@@ -2,8 +2,9 @@
 
 namespace Page\Controller;
 
-use Orchid\Entity\Controller;
-use Orchid\Entity\View;
+use Orchid\Entity\{
+	Controller, View
+};
 
 class Main extends Controller {
 	public function index() {

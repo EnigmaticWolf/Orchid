@@ -394,7 +394,7 @@ class Response {
 	 * @return bool
 	 */
 	public function hasHeader($key) {
-		return isset($this->headers[$key]);
+		return $this->headers[$key] ?? false;
 	}
 
 	/**
@@ -451,7 +451,7 @@ class Response {
 	public function setStatus($code) {
 		if ($code >= 100 || $code < 600) {
 			$this->statusCode = $code;
-			$this->statusText = isset(static::$statusTexts[$code]) ? static::$statusTexts[$code] : "unknown";
+			$this->statusText = static::$statusTexts[$code] ?? "unknown";
 
 			return $this;
 		}

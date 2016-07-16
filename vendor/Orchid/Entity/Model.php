@@ -79,7 +79,7 @@ abstract class Model {
 	 * @return bool
 	 */
 	public function exist($key) {
-		return isset($this->data[$key]);
+		return $this->data[$key] ?? false;
 	}
 
 	/**

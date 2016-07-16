@@ -189,7 +189,7 @@ class Request {
 	 * @return string
 	 */
 	public function getMimeType($format) {
-		return isset(static::$formats[$format]) ? static::$formats[$format][0] : null;
+		return static::$formats[$format][0] ?? null;
 	}
 
 	/**
@@ -200,7 +200,7 @@ class Request {
 	 * @return array
 	 */
 	public static function getMimeTypes($format) {
-		return isset(static::$formats[$format]) ? static::$formats[$format] : [];
+		return static::$formats[$format] ?? [];
 	}
 
 	/**
@@ -317,11 +317,7 @@ class Request {
 	 */
 	public function getHeader($name = "", $default = null) {
 		if ($name) {
-			if (isset($this->headers[$name])) {
-				return $this->headers[$name];
-			}
-
-			return $default;
+			return $this->headers[$name] ?? $default;
 		}
 
 		return $this->headers;
@@ -337,11 +333,7 @@ class Request {
 	 */
 	public function getUri($index = "", $default = null) {
 		if ($index !== "") {
-			if (isset($this->uri[$index])) {
-				return $this->uri[$index];
-			}
-
-			return $default;
+			return $this->uri[$index] ?? $default;
 		}
 
 		return $this->uri;
@@ -366,11 +358,7 @@ class Request {
 	 */
 	public function getParam($key = "", $default = null) {
 		if ($key) {
-			if (isset($this->get[$key])) {
-				return $this->get[$key];
-			}
-
-			return $default;
+			return $this->get[$key] ?? $default;
 		}
 
 		return $this->get;
@@ -386,11 +374,7 @@ class Request {
 	 */
 	public function getData($key = "", $default = null) {
 		if ($key) {
-			if (isset($this->post[$key])) {
-				return $this->post[$key];
-			}
-
-			return $default;
+			return $this->post[$key] ?? $default;
 		}
 
 		return $this->post;
@@ -406,11 +390,7 @@ class Request {
 	 */
 	public function getFile($key = "", $default = null) {
 		if ($key) {
-			if (isset($this->file[$key])) {
-				return $this->file[$key];
-			}
-
-			return $default;
+			return $this->file[$key] ?? $default;
 		}
 
 		return $this->file;
@@ -426,11 +406,7 @@ class Request {
 	 */
 	public function getCookie($key = "", $default = null) {
 		if ($key) {
-			if (isset($this->cookie[$key])) {
-				return $this->cookie[$key];
-			}
-
-			return $default;
+			return $this->cookie[$key] ?? $default;
 		}
 
 		return $this->cookie;

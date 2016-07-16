@@ -47,7 +47,7 @@ class Form {
 	 * @param string $type
 	 * @param array  $args
 	 *
-	 * @return $this|mixed|null|string
+	 * @return string|null
 	 */
 	public static function __callStatic($type, $args) {
 		if (in_array($type, static::$type)) {

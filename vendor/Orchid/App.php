@@ -4,10 +4,11 @@ namespace Orchid;
 
 use Closure;
 use DirectoryIterator;
-use Exception;
+use Throwable;
 use RuntimeException;
-use Orchid\Entity\Exception\FileNotFoundException;
-use Orchid\Entity\Exception\NoSuchMethodException;
+use Orchid\Entity\Exception\{
+	FileNotFoundException, NoSuchMethodException
+};
 
 class App {
 	/**
@@ -86,7 +87,7 @@ class App {
 
 		// not cli mode
 		if (PHP_SAPI != "cli") {
-			set_exception_handler(function (Exception $ex) {
+			set_exception_handler(function (Throwable $ex) {
 				@ob_end_clean();
 
 				if ($this->isDebug()) {
@@ -156,11 +157,7 @@ class App {
 	 * @return mixed
 	 */
 	public function get($key, $default = null) {
-		if (isset($this->config[$key])) {
-			return $this->config[$key];
-		}
-
-		return $default;
+		return $this->config[$key] ?? $default;
 	}
 
 	/**
@@ -319,7 +316,7 @@ class App {
 	 *
 	 * @param array $folders
 	 *
-	 * @return $this
+	 * @return App
 	 * @throws FileNotFoundException
 	 * @throws NoSuchMethodException
 	 * @throws RuntimeException
@@ -437,7 +434,7 @@ class App {
 	 * @param $shortcut
 	 * @param $path
 	 *
-	 * @return $this|string
+	 * @return App|bool|string
 	 */
 	public function path($shortcut, $path = "") {
 		if ($shortcut && $path) {
@@ -477,11 +474,7 @@ class App {
 	 * @return array
 	 */
 	public function pathList($shortcut) {
-		if (isset($this->paths[$shortcut])) {
-			return $this->paths[$shortcut];
-		}
-
-		return [];
+		return $this->paths[$shortcut] ?? [];
 	}
 
 	/**
@@ -513,7 +506,7 @@ class App {
 	/**
 	 * Run Application
 	 *
-	 * @return $this
+	 * @return App
 	 * @throws NoSuchMethodException
 	 */
 	public function run() {
