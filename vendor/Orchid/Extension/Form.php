@@ -222,7 +222,7 @@ class Form {
 		$attr = [];
 
 		// substituted values
-		switch (strtolower($data['method'])) {
+		switch (strtolower($data["method"])) {
 			case "get": {
 				if (isset($_GET[$data["name"]])) {
 					if (in_array($data["type"], ["radio", "checkbox"])) {

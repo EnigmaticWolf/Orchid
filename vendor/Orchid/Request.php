@@ -153,11 +153,11 @@ class Request {
 	 */
 	public function __construct($post = [], $file = [], $cookie = []) {
 		$this->secure = strtolower($_SERVER["REQUEST_SCHEME"]) == "https";
-		$this->host = $_SERVER['HTTP_HOST'];
+		$this->host = $_SERVER["HTTP_HOST"];
 		$this->port = $_SERVER["SERVER_PORT"];
 		$this->method = strtoupper($_SERVER["REQUEST_METHOD"]);
 
-		$url = parse_url($_SERVER['REQUEST_URI']);
+		$url = parse_url($_SERVER["REQUEST_URI"]);
 		if (isset($url["query"])) {
 			parse_str($url["query"], $this->get);
 		}

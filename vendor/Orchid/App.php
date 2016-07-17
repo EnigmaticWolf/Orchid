@@ -297,6 +297,7 @@ class App {
 	 * @param $name
 	 *
 	 * @return bool
+	 * @throws RuntimeException
 	 */
 	public function setApp($name) {
 		if (in_array($name, $this->get("app.list", []))) {
@@ -305,7 +306,7 @@ class App {
 			return true;
 		}
 
-		return false;
+		throw new RuntimeException("Application '" . $name . "' not found in 'app.list'");
 	}
 
 	/**
@@ -343,7 +344,7 @@ class App {
 					}
 
 					// check exists and parent class
-					if (class_exists($class) && is_subclass_of($class, 'Orchid\\Entity\\Module')) {
+					if (class_exists($class) && is_subclass_of($class, "Orchid\\Entity\\Module")) {
 
 						// check have method initialize
 						if (method_exists($class, "initialize")) {
