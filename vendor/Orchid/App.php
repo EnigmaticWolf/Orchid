@@ -33,11 +33,8 @@ class App {
 	 *
 	 * @param array $config
 	 */
-	public function __construct(array $config = []) {
-		if (static::$instance) {
-			return static::$instance;
-		}
-		static::$instance = $self = $this;
+	private function __construct(array $config = []) {
+		$self = $this;
 
 		$this->config = array_merge_recursive([
 			"debug"       => true,
@@ -131,21 +128,21 @@ class App {
 		} else {
 			$this->config["args"] = array_slice($_SERVER["argv"], 1);
 		}
-
-		return $this;
 	}
 
 	/**
 	 * Return App instance
 	 *
+	 * @param array $config
+	 *
 	 * @return App
 	 */
-	public static function getInstance() {
-		if (static::$instance) {
-			return static::$instance;
+	public static function getInstance(array $config = []) {
+		if (!static::$instance) {
+			static::$instance = new App($config);
 		}
 
-		throw new RuntimeException("Instance of class App was not created");
+		return static::$instance;
 	}
 
 	/**

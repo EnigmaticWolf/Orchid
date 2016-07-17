@@ -24,7 +24,7 @@ function pre(...$args) {
 	echo "</pre>";
 }
 
-$app = new App([
+$app = App::getInstance([
 	/* config params here */
 ]);
 
