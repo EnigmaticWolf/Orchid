@@ -146,6 +146,48 @@ class App {
 	}
 
 	/**
+	 * Add value for name (not necessary) in array with key
+	 *
+	 * <code>
+	 * $app->add("array", "bar"); // add index with value "bar"
+	 * $app->add("array", "foo", "bar"); // add key "foo" with value "bar"
+	 * </code>
+	 *
+	 * @param string $key
+	 * @param array  $element
+	 *
+	 * @return $this
+	 */
+	public function add($key, ...$element) {
+		switch (count($element)) {
+			case 1: {
+				$this->config[$key][] = $element[0];
+				break;
+			}
+			case 2: {
+				$this->config[$key][$element[0]] = $element[1];
+				break;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set value for key
+	 *
+	 * @param string $key
+	 * @param mixed  $value
+	 *
+	 * @return $this
+	 */
+	public function set($key, $value) {
+		$this->config[$key] = $value;
+
+		return $this;
+	}
+
+	/**
 	 * Return value from internal config
 	 *
 	 * @param string $key
@@ -155,20 +197,6 @@ class App {
 	 */
 	public function get($key, $default = null) {
 		return $this->config[$key] ?? $default;
-	}
-
-	/**
-	 * Set value for key
-	 *
-	 * @param $key
-	 * @param $value
-	 *
-	 * @return $this
-	 */
-	public function set($key, $value) {
-		$this->config[$key] = $value;
-
-		return $this;
 	}
 
 	/**
