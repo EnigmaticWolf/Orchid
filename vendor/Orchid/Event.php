@@ -15,9 +15,9 @@ class Event {
 	/**
 	 * Bind callable listen event
 	 *
-	 * @param string  $name
-	 * @param Closure $callable
-	 * @param int     $priority
+	 * @param string        $name
+	 * @param Closure|array $callable
+	 * @param int           $priority
 	 *
 	 * @return $this
 	 */
