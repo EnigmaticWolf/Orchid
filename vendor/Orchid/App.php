@@ -345,13 +345,8 @@ class App {
 
 					// check exists and parent class
 					if (class_exists($class) && is_subclass_of($class, "Orchid\\Entity\\Module")) {
-
-						// check have method initialize
-						if (method_exists($class, "initialize")) {
-							call_user_func([$class, "initialize"], $this);
-						} else {
-							throw new NoSuchMethodException("Initialize method is not found in class '" . $class . "'");
-						}
+						// call initialize method
+						call_user_func([$class, "initialize"], $this);
 					} else {
 						throw new RuntimeException("Class '" . $class . "' not found or is not a subclass of 'Orchid\\Entity\\Module'");
 					}
