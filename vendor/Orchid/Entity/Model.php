@@ -2,14 +2,7 @@
 
 namespace Orchid\Entity;
 
-use Orchid\App;
-
 abstract class Model {
-	/**
-	 * @var App
-	 */
-	protected $app;
-
 	/**
 	 * Array of fields describing the model
 	 *
@@ -25,7 +18,6 @@ abstract class Model {
 	protected $data = [];
 
 	public final function __construct(array $data = []) {
-		$this->app = App::getInstance();
 		$this->setAll(array_merge(static::$field, $data));
 	}
 

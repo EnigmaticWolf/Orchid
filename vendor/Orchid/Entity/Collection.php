@@ -6,14 +6,8 @@ use Closure;
 use Countable;
 use Iterator;
 use SplFixedArray;
-use Orchid\App;
 
 abstract class Collection implements Countable, Iterator {
-	/**
-	 * @var App
-	 */
-	protected $app;
-
 	/**
 	 * Full path of the model class
 	 *
@@ -29,7 +23,6 @@ abstract class Collection implements Countable, Iterator {
 	protected $data;
 
 	public final function __construct(array $data = []) {
-		$this->app = App::getInstance();
 		$this->data = SplFixedArray::fromArray($data);
 	}
 
