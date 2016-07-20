@@ -156,7 +156,7 @@ class App {
 	 * @param string $key
 	 * @param array  $element
 	 *
-	 * @return $this
+	 * @return App
 	 */
 	public function add($key, ...$element) {
 		switch (count($element)) {
@@ -179,7 +179,7 @@ class App {
 	 * @param string $key
 	 * @param mixed  $value
 	 *
-	 * @return $this
+	 * @return App
 	 */
 	public function set($key, $value) {
 		$this->config[$key] = $value;
