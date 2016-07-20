@@ -68,7 +68,7 @@ abstract class Model {
 	 * @return mixed
 	 */
 	public function get($key) {
-		return $this->data[$key];
+		return $this->data[$key] ?? static::$field[$key];
 	}
 
 	/**
