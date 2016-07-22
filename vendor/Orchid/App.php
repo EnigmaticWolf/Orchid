@@ -36,7 +36,7 @@ class App {
 	private function __construct(array $config = []) {
 		$self = $this;
 
-		$this->config = array_merge_recursive([
+		$this->config = array_replace_recursive([
 			"debug"       => true,
 			"app.name"    => "public",
 			"app.list"    => [],
