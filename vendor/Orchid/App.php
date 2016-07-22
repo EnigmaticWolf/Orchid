@@ -38,7 +38,7 @@ class App {
 		}
 		static::$instance = $self = $this;
 
-		$this->config = array_merge_recursive([
+		$this->config = array_replace_recursive([
 			"debug"       => true,
 			"app.name"    => "public",
 			"app.list"    => [],
