@@ -65,8 +65,6 @@ abstract class Validator {
 				"validator" => $validator,
 				"message"   => $message,
 			];
-		} else {
-			throw new RuntimeException("The field was not selected");
 		}
 
 		return $this;
