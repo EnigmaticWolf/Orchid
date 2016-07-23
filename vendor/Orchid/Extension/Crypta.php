@@ -67,7 +67,7 @@ class Crypta {
 	 * @param string $string
 	 * @param string $hashString
 	 *
-	 * @return Boolean
+	 * @return bool
 	 */
 	public static function check($string, $hashString) {
 		$saltPos = (mb_strlen($string) >= mb_strlen($hashString) ? mb_strlen($hashString) : mb_strlen($string));

@@ -53,7 +53,7 @@ class Cache {
 	 *
 	 * @param string $key
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function delete($key) {
 		$file = static::getCacheFilePath($key);
@@ -68,7 +68,7 @@ class Cache {
 	/**
 	 * Delete all temporary files
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function flush() {
 		$app = App::getInstance();

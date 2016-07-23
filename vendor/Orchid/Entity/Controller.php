@@ -13,7 +13,7 @@ abstract class Controller {
 	/**
 	 * If set to False stops controller execution
 	 *
-	 * @var boolean
+	 * @var bool
 	 */
 	public $execute = true;
 

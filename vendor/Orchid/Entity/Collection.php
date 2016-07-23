@@ -288,7 +288,7 @@ abstract class Collection implements Countable, Iterator {
 	/**
 	 * Check current position of the iterator
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function valid() {
 		return $this->data->valid();

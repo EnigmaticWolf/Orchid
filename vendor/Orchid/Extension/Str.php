@@ -9,7 +9,7 @@ class Str {
 	 * @param string $needle
 	 * @param string $haystack
 	 *
-	 * @return Boolean;
+	 * @return bool
 	 */
 	public static function start($needle, $haystack) {
 		return !strncmp($haystack, $needle, mb_strlen($needle));
@@ -21,7 +21,7 @@ class Str {
 	 * @param string $needle
 	 * @param string $haystack
 	 *
-	 * @return Boolean;
+	 * @return bool
 	 */
 	public static function end($needle, $haystack) {
 		$length = mb_strlen($needle);
