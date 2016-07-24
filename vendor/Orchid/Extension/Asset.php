@@ -19,29 +19,29 @@ class Asset {
 	 *
 	 * @return null|string
 	 */
-	public static function render() {
+	public static function resource() {
 		$request = App::getInstance()->request();
 		$include = [];
 
 		if (static::$map) {
 			// shared resources
 			if (isset(static::$map["*"])) {
-				$include = array_merge($include, static::renderIterator(static::$map["*"]));
+				$include = array_merge($include, static::resourceIterator(static::$map["*"]));
 			}
 
 			// resources for a particular controller
-			if (($controller = $request->getUri(0)) !== null && isset(static::$map[$controller . "/*"])) {
-				$include = array_merge($include, static::renderIterator(static::$map[$controller . "/*"]));
+			if (($controller = $request->getUri(0, false)) && isset(static::$map[$controller . "/*"])) {
+				$include = array_merge($include, static::resourceIterator(static::$map[$controller . "/*"]));
 			}
 
 			// resources for a particular address
 			if (($path = substr($request->getPathname(), 1)) && isset(static::$map[$path])) {
-				$include = array_merge($include, static::renderIterator(static::$map[$path]));
+				$include = array_merge($include, static::resourceIterator(static::$map[$path]));
 			}
 
 			// previous checks have failed
 			if (empty($include)) {
-				$include = array_merge($include, static::renderIterator(static::$map));
+				$include = array_merge($include, static::resourceIterator(static::$map));
 			}
 		}
 
@@ -55,7 +55,7 @@ class Asset {
 	 *
 	 * @return array
 	 */
-	protected static function renderIterator(array $list) {
+	protected static function resourceIterator(array $list) {
 		$include = [];
 
 		foreach ($list as $address) {
