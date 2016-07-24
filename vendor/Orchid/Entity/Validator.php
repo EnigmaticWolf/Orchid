@@ -5,7 +5,7 @@ namespace Orchid\Entity;
 use Closure;
 use RuntimeException;
 
-class Validator {
+abstract class Validator {
 	protected $data  = [];
 	protected $field = null;
 	protected $rule  = [];
