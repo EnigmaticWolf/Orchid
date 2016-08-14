@@ -178,13 +178,6 @@ class Response {
 	protected $charset;
 
 	/**
-	 * Type of response content
-	 *
-	 * @var string
-	 */
-	protected $contentType;
-
-	/**
 	 * Response body
 	 *
 	 * @var string
@@ -415,20 +408,25 @@ class Response {
 	 *
 	 * Valid types are strings, numbers, null, and objects that implement a __toString() method
 	 *
-	 * @param string|null $body
+	 * @param mixed $response
 	 *
 	 * @return $this
 	 * @throws UnexpectedValueException
 	 */
-	public function setContent($body) {
-		if ($body === null || ($body && (is_string($body) || is_numeric($body))) || is_callable([$body, "__toString"])) {
-			$this->setHeader("Content-Length", mb_strlen($body));
-			$this->body = $body;
+	public function setContent($response) {
+		if (is_array($response)) {
+			$this->setHeader("Content-Type", "application/json");
+			$response = json_encode($response, JSON_UNESCAPED_UNICODE);
+		}
+
+		if ($response === null || ($response && (is_string($response) || is_numeric($response))) || is_callable([$response, "__toString"])) {
+			$this->setHeader("Content-Length", mb_strlen($response));
+			$this->body = $response;
 
 			return $this;
 		}
 
-		throw new UnexpectedValueException("The Response content must be a string or object implementing __toString(), " . gettype($body) . " given");
+		throw new UnexpectedValueException("The Response content must be a string or object implementing __toString(), " . gettype($response) . " given");
 	}
 
 	/**
