@@ -420,7 +420,6 @@ class Response {
 		}
 
 		if ($response === null || ($response && (is_string($response) || is_numeric($response))) || is_callable([$response, "__toString"])) {
-			$this->setHeader("Content-Length", mb_strlen($response));
 			$this->body = $response;
 
 			return $this;
