@@ -326,14 +326,18 @@ class Request {
 	/**
 	 * Return uri by index or array of uri's
 	 *
-	 * @param string $index
-	 * @param mixed  $default
+	 * @param mixed $index integer index element of array or negative for index from the end
+	 * @param mixed $default
 	 *
 	 * @return array|mixed
 	 */
 	public function getUri($index = "", $default = null) {
 		if ($index !== "") {
-			return $this->uri[$index] ?? $default;
+			if ($index >= 0) {
+				return $this->uri[$index] ?? $default;
+			} else {
+				return $this->uri[count($this->uri) - abs($index)] ?? $default;
+			}
 		}
 
 		return $this->uri;
