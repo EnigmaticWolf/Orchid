@@ -3,6 +3,7 @@
 namespace Orchid\Entity\Driver\Cache;
 
 use Orchid\Entity\Exception\CacheException;
+use Memcached;
 
 class Memcache {
 	protected $connection = null;
@@ -17,9 +18,11 @@ class Memcache {
 	 * @throws CacheException
 	 */
 	public function __construct($host, $port, $timeout) {
-		$this->connection = new \Memcache;
+		$this->connection = new Memcached;
+		$this->connection->setOption(Memcached::OPT_CONNECT_TIMEOUT, $timeout * 1000);
+		$this->connection->addServer($host, $port);
 
-		if (!$this->connection->connect($host, $port, $timeout)) {
+		if (!$this->connection->getVersion()) {
 			throw new CacheException("Connecting to a cache server was unable");
 		}
 	}
@@ -52,7 +55,7 @@ class Memcache {
 			$this->set($tag, array_unique($tags));
 		}
 
-		return $this->connection->set($key, $value, MEMCACHE_COMPRESSED, $expire);
+		return $this->connection->set($key, $value, $expire);
 	}
 
 	/**
