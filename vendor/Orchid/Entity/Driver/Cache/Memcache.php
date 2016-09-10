@@ -88,10 +88,8 @@ class Memcache {
 	public function getByTag($tag) {
 		$data = [];
 
-		if (($tags = $this->get($tag)) !== false) {
-			foreach ($tags as $key) {
-				$data[$key] = $this->get($key);
-			}
+		if (($keys = $this->get($tag)) !== false) {
+			$this->connection->getMulti($keys);
 		}
 
 		return $data;
@@ -105,17 +103,12 @@ class Memcache {
 	 * @return bool
 	 */
 	public function deleteByTag($tag) {
-		$deleted = 0;
+		if (($keys = $this->get($tag)) !== false) {
+			$keys[] = $tag;
 
-		if (($tags = $this->get($tag)) !== false) {
-			foreach ($tags as $key) {
-				if ($this->delete($key)) {
-					$deleted++;
-				}
-			}
-			$this->delete($tag);
+			return $this->connection->deleteMulti($keys);
 		}
 
-		return !!$deleted;
+		return false;
 	}
 }
