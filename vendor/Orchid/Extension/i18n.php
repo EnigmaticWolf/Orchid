@@ -64,11 +64,9 @@ namespace Orchid\Extension {
 				switch ($ext["extension"]) {
 					case "ini": {
 						return parse_ini_file($path, true);
-						break;
 					}
 					case "php": {
 						return require_once $path;
-						break;
 					}
 				}
 			}
