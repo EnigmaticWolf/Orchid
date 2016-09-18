@@ -2,117 +2,123 @@
 
 namespace Orchid\Extension;
 
-use RecursiveDirectoryIterator;
 use Orchid\App;
+use RecursiveDirectoryIterator;
 
-class Cache {
-	/**
-	 * Writes data to a temporary file
-	 *
-	 * @param string $key
-	 * @param mixed  $value
-	 * @param int    $expire
-	 *
-	 * @return int|false
-	 */
-	public static function write($key, $value, $expire = -1) {
-		$data = [
-			"expire" => ($expire >= 0) ? (is_string($expire) ? strtotime($expire) : time() + $expire) : $expire,
-			"value"  => serialize($value),
-		];
+class Cache
+{
+    /**
+     * Writes data to a temporary file
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $expire
+     *
+     * @return int|false
+     */
+    public static function write($key, $value, $expire = -1)
+    {
+        $data = [
+            "expire" => ($expire >= 0) ? (is_string($expire) ? strtotime($expire) : time() + $expire) : $expire,
+            "value"  => serialize($value),
+        ];
 
-		return file_put_contents(static::getCacheFilePath($key), serialize($data));
-	}
+        return file_put_contents(static::getCacheFilePath($key), serialize($data));
+    }
 
-	/**
-	 * Reads data from the temporary file
-	 *
-	 * @param string $key
-	 * @param mixed  $default
-	 *
-	 * @return mixed
-	 */
-	public static function read($key, $default = null) {
-		$file = static::getCacheFilePath($key);
+    /**
+     * Returns the path and the name of the temporary file
+     *
+     * @param string $key
+     *
+     * @return string
+     */
+    protected static function getCacheFilePath($key)
+    {
+        $app = App::getInstance();
 
-		if (file_exists($file)) {
-			$data = unserialize(file_get_contents($file));
+        // directory is the default repository
+        $path = $app->getBaseDir() . "/storage/cache/";
 
-			if (($data["expire"] > time()) || $data["expire"] < 0) {
-				return unserialize($data["value"]);
-			}
+        if (($dir = (string)$app->path("cache:")) !== false) {
+            $path = $dir;
+        }
 
-			unlink($file);
-		}
+        return $path . md5($app->getSecret() . ":" . $key) . ".cache";
+    }
 
-		return $default;
-	}
+    /**
+     * Reads data from the temporary file
+     *
+     * @param string $key
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    public static function read($key, $default = null)
+    {
+        $file = static::getCacheFilePath($key);
 
-	/**
-	 * Removes the temporary file
-	 *
-	 * @param string $key
-	 *
-	 * @return bool
-	 */
-	public static function delete($key) {
-		$file = static::getCacheFilePath($key);
+        if (file_exists($file)) {
+            $data = unserialize(file_get_contents($file));
 
-		if (file_exists($file)) {
-			return unlink($file);
-		}
+            if (($data["expire"] > time()) || $data["expire"] < 0) {
+                return unserialize($data["value"]);
+            }
 
-		return false;
-	}
+            unlink($file);
+        }
 
-	/**
-	 * Delete all temporary files
-	 *
-	 * @return bool
-	 */
-	public static function flush() {
-		$app = App::getInstance();
+        return $default;
+    }
 
-		// directory is the default repository
-		$path = $app->getBaseDir() . "/storage/cache";
+    /**
+     * Removes the temporary file
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
+    public static function delete($key)
+    {
+        $file = static::getCacheFilePath($key);
 
-		if (($dir = (string)$app->path("cache:")) !== false) {
-			$path = $dir;
-		}
+        if (file_exists($file)) {
+            return unlink($file);
+        }
 
-		$iterator = new RecursiveDirectoryIterator($path . "/");
+        return false;
+    }
 
-		/** @var RecursiveDirectoryIterator $item */
-		foreach ($iterator as $item) {
-			if ($item->isFile()) {
-				$file = realpath($item->getPathname());
+    /**
+     * Delete all temporary files
+     *
+     * @return bool
+     */
+    public static function flush()
+    {
+        $app = App::getInstance();
 
-				if (pathinfo($file)["extension"] == "cache") {
-					unlink($file);
-				}
-			}
-		}
+        // directory is the default repository
+        $path = $app->getBaseDir() . "/storage/cache";
 
-		return true;
-	}
+        if (($dir = (string)$app->path("cache:")) !== false) {
+            $path = $dir;
+        }
 
-	/**
-	 * Returns the path and the name of the temporary file
-	 *
-	 * @param string $key
-	 *
-	 * @return string
-	 */
-	protected static function getCacheFilePath($key) {
-		$app = App::getInstance();
+        $iterator = new RecursiveDirectoryIterator($path . "/");
 
-		// directory is the default repository
-		$path = $app->getBaseDir() . "/storage/cache/";
+        /** @var RecursiveDirectoryIterator $item */
+        foreach ($iterator as $item) {
+            if ($item->isFile()) {
+                $file = realpath($item->getPathname());
 
-		if (($dir = (string)$app->path("cache:")) !== false) {
-			$path = $dir;
-		}
+                if (pathinfo($file)["extension"] == "cache") {
+                    unlink($file);
+                }
+            }
+        }
 
-		return $path . md5($app->getSecret() . ":" . $key) . ".cache";
-	}
+        return true;
+    }
 }

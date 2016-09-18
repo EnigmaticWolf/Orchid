@@ -2,6 +2,7 @@
 
 namespace Orchid\Entity\Exception;
 
-class FileNotFoundException extends IOException {
+class FileNotFoundException extends IOException
+{
 
 }

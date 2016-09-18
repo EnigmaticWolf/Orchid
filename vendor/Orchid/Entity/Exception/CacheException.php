@@ -4,6 +4,7 @@ namespace Orchid\Entity\Exception;
 
 use Exception;
 
-class CacheException extends Exception {
+class CacheException extends Exception
+{
 
 }

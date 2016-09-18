@@ -3,16 +3,18 @@
 namespace Page\Controller;
 
 use Orchid\Entity\{
-	Controller, View
+    Controller, View
 };
 
-class Main extends Controller {
-	public function index() {
-		return View::fetch(
-			$this->path("Page:View/Layout.php"),
-			[
-				"hello" => "Hello World!",
-			]
-		);
-	}
+class Main extends Controller
+{
+    public function index()
+    {
+        return View::fetch(
+            $this->path("Page:View/Layout.php"),
+            [
+                "hello" => "Hello World!",
+            ]
+        );
+    }
 }

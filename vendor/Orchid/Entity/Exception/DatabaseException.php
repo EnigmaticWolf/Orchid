@@ -4,6 +4,7 @@ namespace Orchid\Entity\Exception;
 
 use Exception;
 
-class DatabaseException extends Exception {
+class DatabaseException extends Exception
+{
 
 }

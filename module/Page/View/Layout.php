@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Demo page</title>
+    <meta charset="UTF-8">
+    <title>Demo page</title>
 </head>
 <body>
-<?= $hello; ?>
+<?php
+/**
+ * @var string $hello
+ */
+echo $hello;
+?>
 </body>
 </html>

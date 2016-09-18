@@ -4,6 +4,7 @@ namespace Orchid\Entity\Exception;
 
 use RuntimeException;
 
-class NullPointException extends RuntimeException {
+class NullPointException extends RuntimeException
+{
 
 }

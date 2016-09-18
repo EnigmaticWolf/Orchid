@@ -4,6 +4,7 @@ namespace Orchid\Entity\Exception;
 
 use RuntimeException;
 
-class IndexOutOfBoundsException extends RuntimeException {
+class IndexOutOfBoundsException extends RuntimeException
+{
 
 }
