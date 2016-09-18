@@ -95,9 +95,9 @@ class View
      * will be available inside the view file as variables
      *
      * <code>
-     * View::$layout = "path/to/file"; // global template
-     * $view = new View("path/to/file");
-     * $view->set("title", "Page title");
+     * View::$layout = 'path/to/file'; // global template
+     * $view = new View('path/to/file');
+     * $view->set('title', 'Page title');
      * echo $view->render();
      * </code>
      *
@@ -109,7 +109,7 @@ class View
     public function render()
     {
         if (!empty($this->file)) {
-            $this->data["content"] = View::fetch($this->file, $this->data);
+            $this->data['content'] = View::fetch($this->file, $this->data);
         }
 
         return View::fetch(static::$layout, $this->data);
@@ -120,8 +120,8 @@ class View
      *
      * <code>
      * View::fetch(
-     *  $this->path("path/to/file"), [
-     *   "hello" => "Hello World!",
+     *  $this->path('path/to/file'), [
+     *   'hello' => 'Hello World!',
      * ]);
      * </code>
      *
@@ -148,6 +148,6 @@ class View
             return ob_get_clean();
         }
 
-        throw new FileNotFoundException("Could not find the template file");
+        throw new FileNotFoundException('Could not find the template file');
     }
 }

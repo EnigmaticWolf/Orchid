@@ -19,8 +19,8 @@ class Cache
     public static function write($key, $value, $expire = -1)
     {
         $data = [
-            "expire" => ($expire >= 0) ? (is_string($expire) ? strtotime($expire) : time() + $expire) : $expire,
-            "value"  => serialize($value),
+            'expire' => ($expire >= 0) ? (is_string($expire) ? strtotime($expire) : time() + $expire) : $expire,
+            'value'  => serialize($value),
         ];
 
         return file_put_contents(static::getCacheFilePath($key), serialize($data));
@@ -38,13 +38,13 @@ class Cache
         $app = App::getInstance();
 
         // directory is the default repository
-        $path = $app->getBaseDir() . "/storage/cache/";
+        $path = $app->getBaseDir() . '/storage/cache/';
 
-        if (($dir = (string)$app->path("cache:")) !== false) {
+        if (($dir = (string)$app->path('cache:')) !== false) {
             $path = $dir;
         }
 
-        return $path . md5($app->getSecret() . ":" . $key) . ".cache";
+        return $path . md5($app->getSecret() . ':' . $key) . '.cache';
     }
 
     /**
@@ -62,8 +62,8 @@ class Cache
         if (file_exists($file)) {
             $data = unserialize(file_get_contents($file));
 
-            if (($data["expire"] > time()) || $data["expire"] < 0) {
-                return unserialize($data["value"]);
+            if (($data['expire'] > time()) || $data['expire'] < 0) {
+                return unserialize($data['value']);
             }
 
             unlink($file);
@@ -100,20 +100,20 @@ class Cache
         $app = App::getInstance();
 
         // directory is the default repository
-        $path = $app->getBaseDir() . "/storage/cache";
+        $path = $app->getBaseDir() . '/storage/cache';
 
-        if (($dir = (string)$app->path("cache:")) !== false) {
+        if (($dir = (string)$app->path('cache:')) !== false) {
             $path = $dir;
         }
 
-        $iterator = new RecursiveDirectoryIterator($path . "/");
+        $iterator = new RecursiveDirectoryIterator($path . '/');
 
         /** @var RecursiveDirectoryIterator $item */
         foreach ($iterator as $item) {
             if ($item->isFile()) {
                 $file = realpath($item->getPathname());
 
-                if (pathinfo($file)["extension"] == "cache") {
+                if (pathinfo($file)['extension'] == 'cache') {
                     unlink($file);
                 }
             }

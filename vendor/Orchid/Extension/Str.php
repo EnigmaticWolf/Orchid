@@ -44,10 +44,10 @@ class Str
      *
      * @return  string
      */
-    public static function truncate($string, $length, $append = "...")
+    public static function truncate($string, $length, $append = '...')
     {
         $ret = substr($string, 0, $length);
-        $last_space = strrpos($ret, " ");
+        $last_space = strrpos($ret, ' ');
         if ($last_space !== false && $string != $ret) {
             $ret = substr($ret, 0, $last_space);
         }
@@ -70,7 +70,7 @@ class Str
      */
     public static function eos($count, $one, $two, $five)
     {
-        if (substr($count, -1, 1) == "1" && substr($count, -2, 2) != "11") {
+        if (substr($count, -1, 1) == '1' && substr($count, -2, 2) != '11') {
             return $one;
         } else {
             if (substr($count, -2, 1) != 1 && substr($count, -1, 1) > 1 && substr($count, -1, 1) < 5) {
@@ -91,22 +91,22 @@ class Str
     public static function romanNumber($int)
     {
         $romanNumerals = [
-            "M"  => 1000,
-            "CM" => 900,
-            "D"  => 500,
-            "CD" => 400,
-            "C"  => 100,
-            "XC" => 90,
-            "L"  => 50,
-            "XL" => 40,
-            "X"  => 10,
-            "IX" => 9,
-            "V"  => 5,
-            "IV" => 4,
-            "I"  => 1,
+            'M'  => 1000,
+            'CM' => 900,
+            'D'  => 500,
+            'CD' => 400,
+            'C'  => 100,
+            'XC' => 90,
+            'L'  => 50,
+            'XL' => 40,
+            'X'  => 10,
+            'IX' => 9,
+            'V'  => 5,
+            'IV' => 4,
+            'I'  => 1,
         ];
 
-        $result = "";
+        $result = '';
         foreach ($romanNumerals as $roman => $number) {
             $result .= str_repeat($roman, intval($int / $number));
             $int = $int % $number;
@@ -166,16 +166,16 @@ class Str
     public static function translate($input, $back = false)
     {
         $russian = [
-            "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У",
-            "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "а", "б", "в", "г", "д", "е", "ё", "ж", "з",
-            "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь",
-            "э", "ю", "я",
+            'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У',
+            'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з',
+            'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь',
+            'э', 'ю', 'я',
         ];
         $latin = [
-            "A", "B", "V", "G", "D", "E", "E", "Gh", "Z", "I", "Y", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U",
-            "F", "H", "C", "Ch", "Sh", "Sch", "Y", "Y", "Y", "E", "Yu", "Ya", "a", "b", "v", "g", "d", "e", "e", "gh",
-            "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "sch", "y",
-            "y", "y", "e", "yu", "ya",
+            'A', 'B', 'V', 'G', 'D', 'E', 'E', 'Gh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U',
+            'F', 'H', 'C', 'Ch', 'Sh', 'Sch', 'Y', 'Y', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh',
+            'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y',
+            'y', 'y', 'e', 'yu', 'ya',
         ];
 
         return !$back ? str_replace($russian, $latin, $input) : str_replace($latin, $russian, $input);
@@ -190,8 +190,8 @@ class Str
      */
     public static function convertSize($size)
     {
-        $unit = ["b", "kb", "mb", "gb", "tb", "pb"];
+        $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
 
-        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . " " . $unit[(int)$i];
+        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int)$i];
     }
 }

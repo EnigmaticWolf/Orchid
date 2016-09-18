@@ -33,13 +33,13 @@ class Daemon
      *
      * @throws RuntimeException
      */
-    public function __construct($name = "Daemon")
+    public function __construct($name = 'Daemon')
     {
-        if (PHP_SAPI == "cli") {
+        if (PHP_SAPI == 'cli') {
             $this->app = App::getInstance();
             $this->name = $name;
         } else {
-            throw new RuntimeException("This method is available only in Daemon");
+            throw new RuntimeException('This method is available only in Daemon');
         }
     }
 
@@ -55,10 +55,10 @@ class Daemon
     public static function run($file, array $args = [])
     {
         if (file_exists($file)) {
-            return system("php " . $file . " " . implode(" ", $args) . " > /dev/null &");
+            return system('php ' . $file . ' ' . implode(' ', $args) . ' > /dev/null &');
         }
 
-        throw new FileNotFoundException("This method is available only in Daemon");
+        throw new FileNotFoundException('This method is available only in Daemon');
     }
 
     /**
@@ -70,7 +70,7 @@ class Daemon
         if (!pcntl_fork()) {
             posix_setsid();
             $this->pid = getmypid();
-            $this->pidFile = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".pid";
+            $this->pidFile = $this->app->getBaseDir() . '/storage/log/' . $this->name . '.pid';
 
             if (!file_exists($this->pidFile)) {
                 // write pid to file
@@ -81,7 +81,7 @@ class Daemon
                     unlink($this->pidFile);
                 });
             } else {
-                echo "Daemon already running!" . PHP_EOL;
+                echo 'Daemon already running!' . PHP_EOL;
                 exit(SIG_ERR);
             }
         } else {
@@ -96,17 +96,17 @@ class Daemon
      */
     public function writeLog()
     {
-        $this->log = $this->app->getBaseDir() . "/storage/log/" . $this->name . ".log";
-        $this->logErr = $this->app->getBaseDir() . "/storage/log/" . $this->name . "-error.log";
+        $this->log = $this->app->getBaseDir() . '/storage/log/' . $this->name . '.log';
+        $this->logErr = $this->app->getBaseDir() . '/storage/log/' . $this->name . '-error.log';
 
         fclose(STDIN);
-        $GLOBALS["STDIN"] = fopen("/dev/null", "r");
+        $GLOBALS['STDIN'] = fopen('/dev/null', 'r');
 
         fclose(STDOUT);
-        $GLOBALS["STDOUT"] = fopen($this->log, "ab");
+        $GLOBALS['STDOUT'] = fopen($this->log, 'ab');
 
         fclose(STDERR);
-        $GLOBALS["STDERR"] = fopen($this->logErr, "ab");
+        $GLOBALS['STDERR'] = fopen($this->logErr, 'ab');
 
         return $this;
     }

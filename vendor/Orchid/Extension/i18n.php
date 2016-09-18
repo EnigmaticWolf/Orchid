@@ -25,7 +25,7 @@ namespace Orchid\Extension {
          * @param string $default
          * @param string $force
          */
-        public function __construct(App $app, $default = "ru", $force = null)
+        public function __construct(App $app, $default = 'ru', $force = null)
         {
             $this->app = $app;
 
@@ -35,7 +35,7 @@ namespace Orchid\Extension {
                 $locale = $app->request()->getLanguage($default);
             }
 
-            if (!in_array($locale, $app->get("locale", []))) {
+            if (!in_array($locale, $app->get('locale', []))) {
                 $locale = $default;
             }
 
@@ -53,25 +53,25 @@ namespace Orchid\Extension {
         protected function load($locale)
         {
             // default path
-            $path = $this->app->getBaseDir() . "/storage/i18n/" . trim($locale) . ".php";
+            $path = $this->app->getBaseDir() . '/storage/i18n/' . trim($locale) . '.php';
 
             // check for dynamic path
-            if (($file = $this->app->path("lang:" . $locale . ".php")) !== false) {
+            if (($file = $this->app->path('lang:' . $locale . '.php')) !== false) {
                 $path = $file;
             }
 
             if (file_exists($path)) {
                 $ext = pathinfo($path);
 
-                switch ($ext["extension"]) {
-                    case "ini":
+                switch ($ext['extension']) {
+                    case 'ini':
                         return parse_ini_file($path, true);
-                    case "php":
+                    case 'php':
                         return require_once $path;
                 }
             }
 
-            throw new FileNotFoundException("Could not find a language file");
+            throw new FileNotFoundException('Could not find a language file');
         }
     }
 }

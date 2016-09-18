@@ -35,11 +35,11 @@ class Router
      *
      * Example:
      * <code>
-     * $router->get("/", function() {
-     *  return "this is GET Request";
+     * $router->get('/', function() {
+     *  return 'this is GET Request';
      * }, $priority = 10);
      * // or
-     * $router->get("/", "\\Namespace\\ClassName", $priority = 10);
+     * $router->get('/', '\\Namespace\\ClassName', $priority = 10);
      * </code>
      *
      * @see Router::bind
@@ -60,31 +60,31 @@ class Router
      *
      * Example:
      * <code>
-     * $router->bind("/", function() {
-     *  return "this is GET or POST Request";
+     * $router->bind('/', function() {
+     *  return 'this is GET or POST Request';
      * }, Request::METHOD_GET, $priority = 10);
      * // or
-     * $router->bind("/", "\\Namespace\\ClassName", $priority = 10);
+     * $router->bind('/', '\\Namespace\\ClassName', $priority = 10);
      * </code>
      *
      * Params example:
      * <code>
-     * $router->get("/news/:date/:id", function($params) {
-     *  return $params["date"]."-".$params["id"];
+     * $router->get('/news/:date/:id', function($params) {
+     *  return $params['date'].'-'.$params['id'];
      * }, Request::METHOD_GET, $priority = 10);
      * </code>
      *
      * Mask example:
      * <code>
-     * $router->post("/file/*", function($params) {
-     *  return $params[":arg"];
+     * $router->post('/file/*', function($params) {
+     *  return $params[':arg'];
      * }, Request::METHOD_GET, $priority = 10);
      * </code>
      *
      * Regex example:
      * <code>
-     * $router->bind("#/page/(about|contact)#", function($params) {
-     *  return implode("\n", $params[":capture"]);
+     * $router->bind('#/page/(about|contact)#', function($params) {
+     *  return implode('\n', $params[':capture']);
      * }, Request::METHOD_GET, $priority = 10);
      * </code>
      *
@@ -98,10 +98,10 @@ class Router
     public function bind($pattern, $callable, $method = null, $priority = 0)
     {
         $this->routes[] = [
-            "method"   => strtoupper($method),
-            "pattern"  => $pattern,
-            "callable" => $callable,
-            "priority" => $priority,
+            'method'   => strtoupper($method),
+            'pattern'  => $pattern,
+            'callable' => $callable,
+            'priority' => $priority,
         ];
 
         return $this;
@@ -112,11 +112,11 @@ class Router
      *
      * Example:
      * <code>
-     * $router->post("/", function() {
-     *  return "this is POST Request";
+     * $router->post('/', function() {
+     *  return 'this is POST Request';
      * }, $priority = 10);
      * // or
-     * $router->post("/", "\\Namespace\\ClassName", $priority = 10);
+     * $router->post('/', '\\Namespace\\ClassName', $priority = 10);
      * </code>
      *
      * @see Router::bind
@@ -153,43 +153,43 @@ class Router
         $params = [];
 
         if ($this->routes) {
-            usort($this->routes, [$this, "compare"]);
+            usort($this->routes, [$this, 'compare']);
 
             foreach ($this->routes as $route) {
-                if ($route["method"] == $method || !$route["method"]) {
-                    if ($route["pattern"] === $pathname) {
-                        $found = $route["callable"];
+                if ($route['method'] == $method || !$route['method']) {
+                    if ($route['pattern'] === $pathname) {
+                        $found = $route['callable'];
                         break;
                     }
 
                     /* #\.html$#  */
-                    if (substr($route["pattern"], 0, 1) == "#" && substr($route["pattern"], -1) == "#") {
-                        if (preg_match($route["pattern"], $pathname, $match)) {
-                            $params[":capture"] = array_slice($match, 1);
-                            $found = $route["callable"];
+                    if (substr($route['pattern'], 0, 1) == '#' && substr($route['pattern'], -1) == '#') {
+                        if (preg_match($route['pattern'], $pathname, $match)) {
+                            $params[':capture'] = array_slice($match, 1);
+                            $found = $route['callable'];
                             break;
                         }
                     }
 
                     /* /example/* */
-                    if (strpos($route["pattern"], "*") !== false) {
-                        $pattern = "#^" . str_replace("\\*", "(.*)", preg_quote($route["pattern"], "#")) . "#";
+                    if (strpos($route['pattern'], '*') !== false) {
+                        $pattern = '#^' . str_replace('\\*', '(.*)', preg_quote($route['pattern'], '#')) . '#';
                         if (preg_match($pattern, $pathname, $match)) {
-                            $params[":arg"] = array_slice($match, 1);
-                            $found = $route["callable"];
+                            $params[':arg'] = array_slice($match, 1);
+                            $found = $route['callable'];
                             break;
                         }
                     }
 
                     /* /example/:id */
-                    if (strpos($route["pattern"], ":") !== false) {
-                        $parts = explode("/", $route["pattern"]);
+                    if (strpos($route['pattern'], ':') !== false) {
+                        $parts = explode('/', $route['pattern']);
                         array_shift($parts);
 
                         if (count($uri) == count($parts)) {
                             $matched = true;
                             foreach ($parts as $index => $part) {
-                                if (":" === substr($part, 0, 1)) {
+                                if (':' === substr($part, 0, 1)) {
                                     $params[substr($part, 1)] = $uri[$index];
                                     continue;
                                 }
@@ -199,7 +199,7 @@ class Router
                                 }
                             }
                             if ($matched) {
-                                $found = $route["callable"];
+                                $found = $route['callable'];
                                 break;
                             }
                         }
@@ -207,7 +207,7 @@ class Router
                 }
             }
         } else {
-            throw new RuntimeException("Route list is empty");
+            throw new RuntimeException('Route list is empty');
         }
 
         if ($found) {
@@ -216,11 +216,11 @@ class Router
             }
             if (is_string($found)) {
                 $controller = new $found($this->app);
-                $action = $this->app->request()->getUri(-1, "index");
+                $action = $this->app->request()->getUri(-1, 'index');
                 $result = null;
 
-                if (method_exists($controller, "before")) {
-                    call_user_func([$controller, "before"], $action);
+                if (method_exists($controller, 'before')) {
+                    call_user_func([$controller, 'before'], $action);
                 }
 
                 if ($controller->execute) {
@@ -228,14 +228,14 @@ class Router
                         $result = call_user_func([$controller, $action], $params);
                     } else {
                         throw new NoSuchMethodException(
-                            "Method '" . $action . "' doesn't exist in " . get_class($controller) . "'"
+                            'Method "' . $action . '" doesn\'t exist in "' . get_class($controller) . '"'
                         );
                     }
                 }
 
                 if ($controller->execute) {
-                    if (method_exists($controller, "after")) {
-                        call_user_func([$controller, "after"], $action);
+                    if (method_exists($controller, 'after')) {
+                        call_user_func([$controller, 'after'], $action);
                     }
                 }
 
@@ -243,7 +243,7 @@ class Router
             }
         }
 
-        throw new RuntimeException("Failed to find and execute the function");
+        throw new RuntimeException('Failed to find and execute the function');
     }
 
     /**
@@ -254,6 +254,6 @@ class Router
      */
     protected function compare($a, $b)
     {
-        return $b["priority"] - $a["priority"];
+        return $b['priority'] - $a['priority'];
     }
 }

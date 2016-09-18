@@ -68,8 +68,8 @@ trait Type
 
     /**
      * Checked value will be converted to a Boolean
-     * For values of "1", "true", "on" and "yes" - true
-     * For values of "0", "false", "off", "no" and "" - false
+     * For values of '1', 'true', 'on' and 'yes' - true
+     * For values of '0', 'false', 'off', 'no' and '' - false
      *
      * @return Closure
      */

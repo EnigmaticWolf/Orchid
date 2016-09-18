@@ -6,10 +6,10 @@ use Closure;
 
 trait Base
 {
-    public static $DATE_RU = "d.m.Y"; // Russian date format (ГОСТ Р 6.30-2003 (п. 3.11))
-    public static $DATE_EN = "d-m-Y"; // English date format
-    public static $DATE_US = "m-d-Y"; // US date format
-    public static $DATE_DB = "Y-m-d"; // data bases date format (ISO 8601)
+    public static $DATE_RU = 'd.m.Y'; // Russian date format (ГОСТ Р 6.30-2003 (п. 3.11))
+    public static $DATE_EN = 'd-m-Y'; // English date format
+    public static $DATE_US = 'm-d-Y'; // US date format
+    public static $DATE_DB = 'Y-m-d'; // data bases date format (ISO 8601)
 
     /**
      * Checked value will be converted to a date in the specified format
@@ -18,7 +18,7 @@ trait Base
      *
      * @return Closure
      */
-    public function date($format = "")
+    public function date($format = '')
     {
         return function (&$field) use ($format) {
             if (($time = strtotime($field)) !== false) {

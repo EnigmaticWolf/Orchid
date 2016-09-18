@@ -29,10 +29,10 @@ class Crypta
     {
         $salt = md5(App::getInstance()->getSecret());
         $len = mb_strlen($input);
-        $gamma = "";
+        $gamma = '';
         $n = $len > 100 ? 8 : 2;
         while (mb_strlen($gamma) < $len) {
-            $gamma .= substr(pack("H*", sha1($gamma . $salt)), 0, $n);
+            $gamma .= substr(pack('H*', sha1($gamma . $salt)), 0, $n);
         }
 
         return $input ^ $gamma;
@@ -59,8 +59,8 @@ class Crypta
      */
     public static function hash($string)
     {
-        $salt = substr(hash("whirlpool", uniqid(rand() . App::getInstance()->getSecret(), true)), 0, 12);
-        $hash = hash("whirlpool", $salt . $string);
+        $salt = substr(hash('whirlpool', uniqid(rand() . App::getInstance()->getSecret(), true)), 0, 12);
+        $hash = hash('whirlpool', $salt . $string);
         $saltPos = (mb_strlen($string) >= mb_strlen($hash) ? mb_strlen($hash) : mb_strlen($string));
 
         return substr($hash, 0, $saltPos) . $salt . substr($hash, $saltPos);
@@ -78,7 +78,7 @@ class Crypta
     {
         $saltPos = (mb_strlen($string) >= mb_strlen($hashString) ? mb_strlen($hashString) : mb_strlen($string));
         $salt = substr($hashString, $saltPos, 12);
-        $hash = hash("whirlpool", $salt . $string);
+        $hash = hash('whirlpool', $salt . $string);
 
         return $hashString == substr($hash, 0, $saltPos) . $salt . substr($hash, $saltPos);
     }

@@ -43,42 +43,42 @@ class App
         $self = $this;
 
         $this->config = array_replace_recursive([
-            "debug"       => true,
-            "app.name"    => "public",
-            "app.list"    => [],
-            "module"      => [],
-            "autoload"    => [],
-            "module.list" => [],
-            "secret"      => "orchid secret",
-            "args"        => [],
-            "base_dir"    => "",
-            "base_host"   => "",
-            "base_port"   => 0,
+            'debug'       => true,
+            'app.name'    => 'public',
+            'app.list'    => [],
+            'module'      => [],
+            'autoload'    => [],
+            'module.list' => [],
+            'secret'      => 'orchid secret',
+            'args'        => [],
+            'base_dir'    => '',
+            'base_host'   => '',
+            'base_port'   => 0,
         ], $config);
 
         // set base dir
-        if (!$this->config["base_dir"]) {
-            if (!empty($_SERVER["DOCUMENT_ROOT"])) {
-                $this->config["base_dir"] = $_SERVER["DOCUMENT_ROOT"];
-            } elseif (defined("ORCHID")) {
-                $this->config["base_dir"] = ORCHID;
+        if (!$this->config['base_dir']) {
+            if (!empty($_SERVER['DOCUMENT_ROOT'])) {
+                $this->config['base_dir'] = $_SERVER['DOCUMENT_ROOT'];
+            } elseif (defined('ORCHID')) {
+                $this->config['base_dir'] = ORCHID;
             }
         }
 
         // set base host
-        if (!$this->config["base_host"] && isset($_SERVER["HTTP_HOST"])) {
-            $this->config["base_host"] = $_SERVER["HTTP_HOST"];
+        if (!$this->config['base_host'] && isset($_SERVER['HTTP_HOST'])) {
+            $this->config['base_host'] = $_SERVER['HTTP_HOST'];
         }
 
         // set base port
-        if (!$this->config["base_port"] && isset($_SERVER["SERVER_PORT"])) {
-            $this->config["base_port"] = $_SERVER["SERVER_PORT"];
+        if (!$this->config['base_port'] && isset($_SERVER['SERVER_PORT'])) {
+            $this->config['base_port'] = $_SERVER['SERVER_PORT'];
         }
 
         // register auto loader
         spl_autoload_register(function ($class) use ($self) {
-            foreach ($self->config["autoload"] as $dir) {
-                $class_path = $dir . "/" . str_replace(["\\", "_"], "/", $class) . ".php";
+            foreach ($self->config['autoload'] as $dir) {
+                $class_path = $dir . '/' . str_replace(['\\', '_'], '/', $class) . '.php';
 
                 if (file_exists($class_path)) {
                     require_once($class_path);
@@ -89,53 +89,53 @@ class App
         });
 
         // not cli mode
-        if (PHP_SAPI != "cli") {
+        if (PHP_SAPI != 'cli') {
             set_exception_handler(function (Throwable $ex) {
                 @ob_end_clean();
 
                 if ($this->isDebug()) {
-                    $message = "Exception: " . $ex->getMessage() . " (code " . $ex->getCode() . ")\nFile: " .
-                        $ex->getFile() . " (at " . $ex->getLine() .
-                        " line)\nTrace:\n" . $ex->getTraceAsString();
+                    $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')\nFile: ' .
+                        $ex->getFile() . ' (at ' . $ex->getLine() .
+                        ' line)\nTrace:\n' . $ex->getTraceAsString();
                 } else {
-                    $message = "Internal Error";
+                    $message = 'Internal Error';
                 }
 
                 $this->response()
                      ->setStatus(Response::HTTP_INTERNAL_SERVER_ERROR)
-                     ->setHeader("Content-Type", "text/plain")
+                     ->setHeader('Content-Type', 'text/plain')
                      ->setContent($message);
             });
 
             // обработка заверщения работы
             register_shutdown_function(function () {
-                if (($error = error_get_last()) && error_reporting() & $error["type"]) {
+                if (($error = error_get_last()) && error_reporting() & $error['type']) {
                     @ob_end_clean();
 
                     if ($this->isDebug()) {
-                        $message = "ERROR: " . $error["message"] . " (code " . $error["type"] .
-                            ")\nFile: " . $error["file"] . " (at " . $error["line"] . " line)";
+                        $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] .
+                            ')\nFile: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
                     } else {
-                        $message = "Internal Error";
+                        $message = 'Internal Error';
                     }
 
                     $this->response()
                          ->setStatus(Response::HTTP_INTERNAL_SERVER_ERROR)
-                         ->setHeader("Content-Type", "text/plain")
+                         ->setHeader('Content-Type', 'text/plain')
                          ->setContent($message);
                 } else {
                     if ($this->response()->isOk() && !$this->response()->getContent()) {
                         $this->response()
                              ->setStatus(Response::HTTP_NOT_FOUND)
-                             ->setContent("Path not found");
+                             ->setContent('Path not found');
                     }
                 }
 
-                $this->event()->trigger("shutdown");
+                $this->event()->trigger('shutdown');
                 $this->response()->send();
             });
         } else {
-            $this->config["args"] = array_slice($_SERVER["argv"], 1);
+            $this->config['args'] = array_slice($_SERVER['argv'], 1);
         }
     }
 
@@ -146,7 +146,7 @@ class App
      */
     public function isDebug()
     {
-        return $this->get("debug", true);
+        return $this->get('debug', true);
     }
 
     /**
@@ -214,8 +214,8 @@ class App
      * Add value for name (not necessary) in array with key
      *
      * <code>
-     * $app->add("array", "bar"); // add index with value "bar"
-     * $app->add("array", "foo", "bar"); // add key "foo" with value "bar"
+     * $app->add('array', 'bar'); // add index with value 'bar'
+     * $app->add('array', 'foo', 'bar'); // add key 'foo' with value 'bar'
      * </code>
      *
      * @param string $key
@@ -281,7 +281,7 @@ class App
 
         if (!$database) {
             if (!$configs) {
-                $configs = $this->get("database", []);
+                $configs = $this->get('database', []);
             }
 
             $database = new Database($this, $configs);
@@ -303,7 +303,7 @@ class App
 
         if (!$memory) {
             if (!$configs) {
-                $configs = $this->get("memory", []);
+                $configs = $this->get('memory', []);
             }
 
             $memory = new Memory($this, $configs);
@@ -319,7 +319,7 @@ class App
      */
     public function getApp()
     {
-        return $this->get("app.name", "public");
+        return $this->get('app.name', 'public');
     }
 
     /**
@@ -332,13 +332,13 @@ class App
      */
     public function setApp($name)
     {
-        if (in_array($name, $this->get("app.list", []))) {
-            $this->config["app.name"] = $name;
+        if (in_array($name, $this->get('app.list', []))) {
+            $this->config['app.name'] = $name;
 
             return true;
         }
 
-        throw new RuntimeException("Application '" . $name . "' not found in 'app.list'");
+        throw new RuntimeException('Application "' . $name . '" not found in "app.list"');
     }
 
     /**
@@ -355,42 +355,42 @@ class App
     {
         foreach ($folders as $folder) {
             // add folder to autoload
-            $this->config["autoload"][] = $folder;
+            $this->config['autoload'][] = $folder;
 
             foreach (new DirectoryIterator($folder) as $element) {
                 if (!$element->isDot() && (
                         $element->isDir() ||
-                        $element->isFile() && $element->getExtension() == "php"
+                        $element->isFile() && $element->getExtension() == 'php'
                     )
                 ) {
                     $dir = $element->getRealPath();
-                    $name = $class = $element->getBasename(".php");
+                    $name = $class = $element->getBasename('.php');
 
                     if (!is_file($dir)) {
                         $this->path($class, $dir);
-                        $dir = $dir . DIRECTORY_SEPARATOR . "Module" . $class . ".php";
+                        $dir = $dir . DIRECTORY_SEPARATOR . 'Module' . $class . '.php';
 
                         // class name with namespace
-                        $class = $element->getFilename() . "\\Module" . $class;
+                        $class = $element->getFilename() . '\\Module' . $class;
                     }
 
                     if (file_exists($dir)) {
                         require_once($dir);
                     } else {
-                        throw new FileNotFoundException("Could not find specified file");
+                        throw new FileNotFoundException('Could not find specified file');
                     }
 
                     // check exists and parent class
-                    if (class_exists($class) && is_subclass_of($class, "Orchid\\Entity\\Module")) {
+                    if (class_exists($class) && is_subclass_of($class, 'Orchid\\Entity\\Module')) {
                         // call initialize method
-                        call_user_func([$class, "initialize"], $this);
+                        call_user_func([$class, 'initialize'], $this);
                     } else {
                         throw new RuntimeException(
-                            "Class '" . $class . "' not found or is not a subclass of 'Orchid\\Entity\\Module'"
+                            'Class "' . $class . '" not found or is not a subclass of "Orchid\\Entity\\Module"'
                         );
                     }
 
-                    $this->config["module.list"][] = $name;
+                    $this->config['module.list'][] = $name;
                 }
             }
         }
@@ -403,10 +403,10 @@ class App
      *
      * <code>
      * // set path shortcut
-     * $app->path("cache", ORCHID . "/storage/cache");
+     * $app->path('cache', ORCHID . '/storage/cache');
      *
      * // get path for file
-     * $app->path("cache:filename.cache");
+     * $app->path('cache:filename.cache');
      * </code>
      *
      * @param $shortcut
@@ -414,16 +414,16 @@ class App
      *
      * @return App|bool|string
      */
-    public function path($shortcut, $path = "")
+    public function path($shortcut, $path = '')
     {
         if ($shortcut && $path) {
-            $path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
+            $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
 
             if (!isset($this->paths[$shortcut])) {
                 $this->paths[$shortcut] = [];
             }
 
-            array_unshift($this->paths[$shortcut], is_file($path) ? $path : $path . "/");
+            array_unshift($this->paths[$shortcut], is_file($path) ? $path : $path . '/');
 
             return $this;
         } else {
@@ -431,7 +431,7 @@ class App
                 return $shortcut;
             }
 
-            if (($parts = explode(":", $shortcut, 2)) && count($parts) == 2) {
+            if (($parts = explode(':', $shortcut, 2)) && count($parts) == 2) {
                 if (isset($this->paths[$parts[0]])) {
                     foreach ($this->paths[$parts[0]] as &$shortcut) {
                         if (file_exists($shortcut . $parts[1])) {
@@ -455,12 +455,12 @@ class App
     public static function isAbsolutePath($path)
     {
         return $path && (
-            "/" == $path[0] ||
-            "\\" == $path[0] ||
-            (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ":" &&
+            '/' == $path[0] ||
+            '\\' == $path[0] ||
+            (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ':' &&
                 (
-                    "\\" == $path[2] ||
-                    "/" == $path[2]
+                    '\\' == $path[2] ||
+                    '/' == $path[2]
                 )
             )
         );
@@ -473,7 +473,7 @@ class App
      */
     public function getModules()
     {
-        return $this->get("module.list", []);
+        return $this->get('module.list', []);
     }
 
     /**
@@ -483,7 +483,7 @@ class App
      */
     public function getSecret()
     {
-        return $this->get("secret", "secret");
+        return $this->get('secret', 'secret');
     }
 
     /**
@@ -493,7 +493,7 @@ class App
      */
     public function getArgs()
     {
-        return $this->get("args", []);
+        return $this->get('args', []);
     }
 
     /**
@@ -503,7 +503,7 @@ class App
      */
     public function getBaseDir()
     {
-        return $this->get("base_dir");
+        return $this->get('base_dir');
     }
 
     /**
@@ -513,7 +513,7 @@ class App
      */
     public function getBaseHost()
     {
-        return $this->get("base_host");
+        return $this->get('base_host');
     }
 
     /**
@@ -523,7 +523,7 @@ class App
      */
     public function getBasePort()
     {
-        return (int)$this->get("base_port");
+        return (int)$this->get('base_port');
     }
 
     /**
@@ -548,7 +548,7 @@ class App
     public function pathToUrl($path)
     {
         if (($file = $this->path($path)) != false) {
-            return "/" . ltrim(str_replace($this->get("base_dir"), "", $file), "/");
+            return '/' . ltrim(str_replace($this->get('base_dir'), '', $file), '/');
         }
 
         return false;
@@ -562,17 +562,17 @@ class App
      */
     public function run()
     {
-        @ob_start("ob_gzhandler");
+        @ob_start('ob_gzhandler');
         @ob_implicit_flush(false);
 
         // trigger before route event
-        $this->event()->trigger("before");
+        $this->event()->trigger('before');
 
         // route and set response content
         $this->response()->setContent($this->router()->dispatch());
 
         // trigger after route event
-        $this->event()->trigger("after");
+        $this->event()->trigger('after');
 
         return $this;
     }
@@ -618,7 +618,7 @@ class App
             return true;
         }
 
-        throw new RuntimeException("Failed to add closure '" . $name . "'");
+        throw new RuntimeException('Failed to add closure "' . $name . '"');
     }
 
     /**
@@ -636,7 +636,7 @@ class App
             return call_user_func_array($this->closures[$name], $param);
         }
 
-        throw new RuntimeException("Unable to complete closure '" . $name . "'");
+        throw new RuntimeException('Unable to complete closure "' . $name . '"');
     }
 
     private function __clone()
@@ -647,9 +647,9 @@ class App
 // function for debugging
 function pre(...$args)
 {
-    echo "<pre>";
+    echo '<pre>';
     foreach ($args as $obj) {
         var_dump($obj);
     }
-    echo "</pre>";
+    echo '</pre>';
 }

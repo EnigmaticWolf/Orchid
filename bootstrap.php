@@ -6,7 +6,7 @@ const ORCHID = __DIR__;
 
 // PSR-compatible boot loader key files
 spl_autoload_register(function ($class) {
-    $class_path = ORCHID . "/vendor/" . str_replace(["\\", "_"], "/", $class) . ".php";
+    $class_path = ORCHID . '/vendor/' . str_replace(['\\', '_'], '/', $class) . '.php';
 
     if (file_exists($class_path)) {
         require_once($class_path);
@@ -20,5 +20,5 @@ $app = App::getInstance([
 ]);
 
 $app->loadModule([
-    ORCHID . "/module",
+    ORCHID . '/module',
 ]);

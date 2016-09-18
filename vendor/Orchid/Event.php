@@ -24,7 +24,7 @@ class Event
      */
     public function on($name, $callable, $priority = 0)
     {
-        $this->events[$name][] = ["callable" => $callable, "priority" => $priority];
+        $this->events[$name][] = ['callable' => $callable, 'priority' => $priority];
 
         return $this;
     }
@@ -54,11 +54,11 @@ class Event
     public function trigger($name, $params = [])
     {
         if (!empty($this->events[$name])) {
-            usort($this->events[$name], [$this, "compare"]);
+            usort($this->events[$name], [$this, 'compare']);
 
             foreach ($this->events[$name] as $ev) {
-                if (is_callable($ev["callable"])) {
-                    call_user_func_array($ev["callable"], $params);
+                if (is_callable($ev['callable'])) {
+                    call_user_func_array($ev['callable'], $params);
                 }
             }
         }
@@ -74,6 +74,6 @@ class Event
      */
     protected function compare($a, $b)
     {
-        return $b["priority"] - $a["priority"];
+        return $b['priority'] - $a['priority'];
     }
 }

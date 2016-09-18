@@ -4,82 +4,82 @@ namespace Orchid;
 
 class Request
 {
-    const METHOD_HEAD = "HEAD";
-    const METHOD_GET = "GET";
-    const METHOD_POST = "POST";
-    const METHOD_PUT = "PUT";
-    const METHOD_PATCH = "PATCH";
-    const METHOD_DELETE = "DELETE";
-    const METHOD_PURGE = "PURGE";
-    const METHOD_OPTIONS = "OPTIONS";
-    const METHOD_TRACE = "TRACE";
-    const METHOD_CONNECT = "CONNECT";
+    const METHOD_HEAD = 'HEAD';
+    const METHOD_GET = 'GET';
+    const METHOD_POST = 'POST';
+    const METHOD_PUT = 'PUT';
+    const METHOD_PATCH = 'PATCH';
+    const METHOD_DELETE = 'DELETE';
+    const METHOD_PURGE = 'PURGE';
+    const METHOD_OPTIONS = 'OPTIONS';
+    const METHOD_TRACE = 'TRACE';
+    const METHOD_CONNECT = 'CONNECT';
 
     /**
      * @var array
      */
     protected static $formats = [
         //Texts
-        "txt"    => ["text/plain"],
-        "ini"    => ["text/ini"],
-        "config" => ["text/xml"],
+        'txt'    => ['text/plain'],
+        'ini'    => ['text/ini'],
+        'config' => ['text/xml'],
 
         //WWW
-        "htm"    => ["text/html", "application/xhtml+xml"],
-        "html"   => ["text/html", "application/xhtml+xml"],
-        "tpl"    => ["text/html", "application/xhtml+xml"],
-        "css"    => ["text/css"],
-        "less"   => ["text/css"],
-        "js"     => ["application/javascript", "application/x-javascript", "text/javascript"],
-        "json"   => ["application/json", "application/x-json"],
-        "xml"    => ["text/xml", "application/xml", "application/x-xml"],
-        "swf"    => ["application/x-shockwave-flash"],
-        "rdf"    => ["application/rdf+xml"],
-        "atom"   => ["application/atom+xml"],
-        "rss"    => ["application/rss+xml"],
-        "form"   => ["application/x-www-form-urlencoded"],
+        'htm'    => ['text/html', 'application/xhtml+xml'],
+        'html'   => ['text/html', 'application/xhtml+xml'],
+        'tpl'    => ['text/html', 'application/xhtml+xml'],
+        'css'    => ['text/css'],
+        'less'   => ['text/css'],
+        'js'     => ['application/javascript', 'application/x-javascript', 'text/javascript'],
+        'json'   => ['application/json', 'application/x-json'],
+        'xml'    => ['text/xml', 'application/xml', 'application/x-xml'],
+        'swf'    => ['application/x-shockwave-flash'],
+        'rdf'    => ['application/rdf+xml'],
+        'atom'   => ['application/atom+xml'],
+        'rss'    => ['application/rss+xml'],
+        'form'   => ['application/x-www-form-urlencoded'],
 
         //Images
-        "jpe"    => ["image/jpeg"],
-        "jpg"    => ["image/jpeg"],
-        "jpeg"   => ["image/jpeg"],
-        "png"    => ["image/png"],
-        "bmp"    => ["image/bmp"],
-        "gif"    => ["image/gif"],
-        "tif"    => ["image/tiff"],
-        "tiff"   => ["image/tiff"],
-        "ico"    => ["image/vnd.microsoft.icon"],
-        "svg"    => ["image/svg+xml"],
-        "svgz"   => ["image/svg+xml"],
+        'jpe'    => ['image/jpeg'],
+        'jpg'    => ['image/jpeg'],
+        'jpeg'   => ['image/jpeg'],
+        'png'    => ['image/png'],
+        'bmp'    => ['image/bmp'],
+        'gif'    => ['image/gif'],
+        'tif'    => ['image/tiff'],
+        'tiff'   => ['image/tiff'],
+        'ico'    => ['image/vnd.microsoft.icon'],
+        'svg'    => ['image/svg+xml'],
+        'svgz'   => ['image/svg+xml'],
 
         //Fonts
-        "eot"    => ["application/vnd.ms-fontobject"],
-        "ttf"    => ["application/font-ttf"],
-        "woff"   => ["application/font-woff"],
+        'eot'    => ['application/vnd.ms-fontobject'],
+        'ttf'    => ['application/font-ttf'],
+        'woff'   => ['application/font-woff'],
 
         //Audio
-        "flac"   => ["audio/x-flac"],
-        "mp3"    => ["audio/mpeg"],
-        "wav"    => ["audio/wav"],
-        "wma"    => ["audio/x-ms-wma"],
+        'flac'   => ['audio/x-flac'],
+        'mp3'    => ['audio/mpeg'],
+        'wav'    => ['audio/wav'],
+        'wma'    => ['audio/x-ms-wma'],
 
         //Video
-        "qt"     => ["video/quicktime"],
-        "mov"    => ["video/quicktime"],
-        "mkv"    => ["video/mkv"],
-        "mp4"    => ["video/mp4"],
+        'qt'     => ['video/quicktime'],
+        'mov'    => ['video/quicktime'],
+        'mkv'    => ['video/mkv'],
+        'mp4'    => ['video/mp4'],
 
         //Archive
-        "7z"     => ["application/x-7z-compressed"],
-        "zip"    => ["application/x-zip-compressed"],
-        "rar"    => ["application/x-rar-compressed"],
+        '7z'     => ['application/x-7z-compressed'],
+        'zip'    => ['application/x-zip-compressed'],
+        'rar'    => ['application/x-rar-compressed'],
 
         //Application
-        "jar"    => ["application/java-archive"],
-        "java"   => ["application/octet-stream"],
-        "exe"    => ["application/octet-stream"],
-        "msi"    => ["application/octet-stream"],
-        "dll"    => ["application/x-msdownload"],
+        'jar'    => ['application/java-archive'],
+        'java'   => ['application/octet-stream'],
+        'exe'    => ['application/octet-stream'],
+        'msi'    => ['application/octet-stream'],
+        'dll'    => ['application/x-msdownload'],
     ];
 
     /**
@@ -154,17 +154,17 @@ class Request
      */
     public function __construct($post = [], $file = [], $cookie = [])
     {
-        $this->secure = strtolower($_SERVER["REQUEST_SCHEME"]) == "https";
-        $this->host = $_SERVER["HTTP_HOST"];
-        $this->port = $_SERVER["SERVER_PORT"];
-        $this->method = strtoupper($_SERVER["REQUEST_METHOD"]);
+        $this->secure = strtolower($_SERVER['REQUEST_SCHEME']) == 'https';
+        $this->host = $_SERVER['HTTP_HOST'];
+        $this->port = $_SERVER['SERVER_PORT'];
+        $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
 
-        $url = parse_url($_SERVER["REQUEST_URI"]);
-        if (isset($url["query"])) {
-            parse_str($url["query"], $this->get);
+        $url = parse_url($_SERVER['REQUEST_URI']);
+        if (isset($url['query'])) {
+            parse_str($url['query'], $this->get);
         }
-        if (isset($url["path"])) {
-            foreach (explode("/", $url["path"]) as $part) {
+        if (isset($url['path'])) {
+            foreach (explode('/', $url['path']) as $part) {
                 if ($part) {
                     $this->uri[] = $part;
                 }
@@ -177,8 +177,8 @@ class Request
 
         // fill an array of headers
         foreach ($_SERVER as $name => $value) {
-            if (substr($name, 0, 5) == "HTTP_") {
-                $name = str_replace(" ", "-", ucwords(strtolower(str_replace("_", " ", substr($name, 5)))));
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
                 $this->headers[$name] = $value;
             }
         }
@@ -204,12 +204,12 @@ class Request
     public static function getClientIp()
     {
         switch (true) {
-            case isset($_SERVER["HTTP_X_FORWARDED_FOR"]):
-                return $_SERVER["HTTP_X_FORWARDED_FOR"];
-            case isset($_SERVER["HTTP_CLIENT_IP"]):
-                return $_SERVER["HTTP_CLIENT_IP"];
-            case isset($_SERVER["REMOTE_ADDR"]):
-                return $_SERVER["REMOTE_ADDR"];
+            case isset($_SERVER['HTTP_X_FORWARDED_FOR']):
+                return $_SERVER['HTTP_X_FORWARDED_FOR'];
+            case isset($_SERVER['HTTP_CLIENT_IP']):
+                return $_SERVER['HTTP_CLIENT_IP'];
+            case isset($_SERVER['REMOTE_ADDR']):
+                return $_SERVER['REMOTE_ADDR'];
         }
 
         return null;
@@ -234,16 +234,16 @@ class Request
      *
      * @return mixed|string
      */
-    public function getFormat($default = "text/html")
+    public function getFormat($default = 'text/html')
     {
         preg_match_all(
-            "~(?<type>(?:\w+|\*)\/(?:\w+|\*))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i",
-            $this->getHeader("Accept"),
+            '~(?<type>(?:\w+|\*)\/(?:\w+|\*))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i',
+            $this->getHeader('Accept'),
             $list
         );
 
         $data = [];
-        foreach (array_combine($list["type"], $list["q"]) as $key => $priority) {
+        foreach (array_combine($list['type'], $list['q']) as $key => $priority) {
             $data[$key] = (float)($priority ? $priority : 1);
         }
         arsort($data, SORT_NUMERIC);
@@ -259,7 +259,7 @@ class Request
      *
      * @return mixed
      */
-    public function getHeader($name = "", $default = null)
+    public function getHeader($name = '', $default = null)
     {
         if ($name) {
             return $this->headers[$name] ?? $default;
@@ -275,16 +275,16 @@ class Request
      *
      * @return mixed|string
      */
-    public function getLanguage($default = "ru")
+    public function getLanguage($default = 'ru')
     {
         preg_match_all(
-            "~(?<lang>\w+(?:\-\w+|))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i",
-            $this->getHeader("Accept-Language"),
+            '~(?<lang>\w+(?:\-\w+|))(?:\;q=(?<q>\d(?:\.\d|))|)[\,]{0,}~i',
+            $this->getHeader('Accept-Language'),
             $list
         );
 
         $data = [];
-        foreach (array_combine($list["lang"], $list["q"]) as $key => $priority) {
+        foreach (array_combine($list['lang'], $list['q']) as $key => $priority) {
             $data[$key] = (float)($priority ? $priority : 1);
         }
         arsort($data, SORT_NUMERIC);
@@ -323,14 +323,14 @@ class Request
     {
         return (
             (
-                isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
-                $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
+                isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
             ) || (
-                isset($_SERVER["CONTENT_TYPE"]) &&
-                stripos($_SERVER["CONTENT_TYPE"], "application/json") !== false
+                isset($_SERVER['CONTENT_TYPE']) &&
+                stripos($_SERVER['CONTENT_TYPE'], 'application/json') !== false
             ) || (
-                isset($_SERVER["HTTP_CONTENT_TYPE"]) &&
-                stripos($_SERVER["HTTP_CONTENT_TYPE"], "application/json") !== false
+                isset($_SERVER['HTTP_CONTENT_TYPE']) &&
+                stripos($_SERVER['HTTP_CONTENT_TYPE'], 'application/json') !== false
             )
         );
     }
@@ -353,9 +353,9 @@ class Request
      *
      * @return array|mixed
      */
-    public function getUri($index = "", $default = null)
+    public function getUri($index = '', $default = null)
     {
-        if ($index !== "") {
+        if ($index !== '') {
             if ($index >= 0) {
                 return $this->uri[$index] ?? $default;
             } else {
@@ -373,7 +373,7 @@ class Request
      */
     public function getPathname()
     {
-        return "/" . implode("/", $this->uri);
+        return '/' . implode('/', $this->uri);
     }
 
     /**
@@ -384,7 +384,7 @@ class Request
      *
      * @return array|mixed
      */
-    public function getParam($key = "", $default = null)
+    public function getParam($key = '', $default = null)
     {
         if ($key) {
             return $this->get[$key] ?? $default;
@@ -401,7 +401,7 @@ class Request
      *
      * @return array|mixed
      */
-    public function getData($key = "", $default = null)
+    public function getData($key = '', $default = null)
     {
         if ($key) {
             return $this->post[$key] ?? $default;
@@ -418,7 +418,7 @@ class Request
      *
      * @return array|mixed
      */
-    public function getFile($key = "", $default = null)
+    public function getFile($key = '', $default = null)
     {
         if ($key) {
             return $this->file[$key] ?? $default;
@@ -435,7 +435,7 @@ class Request
      *
      * @return array|mixed
      */
-    public function getCookie($key = "", $default = null)
+    public function getCookie($key = '', $default = null)
     {
         if ($key) {
             return $this->cookie[$key] ?? $default;

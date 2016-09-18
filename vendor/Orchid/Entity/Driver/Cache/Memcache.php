@@ -25,7 +25,7 @@ class Memcache
         $this->connection->addServer($host, $port);
 
         if (!$this->connection->getVersion()) {
-            throw new CacheException("Connecting to a cache server was unable");
+            throw new CacheException('Connecting to a cache server was unable');
         }
     }
 

@@ -63,12 +63,12 @@ abstract class Validator
      * @return $this
      * @throws RuntimeException
      */
-    public function addRule($validator, $message = "")
+    public function addRule($validator, $message = '')
     {
         if ($this->field) {
             $this->rule[$this->field][] = [
-                "validator" => $validator,
-                "message"   => $message,
+                'validator' => $validator,
+                'message'   => $message,
             ];
         }
 
@@ -86,8 +86,8 @@ abstract class Validator
 
         foreach ($this->rule as $field => $rules) {
             foreach ($rules as $rule) {
-                if ($rule["validator"]($this->data[$field]) !== true) {
-                    $this->error[$field] = $rule["message"] ? $rule["message"] : false;
+                if ($rule['validator']($this->data[$field]) !== true) {
+                    $this->error[$field] = $rule['message'] ? $rule['message'] : false;
                     break;
                 }
             }

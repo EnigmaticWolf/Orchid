@@ -20,6 +20,6 @@ class ModulePage extends Module
     public static function initialize(App $app)
     {
         $app->router()
-            ->get("/*", "\\Page\\Controller\\Main");
+            ->get('/*', '\\Page\\Controller\\Main');
     }
 }

@@ -20,7 +20,7 @@ class Memory
      *
      * @var string
      */
-    public $prefix = "";
+    public $prefix = '';
 
     /**
      * List of keys that are stored in the buffer
@@ -58,35 +58,35 @@ class Memory
 
         if ($configs) {
             $default = [
-                "driver"  => "memcache",
-                "host"    => "",
-                "port"    => "",
-                "timeout" => 10,
-                "role"    => "master",
+                'driver'  => 'memcache',
+                'host'    => '',
+                'port'    => '',
+                'timeout' => 10,
+                'role'    => 'master',
             ];
 
-            $keyHash = "memory:" . spl_object_hash($this) . ":";
+            $keyHash = 'memory:' . spl_object_hash($this) . ':';
             foreach ($configs as $index => $config) {
                 $key = $keyHash . $index;
                 $config = array_merge($default, $config);
 
-                switch (strtolower($config["driver"])) {
-                    case "memcache":
+                switch (strtolower($config['driver'])) {
+                    case 'memcache':
                         $app->addClosure($key, function () use ($config) {
                             return new Memcache(
-                                $config["host"],
-                                $config["port"],
-                                $config["timeout"]
+                                $config['host'],
+                                $config['port'],
+                                $config['timeout']
                             );
                         });
 
                         break;
                 }
 
-                $this->instance[strtolower($config["role"]) == "master" ? "master" : "slave"][] = $key;
+                $this->instance[strtolower($config['role']) == 'master' ? 'master' : 'slave'][] = $key;
             }
         } else {
-            throw new RuntimeException("There are no settings to connect to the memory");
+            throw new RuntimeException('There are no settings to connect to the memory');
         }
     }
 
@@ -130,19 +130,19 @@ class Memory
     public function getInstance($use_master = false)
     {
         $pool = [];
-        $role = $use_master ? "master" : "slave";
+        $role = $use_master ? 'master' : 'slave';
 
         switch (true) {
             case !empty($this->instance[$role]):
                 $pool = $this->instance[$role];
                 break;
-            case !empty($this->instance["master"]):
-                $pool = $this->instance["master"];
-                $role = "master";
+            case !empty($this->instance['master']):
+                $pool = $this->instance['master'];
+                $role = 'master';
                 break;
-            case !empty($this->instance["slave"]):
-                $pool = $this->instance["slave"];
-                $role = "slave";
+            case !empty($this->instance['slave']):
+                $pool = $this->instance['slave'];
+                $role = 'slave';
                 break;
         }
 
@@ -154,7 +154,7 @@ class Memory
             }
         }
 
-        throw new CacheException("Unable to establish connection");
+        throw new CacheException('Unable to establish connection');
     }
 
     /**
@@ -166,7 +166,7 @@ class Memory
      */
     public function getKey($key)
     {
-        return $this->prefix ? $this->prefix . ":" . $key : $key;
+        return $this->prefix ? $this->prefix . ':' . $key : $key;
     }
 
     /**

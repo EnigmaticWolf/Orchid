@@ -88,66 +88,66 @@ class Response
      * @var array
      */
     public static $statusTexts = [
-        100 => "Continue",
-        101 => "Switching Protocols",
-        102 => "Processing",
-        200 => "OK",
-        201 => "Created",
-        202 => "Accepted",
-        203 => "Non-Authoritative Information",
-        204 => "No Content",
-        205 => "Reset Content",
-        206 => "Partial Content",
-        207 => "Multi-Status",
-        208 => "Already Reported",
-        226 => "IM Used",
-        300 => "Multiple Choices",
-        301 => "Moved Permanently",
-        302 => "Found",
-        303 => "See Other",
-        304 => "Not Modified",
-        305 => "Use Proxy",
-        307 => "Temporary Redirect",
-        308 => "Permanent Redirect",
-        400 => "Bad Request",
-        401 => "Unauthorized",
-        402 => "Payment Required",
-        403 => "Forbidden",
-        404 => "Not Found",
-        405 => "Method Not Allowed",
-        406 => "Not Acceptable",
-        407 => "Proxy Authentication Required",
-        408 => "Request Timeout",
-        409 => "Conflict",
-        410 => "Gone",
-        411 => "Length Required",
-        412 => "Precondition Failed",
-        413 => "Payload Too Large",
-        414 => "URI Too Long",
-        415 => "Unsupported Media Type",
-        416 => "Range Not Satisfiable",
-        417 => "Expectation Failed",
-        418 => "I'm a teapot",
-        422 => "Unprocessable Entity",
-        423 => "Locked",
-        424 => "Failed Dependency",
-        425 => "Reserved for WebDAV advanced collections expired proposal",
-        426 => "Upgrade Required",
-        428 => "Precondition Required",
-        429 => "Too Many Requests",
-        431 => "Request Header Fields Too Large",
-        451 => "Unavailable For Legal Reasons",
-        500 => "Internal Server Error",
-        501 => "Not Implemented",
-        502 => "Bad Gateway",
-        503 => "Service Unavailable",
-        504 => "Gateway Timeout",
-        505 => "HTTP Version Not Supported",
-        506 => "Variant Also Negotiates (Experimental)",
-        507 => "Insufficient Storage",
-        508 => "Loop Detected",
-        510 => "Not Extended",
-        511 => "Network Authentication Required",
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status',
+        208 => 'Already Reported',
+        226 => 'IM Used',
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        402 => 'Payment Required',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
+        408 => 'Request Timeout',
+        409 => 'Conflict',
+        410 => 'Gone',
+        411 => 'Length Required',
+        412 => 'Precondition Failed',
+        413 => 'Payload Too Large',
+        414 => 'URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
+        422 => 'Unprocessable Entity',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        425 => 'Reserved for WebDAV advanced collections expired proposal',
+        426 => 'Upgrade Required',
+        428 => 'Precondition Required',
+        429 => 'Too Many Requests',
+        431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates (Experimental)',
+        507 => 'Insufficient Storage',
+        508 => 'Loop Detected',
+        510 => 'Not Extended',
+        511 => 'Network Authentication Required',
     ];
 
     /**
@@ -196,7 +196,7 @@ class Response
     {
         $this->setContent($body);
         $this->setStatus($status);
-        $this->setCharset("UTF-8");
+        $this->setCharset('UTF-8');
 
         foreach ($headers as $key => $value) {
             $this->setHeader($key, $value);
@@ -216,7 +216,7 @@ class Response
     public function setContent($response)
     {
         if (is_array($response)) {
-            $this->setHeader("Content-Type", "application/json");
+            $this->setHeader('Content-Type', 'application/json');
             $response = json_encode($response, JSON_UNESCAPED_UNICODE);
         }
 
@@ -228,7 +228,7 @@ class Response
                     is_numeric($response)
                 )
             ) ||
-            is_callable([$response, "__toString"])
+            is_callable([$response, '__toString'])
         ) {
             $this->body = $response;
 
@@ -236,8 +236,8 @@ class Response
         }
 
         throw new UnexpectedValueException(
-            "The Response content must be a string or object implementing __toString(), " .
-            gettype($response) . " given"
+            'The Response content must be a string or object implementing __toString(), ' .
+            gettype($response) . ' given'
         );
     }
 
@@ -268,12 +268,12 @@ class Response
     {
         if ($code >= 100 || $code < 600) {
             $this->statusCode = $code;
-            $this->statusText = static::$statusTexts[$code] ?? "unknown";
+            $this->statusText = static::$statusTexts[$code] ?? 'unknown';
 
             return $this;
         }
 
-        throw new InvalidArgumentException("The HTTP status code '" . $code . "'' is not valid");
+        throw new InvalidArgumentException('The HTTP status code "' . $code . '" is not valid');
     }
 
     /**
@@ -310,11 +310,11 @@ class Response
         }
 
         $notModified = false;
-        $lastModified = static::getHeader("Last-Modified");
-        $modifiedSince = $request->getHeader("If-Modified-Since");
+        $lastModified = static::getHeader('Last-Modified');
+        $modifiedSince = $request->getHeader('If-Modified-Since');
 
-        if ($etags = $request->getHeader("If-None-Match")) {
-            $notModified = static::getHeader("ETag") == $etags;
+        if ($etags = $request->getHeader('If-None-Match')) {
+            $notModified = static::getHeader('ETag') == $etags;
         }
 
         if ($modifiedSince && $lastModified) {
@@ -336,14 +336,14 @@ class Response
      * @return array|mixed
      * @throws NullPointException
      */
-    public function getHeader($key = "")
+    public function getHeader($key = '')
     {
         if ($key) {
             if (isset($this->headers[$key])) {
                 return $this->headers[$key];
             }
 
-            throw new NullPointException("Header with key '" . $key . "' not found");
+            throw new NullPointException('Header with key "' . $key . '" not found');
         }
 
         return $this->headers;
@@ -364,13 +364,13 @@ class Response
 
         // remove headers that MUST NOT be included with 304 Not Modified responses
         $keys = [
-            "Allow",
-            "Content-Encoding",
-            "Content-Language",
-            "Content-Length",
-            "Content-MD5",
-            "Content-Type",
-            "Last-Modified",
+            'Allow',
+            'Content-Encoding',
+            'Content-Language',
+            'Content-Length',
+            'Content-MD5',
+            'Content-Type',
+            'Last-Modified',
         ];
 
         foreach ($keys as $header) {
@@ -403,8 +403,8 @@ class Response
      */
     public function setHeaderExpires(DateTime $date)
     {
-        $date->setTimezone(new DateTimeZone("UTC"));
-        $this->setHeader("Expires", $date->format("D, d M Y H:i:s") . " GMT");
+        $date->setTimezone(new DateTimeZone('UTC'));
+        $this->setHeader('Expires', $date->format('D, d M Y H:i:s') . ' GMT');
 
         return $this;
     }
@@ -433,15 +433,15 @@ class Response
     public function setHeaderCacheControl($bitWeight = 0, $maxAge = 3600, $sharedMaxAge = 600)
     {
         $valuesByWeight = [
-            2   => "public",
-            4   => "private",
-            8   => "no-cache",
-            16  => "no-store",
-            32  => "must-revalidate",
-            64  => "proxy-revalidate",
-            128 => "no-transform",
-            256 => "max-age=" . $maxAge,
-            512 => "s-maxage=" . $sharedMaxAge,
+            2   => 'public',
+            4   => 'private',
+            8   => 'no-cache',
+            16  => 'no-store',
+            32  => 'must-revalidate',
+            64  => 'proxy-revalidate',
+            128 => 'no-transform',
+            256 => 'max-age=' . $maxAge,
+            512 => 's-maxage=' . $sharedMaxAge,
         ];
 
         $header = [];
@@ -451,7 +451,7 @@ class Response
             }
         }
 
-        $this->setHeader("Cache-Control", implode(" ", array_reverse($header)));
+        $this->setHeader('Cache-Control', implode(' ', array_reverse($header)));
 
         return $this;
     }
@@ -562,7 +562,7 @@ class Response
         return in_array(
             $this->statusCode,
             [201, 301, 302, 303, 307, 308]
-        ) && (null === $location ? : $location == $this->headers["Location"]);
+        ) && (null === $location ? : $location == $this->headers['Location']);
     }
 
     /**
@@ -591,17 +591,17 @@ class Response
         }
 
         // date
-        if (!$this->hasHeader("Date")) {
-            $this->setHeaderDate(DateTime::createFromFormat("U", time()));
+        if (!$this->hasHeader('Date')) {
+            $this->setHeaderDate(DateTime::createFromFormat('U', time()));
         }
 
         // headers
         foreach ($this->headers as $key => $value) {
-            header($key . ": " . $value, false, $this->statusCode);
+            header($key . ': ' . $value, false, $this->statusCode);
         }
 
         // status
-        header("HTTP/1.1 " . $this->statusCode . " " . $this->statusText, true, $this->statusCode);
+        header('HTTP/1.1 ' . $this->statusCode . ' ' . $this->statusText, true, $this->statusCode);
     }
 
     /**
@@ -625,8 +625,8 @@ class Response
      */
     public function setHeaderDate(DateTime $date)
     {
-        $date->setTimezone(new DateTimeZone("UTC"));
-        $this->setHeader("Date", $date->format("D, d M Y H:i:s") . " GMT");
+        $date->setTimezone(new DateTimeZone('UTC'));
+        $this->setHeader('Date', $date->format('D, d M Y H:i:s') . ' GMT');
 
         return $this;
     }
@@ -650,35 +650,35 @@ class Response
     {
         if ($this->isInformational() || $this->isRedirection() || $this->isEmpty()) {
             $this->setContent(null);
-            $this->deleteHeader("Content-Type");
-            $this->deleteHeader("Content-Length");
+            $this->deleteHeader('Content-Type');
+            $this->deleteHeader('Content-Length');
         } else {
             // content-type based on the Request
-            if (!$this->hasHeader("Content-Type")) {
+            if (!$this->hasHeader('Content-Type')) {
                 $mime = $request->getFormat();
 
                 if (null !== $mime) {
-                    $this->setHeader("Content-Type", $mime . "; charset=" . $this->charset);
+                    $this->setHeader('Content-Type', $mime . '; charset=' . $this->charset);
                 }
             }
 
             // fix Content-Length
-            if ($this->hasHeader("Transfer-Encoding")) {
-                $this->deleteHeader("Content-Length");
+            if ($this->hasHeader('Transfer-Encoding')) {
+                $this->deleteHeader('Content-Length');
             }
 
             if ($request->isMethod(Request::METHOD_HEAD)) {
                 // RFC2616 14.13
-                $length = $this->hasHeader("Content-Length");
+                $length = $this->hasHeader('Content-Length');
                 $this->setContent(null);
                 if ($length) {
-                    $this->setHeader("Content-Length", $length);
+                    $this->setHeader('Content-Length', $length);
                 }
             }
         }
 
-        if ($this->hasHeader("Transfer-Encoding")) {
-            $this->deleteHeader("Content-Length");
+        if ($this->hasHeader('Transfer-Encoding')) {
+            $this->deleteHeader('Content-Length');
         }
 
         return $this;
@@ -721,13 +721,13 @@ class Response
      */
     public function __toString()
     {
-        $ret = "HTTP/1.1 " . $this->statusCode . " " . $this->statusText . "\r\n";
+        $ret = 'HTTP/1.1 ' . $this->statusCode . ' ' . $this->statusText . '\r\n';
 
         foreach ($this->headers as $key => $value) {
-            $ret .= $key . ": " . $value . "\r\n";
+            $ret .= $key . ': ' . $value . '\r\n';
         }
 
-        return $ret . "\r\n" . $this->getContent();
+        return $ret . '\r\n' . $this->getContent();
     }
 
     /**

@@ -19,8 +19,8 @@ class Database
      * @var array
      */
     protected $connection = [
-        "master" => [],
-        "slave"  => [],
+        'master' => [],
+        'slave'  => [],
     ];
 
     /**
@@ -43,14 +43,14 @@ class Database
 
         if ($configs) {
             $default = [
-                "dsn"      => "",
-                "username" => "",
-                "password" => "",
-                "options"  => [],
-                "role"     => "master",
+                'dsn'      => '',
+                'username' => '',
+                'password' => '',
+                'options'  => [],
+                'role'     => 'master',
             ];
 
-            $keyHash = "database:" . spl_object_hash($this) . ":";
+            $keyHash = 'database:' . spl_object_hash($this) . ':';
             foreach ($configs as $index => $config) {
                 $key = $keyHash . $index;
                 $config = array_merge($default, $config);
@@ -58,24 +58,24 @@ class Database
                 $app->addClosure($key, function () use ($config) {
                     try {
                         return new PDO(
-                            $config["dsn"],
-                            $config["username"],
-                            $config["password"],
-                            $config["options"]
+                            $config['dsn'],
+                            $config['username'],
+                            $config['password'],
+                            $config['options']
                         );
                     } catch (PDOException $ex) {
                         throw new DatabaseException(
-                            "The connection to the database server fails (" . $ex->getMessage() . ")",
+                            'The connection to the database server fails (' . $ex->getMessage() . ')',
                             0,
                             $ex
                         );
                     }
                 });
 
-                $this->connection[$config["role"] == "master" ? "master" : "slave"][] = $key;
+                $this->connection[$config['role'] == 'master' ? 'master' : 'slave'][] = $key;
             }
         } else {
-            throw new RuntimeException("There are no settings to connect to the database");
+            throw new RuntimeException('There are no settings to connect to the database');
         }
     }
 
@@ -91,7 +91,7 @@ class Database
     public function query($query, array $params = [], $use_master = false)
     {
         // obtain connection
-        $this->lastConnection = $this->getInstance(!$use_master ? !!strncmp($query, "SELECT", 6) : true);
+        $this->lastConnection = $this->getInstance(!$use_master ? !!strncmp($query, 'SELECT', 6) : true);
 
         $stm = $this->lastConnection->prepare($query);
         $stm->execute($params);
@@ -110,19 +110,19 @@ class Database
     public function getInstance($use_master = false)
     {
         $pool = [];
-        $role = $use_master ? "master" : "slave";
+        $role = $use_master ? 'master' : 'slave';
 
         switch (true) {
             case !empty($this->connection[$role]):
                 $pool = $this->connection[$role];
                 break;
-            case !empty($this->connection["master"]):
-                $pool = $this->connection["master"];
-                $role = "master";
+            case !empty($this->connection['master']):
+                $pool = $this->connection['master'];
+                $role = 'master';
                 break;
-            case !empty($this->connection["slave"]):
-                $pool = $this->connection["slave"];
-                $role = "slave";
+            case !empty($this->connection['slave']):
+                $pool = $this->connection['slave'];
+                $role = 'slave';
                 break;
         }
 
@@ -134,7 +134,7 @@ class Database
             }
         }
 
-        throw new DatabaseException("Unable to establish connection");
+        throw new DatabaseException('Unable to establish connection');
     }
 
     /**
