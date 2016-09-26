@@ -2,22 +2,16 @@
 
 declare(strict_types = 1);
 
-use Orchid\Extension\Str;
-
-require_once('bootstrap.php');
+require_once 'src/Orchid/App.php';
+require_once 'src/Orchid/Event.php';
+require_once 'src/Orchid/Request.php';
+require_once 'src/Orchid/Response.php';
+require_once 'src/Orchid/Router.php';
 
 $app = \Orchid\App::getInstance();
 
-if ($app->isDebug()) {
-    // add tasks outputting time and memory in the response header
-    $app->event()->on('shutdown', function () use ($app) {
-        $app->response()
-            ->setHeaderCacheControl(284, 0, 0)
-            ->setHeaderExpires(DateTime::createFromFormat(DATE_RFC2822, 'Sat, 01 Jan 00 00:00:00 +0000'))
-            ->setHeader('X-Time', round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 7) . 'ms')
-            ->setHeader('X-Memory', Str::convertSize(memory_get_usage()));
-    });
-}
+$app->router()->bind('/', function () use ($app) {
+    return 'Hello World';
+});
 
-// запускаем приложение
 $app->run();

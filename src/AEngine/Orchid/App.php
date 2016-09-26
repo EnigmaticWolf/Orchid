@@ -13,6 +13,13 @@ use Throwable;
 class App
 {
     /**
+     * Base Orchid location
+     *
+     * @const string
+     */
+    const ORCHID = __DIR__;
+
+    /**
      * Instance of class App
      *
      * @var App
