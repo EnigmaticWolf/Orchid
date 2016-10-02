@@ -652,13 +652,3 @@ class App
     {
     }
 }
-
-// function for debugging
-function pre(...$args)
-{
-    echo '<pre>';
-    foreach ($args as $obj) {
-        var_dump($obj);
-    }
-    echo '</pre>';
-}
