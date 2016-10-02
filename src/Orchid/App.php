@@ -572,7 +572,7 @@ class App
     public function run()
     {
         @ob_start('ob_gzhandler');
-        @ob_implicit_flush(false);
+        @ob_implicit_flush(0);
 
         // trigger before route event
         $this->event()->trigger('before');
