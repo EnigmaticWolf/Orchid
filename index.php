@@ -17,5 +17,3 @@ $app->router()->bind('/', function () use ($app) {
 });
 
 $app->run();
-
-pre($app);
