@@ -10,17 +10,6 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// function for debugging
-function pre(...$args)
-{
-    echo '<pre>';
-    foreach ($args as $obj) {
-        var_dump($obj);
-    }
-    echo '</pre>';
-}
-
-
 $app = \Orchid\App::getInstance();
 
 $app->router()->bind('/', function () use ($app) {
@@ -28,3 +17,5 @@ $app->router()->bind('/', function () use ($app) {
 });
 
 $app->run();
+
+pre($app);
