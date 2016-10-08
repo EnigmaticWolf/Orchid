@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Extension;
+namespace AEngine\Orchid\Extension;
 
 class Str
 {

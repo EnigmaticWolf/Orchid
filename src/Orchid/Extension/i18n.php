@@ -1,9 +1,9 @@
 <?php
 
-namespace Orchid\Extension {
+namespace AEngine\Orchid\Extension {
 
-    use Orchid\App;
-    use Orchid\Entity\Exception\FileNotFoundException;
+    use AEngine\Orchid\App;
+    use AEngine\Orchid\Entity\Exception\FileNotFoundException;
 
     class i18n
     {
@@ -78,7 +78,7 @@ namespace Orchid\Extension {
 
 namespace {
 
-    use Orchid\Extension\i18n;
+    use AEngine\Orchid\Extension\i18n;
 
     class L
     {

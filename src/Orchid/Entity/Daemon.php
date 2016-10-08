@@ -1,9 +1,9 @@
 <?php
 
-namespace Orchid\Entity;
+namespace AEngine\Orchid\Entity;
 
-use Orchid\App;
-use Orchid\Entity\Exception\FileNotFoundException;
+use AEngine\Orchid\App;
+use AEngine\Orchid\Entity\Exception\FileNotFoundException;
 use RuntimeException;
 
 class Daemon

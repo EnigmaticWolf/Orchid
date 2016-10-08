@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Entity;
+namespace AEngine\Orchid\Entity;
 
 use Closure;
 use Countable;

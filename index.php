@@ -10,7 +10,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-$app = \Orchid\App::getInstance();
+$app = AEngine\Orchid\App::getInstance();
 
 $app->router()->bind('/', function () use ($app) {
     return 'Hello World';

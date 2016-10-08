@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Entity\Exception;
+namespace AEngine\Orchid\Entity\Exception;
 
 use Exception;
 

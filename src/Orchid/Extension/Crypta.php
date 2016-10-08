@@ -1,8 +1,8 @@
 <?php
 
-namespace Orchid\Extension;
+namespace AEngine\Orchid\Extension;
 
-use Orchid\App;
+use AEngine\Orchid\App;
 
 class Crypta
 {

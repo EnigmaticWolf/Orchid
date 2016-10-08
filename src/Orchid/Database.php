@@ -1,8 +1,8 @@
 <?php
 
-namespace Orchid;
+namespace AEngine\Orchid;
 
-use Orchid\Entity\Exception\DatabaseException;
+use AEngine\Orchid\Entity\Exception\DatabaseException;
 use PDO;
 use PDOException;
 use PDOStatement;

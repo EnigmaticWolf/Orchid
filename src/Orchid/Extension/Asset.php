@@ -1,10 +1,11 @@
 <?php
 
-namespace Orchid\Extension;
+namespace AEngine\Orchid\Extension;
 
+use AEngine\Orchid\Entity\Exception\FileNotFoundException;
 use DirectoryIterator;
-use Orchid\App;
-use Orchid\Entity\View;
+use AEngine\Orchid\App;
+use AEngine\Orchid\Entity\View;
 
 class Asset
 {
@@ -112,7 +113,7 @@ class Asset
      * @param string $initial
      *
      * @return string
-     * @throws \Orchid\Entity\Exception\FileNotFoundException
+     * @throws FileNotFoundException
      */
     protected static function templateIterator(App $app, $dir, $initial = '')
     {

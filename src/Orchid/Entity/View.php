@@ -1,8 +1,8 @@
 <?php
 
-namespace Orchid\Entity;
+namespace AEngine\Orchid\Entity;
 
-use Orchid\Entity\Exception\FileNotFoundException;
+use AEngine\Orchid\Entity\Exception\FileNotFoundException;
 
 class View
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Orchid\Entity;
+namespace AEngine\Orchid\Entity;
 
-use Orchid\App;
+use AEngine\Orchid\App;
 
 abstract class Module
 {

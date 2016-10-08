@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Extension;
+namespace AEngine\Orchid\Extension;
 
 /**
  * @method static string text(string $name, array $options = [])
