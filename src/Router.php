@@ -2,8 +2,9 @@
 
 namespace AEngine\Orchid;
 
-use Closure;
 use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+use AEngine\Orchid\Http\Request;
+use Closure;
 use RuntimeException;
 
 class Router
@@ -48,11 +49,36 @@ class Router
      * @param Closure|string $callable
      * @param int            $priority
      *
-     * @return $this
+     * @return Router
      */
     public function get($pattern, $callable, $priority = 0)
     {
         return $this->bind($pattern, $callable, Request::METHOD_GET, $priority);
+    }
+
+    /**
+     * Bind POST request to route
+     *
+     * Example:
+     * <code>
+     * $router->post('/', function() {
+     *  return 'this is POST Request';
+     * }, $priority = 10);
+     * // or
+     * $router->post('/', '\\Namespace\\ClassName', $priority = 10);
+     * </code>
+     *
+     * @see Router::bind
+     *
+     * @param string         $pattern
+     * @param Closure|string $callable
+     * @param int            $priority
+     *
+     * @return Router
+     */
+    public function post($pattern, $callable, $priority = 0)
+    {
+        return $this->bind($pattern, $callable, Request::METHOD_POST, $priority);
     }
 
     /**
@@ -93,43 +119,39 @@ class Router
      * @param string         $method
      * @param int            $priority
      *
-     * @return $this
+     * @return Router
      */
     public function bind($pattern, $callable, $method = null, $priority = 0)
     {
         $this->routes[] = [
-            'method'   => strtoupper($method),
-            'pattern'  => $pattern,
-            'callable' => $callable,
-            'priority' => $priority,
+            'method'     => strtoupper($method),
+            'pattern'    => $pattern,
+            'callable'   => $callable,
+            'priority'   => $priority,
+            'middleware' => [],
         ];
 
         return $this;
     }
 
     /**
-     * Bind POST request to route
+     * Attach middleware to last added route
      *
-     * Example:
-     * <code>
-     * $router->post('/', function() {
-     *  return 'this is POST Request';
-     * }, $priority = 10);
-     * // or
-     * $router->post('/', '\\Namespace\\ClassName', $priority = 10);
-     * </code>
+     * @param  array|string|null $middleware
      *
-     * @see Router::bind
-     *
-     * @param string         $pattern
-     * @param Closure|string $callable
-     * @param int            $priority
-     *
-     * @return $this
+     * @return array|Router
      */
-    public function post($pattern, $callable, $priority = 0)
+    public function middleware(...$middleware)
     {
-        return $this->bind($pattern, $callable, Request::METHOD_POST, $priority);
+        if ($middleware) {
+            foreach ($middleware as $key) {
+                if (is_a($key, 'AEngine\Orchid\Entity\Middleware', true)) {
+                    $this->routes[count($this->routes) - 1]['middleware'][] = $key;
+                }
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -145,9 +167,11 @@ class Router
      */
     public function dispatch()
     {
-        $method = $this->app->request()->getMethod();
-        $pathname = $this->app->request()->getPathname();
-        $uri = $this->app->request()->getUri();
+        $request = $this->app->request();
+
+        $method = $request->getMethod();
+        $pathname = $request->getPathname();
+        $uri = $request->getUri();
 
         $found = null;
         $params = [];
@@ -158,7 +182,7 @@ class Router
             foreach ($this->routes as $route) {
                 if ($route['method'] == $method || !$route['method']) {
                     if ($route['pattern'] === $pathname) {
-                        $found = $route['callable'];
+                        $found = $route;
                         break;
                     }
 
@@ -166,7 +190,7 @@ class Router
                     if (substr($route['pattern'], 0, 1) == '#' && substr($route['pattern'], -1) == '#') {
                         if (preg_match($route['pattern'], $pathname, $match)) {
                             $params[':capture'] = array_slice($match, 1);
-                            $found = $route['callable'];
+                            $found = $route;
                             break;
                         }
                     }
@@ -176,7 +200,7 @@ class Router
                         $pattern = '#^' . str_replace('\\*', '(.*)', preg_quote($route['pattern'], '#')) . '#';
                         if (preg_match($pattern, $pathname, $match)) {
                             $params[':arg'] = array_slice($match, 1);
-                            $found = $route['callable'];
+                            $found = $route;
                             break;
                         }
                     }
@@ -199,7 +223,7 @@ class Router
                                 }
                             }
                             if ($matched) {
-                                $found = $route['callable'];
+                                $found = $route;
                                 break;
                             }
                         }
@@ -211,16 +235,25 @@ class Router
         }
 
         if ($found) {
-            if (is_object($found)) {
-                return call_user_func($found, $this->app, $params);
+            $callable = $found['callable'];
+            $action = $request->getUri(-1, 'index');
+
+            if ($found['middleware']) {
+                // execute all middleware
+                foreach ($found['middleware'] as $key) {
+                    call_user_func_array([$key, 'handle'], [$request, $this->app->response()]);
+                }
             }
-            if (is_string($found)) {
-                $controller = new $found($this->app);
-                $action = $this->app->request()->getUri(-1, 'index');
+
+            if (is_object($callable)) {
+                return call_user_func($callable, $action, $params);
+            }
+            if (is_string($callable)) {
+                $controller = new $callable($this->app);
                 $result = null;
 
                 if (method_exists($controller, 'before')) {
-                    call_user_func([$controller, 'before'], $action);
+                    call_user_func([$controller, 'before'], $action, $params);
                 }
 
                 if ($controller->execute) {
@@ -235,7 +268,7 @@ class Router
 
                 if ($controller->execute) {
                     if (method_exists($controller, 'after')) {
-                        call_user_func([$controller, 'after'], $action);
+                        call_user_func([$controller, 'after'], $action, $params);
                     }
                 }
 

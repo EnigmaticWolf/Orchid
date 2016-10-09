@@ -4,37 +4,34 @@ declare(strict_types = 1);
 
 namespace AEngine\Orchid {
 
+    use AEngine\Orchid\Entity\Exception\FileNotFoundException;
+    use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+    use AEngine\Orchid\Http\Request;
+    use AEngine\Orchid\Http\Response;
     use Closure;
     use DirectoryIterator;
-    use AEngine\Orchid\Entity\Exception\{
-        FileNotFoundException, NoSuchMethodException
-    };
     use RuntimeException;
     use Throwable;
 
     class App
     {
         /**
-         * Base Orchid location
-         *
-         * @const string
-         */
-        const ORCHID = __DIR__;
-
-        /**
          * Instance of class App
          *
          * @var App
          */
         protected static $instance;
+
         /**
          * @var array
          */
         protected $config = [];
+
         /**
          * @var array
          */
         protected $paths = [];
+
         /**
          * Storage closure of services
          *
@@ -47,7 +44,7 @@ namespace AEngine\Orchid {
          *
          * @param array $config
          */
-        private function __construct(array $config = [])
+        protected function __construct(array $config = [])
         {
             $self = $this;
 
@@ -149,26 +146,35 @@ namespace AEngine\Orchid {
         }
 
         /**
-         * Return debug flag
+         * Return App instance
          *
-         * @return bool
+         * @param array $config
+         *
+         * @return App
          */
-        public function isDebug()
+        public static function getInstance(array $config = [])
         {
-            return $this->get('debug', true);
+            if (!static::$instance) {
+                static::$instance = new App($config);
+            }
+
+            return static::$instance;
         }
 
         /**
-         * Return value from internal config
+         * Return request
          *
-         * @param string $key
-         * @param mixed  $default
-         *
-         * @return mixed
+         * @return Request
          */
-        public function get($key, $default = null)
+        public function request()
         {
-            return $this->config[$key] ?? $default;
+            static $request;
+
+            if (!$request) {
+                $request = new Request($_POST, $_FILES, $_COOKIE);
+            }
+
+            return $request;
         }
 
         /**
@@ -188,6 +194,22 @@ namespace AEngine\Orchid {
         }
 
         /**
+         * Return router
+         *
+         * @return Router
+         */
+        public function router()
+        {
+            static $router;
+
+            if (!$router) {
+                $router = new Router($this);
+            }
+
+            return $router;
+        }
+
+        /**
          * Return event
          *
          * @return Event
@@ -201,80 +223,6 @@ namespace AEngine\Orchid {
             }
 
             return $event;
-        }
-
-        /**
-         * Return App instance
-         *
-         * @param array $config
-         *
-         * @return App
-         */
-        public static function getInstance(array $config = [])
-        {
-            if (!static::$instance) {
-                static::$instance = new App($config);
-            }
-
-            return static::$instance;
-        }
-
-        /**
-         * Add value for name (not necessary) in array with key
-         *
-         * <code>
-         * $app->add('array', 'bar'); // add index with value 'bar'
-         * $app->add('array', 'foo', 'bar'); // add key 'foo' with value 'bar'
-         * </code>
-         *
-         * @param string $key
-         * @param array  $element
-         *
-         * @return App
-         */
-        public function add($key, ...$element)
-        {
-            switch (count($element)) {
-                case 1:
-                    $this->config[$key][] = $element[0];
-                    break;
-                case 2:
-                    $this->config[$key][$element[0]] = $element[1];
-                    break;
-            }
-
-            return $this;
-        }
-
-        /**
-         * Set value for key
-         *
-         * @param string $key
-         * @param mixed  $value
-         *
-         * @return App
-         */
-        public function set($key, $value)
-        {
-            $this->config[$key] = $value;
-
-            return $this;
-        }
-
-        /**
-         * Return request
-         *
-         * @return Request
-         */
-        public function request()
-        {
-            static $request;
-
-            if (!$request) {
-                $request = new Request($_POST, $_FILES, $_COOKIE);
-            }
-
-            return $request;
         }
 
         /**
@@ -319,6 +267,71 @@ namespace AEngine\Orchid {
             }
 
             return $memory;
+        }
+
+        /**
+         * Return debug flag
+         *
+         * @return bool
+         */
+        public function isDebug()
+        {
+            return $this->get('debug', true);
+        }
+
+        /**
+         * Return value from internal config
+         *
+         * @param string $key
+         * @param mixed  $default
+         *
+         * @return mixed
+         */
+        public function get($key, $default = null)
+        {
+            return $this->config[$key] ?? $default;
+        }
+
+        /**
+         * Add value for name (not necessary) in array with key
+         *
+         * <code>
+         * $app->add('array', 'bar'); // add index with value 'bar'
+         * $app->add('array', 'foo', 'bar'); // add key 'foo' with value 'bar'
+         * </code>
+         *
+         * @param string $key
+         * @param array  $element
+         *
+         * @return App
+         */
+        public function add($key, ...$element)
+        {
+            switch (count($element)) {
+                case 1:
+                    $this->config[$key][] = $element[0];
+                    break;
+                case 2:
+                    $this->config[$key][$element[0]] = $element[1];
+                    break;
+            }
+
+            return $this;
+        }
+
+        /**
+         * Set value for key
+         *
+         * @param string $key
+         * @param mixed  $value
+         *
+         * @return App
+         */
+        public function set($key, $value)
+        {
+            $this->config[$key] = $value;
+
+            return $this;
         }
 
         /**
@@ -564,45 +577,6 @@ namespace AEngine\Orchid {
         }
 
         /**
-         * Run Application
-         *
-         * @return App
-         * @throws NoSuchMethodException
-         */
-        public function run()
-        {
-            @ob_start('ob_gzhandler');
-            @ob_implicit_flush(0);
-
-            // trigger before route event
-            $this->event()->trigger('before');
-
-            // route and set response content
-            $this->response()->setContent($this->router()->dispatch());
-
-            // trigger after route event
-            $this->event()->trigger('after');
-
-            return $this;
-        }
-
-        /**
-         * Return router
-         *
-         * @return Router
-         */
-        public function router()
-        {
-            static $router;
-
-            if (!$router) {
-                $router = new Router($this);
-            }
-
-            return $router;
-        }
-
-        /**
          * Add closure
          *
          * @param string  $name
@@ -648,7 +622,7 @@ namespace AEngine\Orchid {
             throw new RuntimeException('Unable to complete closure "' . $name . '"');
         }
 
-        private function __clone()
+        protected function __clone()
         {
         }
     }

@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+const ORCHID = __DIR__;
+
+@ob_start('ob_gzhandler');
+@ob_implicit_flush(0);
+
 spl_autoload_register(function ($class) {
-    $class_path = __DIR__ . '/src/' . str_replace(['\\', '_'], '/', $class) . '.php';
+    $class_path = ORCHID . '/src/' . str_replace(['\\', '_'], '/', $class) . '.php';
     $class_path = str_replace('AEngine/Orchid/', '', $class_path);
 
     if (file_exists($class_path)) {
@@ -13,8 +19,17 @@ spl_autoload_register(function ($class) {
 
 $app = AEngine\Orchid\App::getInstance();
 
-$app->router()->bind('/', function () use ($app) {
-    return 'Hello World';
-});
+$app->router()
+    ->get('/', function () {
+        return 'Hello World';
+    })
+    ->middleware('Lerank');
 
-$app->run();
+// trigger before route event
+//$app->event()->trigger('before');
+
+// route and set response content
+$app->response()->setContent($app->router()->dispatch());
+
+// trigger after route event
+//$app->event()->trigger('after');

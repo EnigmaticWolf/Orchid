@@ -1,6 +1,6 @@
 <?php
 
-namespace AEngine\Orchid;
+namespace AEngine\Orchid\Http;
 
 use DateTime;
 use DateTimeZone;
