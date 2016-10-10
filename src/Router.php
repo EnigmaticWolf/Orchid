@@ -3,6 +3,7 @@
 namespace AEngine\Orchid;
 
 use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+use AEngine\Orchid\Http\Routing\MiddlewareInterface;
 use AEngine\Orchid\Http\Request;
 use Closure;
 use RuntimeException;
@@ -145,7 +146,7 @@ class Router
     {
         if ($middleware) {
             foreach ($middleware as $key) {
-                if (is_a($key, 'AEngine\Orchid\Entity\Middleware', true)) {
+                if (is_a($key, MiddlewareInterface::class, true)) {
                     $this->routes[count($this->routes) - 1]['middleware'][] = $key;
                 }
             }
@@ -161,14 +162,13 @@ class Router
      * It will execute the before() method before the action
      * and after() method after the action finishes
      *
-     * @return mixed
+     * @return string|null
      * @throws RuntimeException
      * @throws NoSuchMethodException
      */
     public function dispatch()
     {
         $request = $this->app->request();
-
         $method = $request->getMethod();
         $pathname = $request->getPathname();
         $uri = $request->getUri();
@@ -235,48 +235,55 @@ class Router
         }
 
         if ($found) {
-            $callable = $found['callable'];
-            $action = $request->getUri(-1, 'index');
+            $continue = !count($found['middleware']);
 
             if ($found['middleware']) {
                 // execute all middleware
                 foreach ($found['middleware'] as $key) {
-                    call_user_func_array([$key, 'handle'], [$request, $this->app->response()]);
+                    $continue = call_user_func_array([$key, 'handle'], [$request, $this->app->response()]);
                 }
             }
 
-            if (is_object($callable)) {
-                return call_user_func($callable, $action, $params);
-            }
-            if (is_string($callable)) {
-                $controller = new $callable($this->app);
-                $result = null;
+            // continue if middlewares allow
+            if ($continue === true) {
+                $action = $request->getUri(-1, 'index');
 
-                if (method_exists($controller, 'before')) {
-                    call_user_func([$controller, 'before'], $action, $params);
+                if (is_object($found['callable'])) {
+                    return call_user_func($found['callable'], $action, $params);
                 }
+                if (is_string($found['callable'])) {
+                    $controller = new $found['callable']($this->app);
+                    $result = null;
 
-                if ($controller->execute) {
-                    if (method_exists($controller, $action)) {
-                        $result = call_user_func([$controller, $action], $params);
-                    } else {
-                        throw new NoSuchMethodException(
-                            'Method "' . $action . '" doesn\'t exist in "' . get_class($controller) . '"'
-                        );
+                    if (method_exists($controller, 'before')) {
+                        call_user_func([$controller, 'before'], $action, $params);
                     }
-                }
 
-                if ($controller->execute) {
-                    if (method_exists($controller, 'after')) {
-                        call_user_func([$controller, 'after'], $action, $params);
+                    if ($controller->execute) {
+                        if (method_exists($controller, $action)) {
+                            $result = call_user_func([$controller, $action], $params);
+                        } else {
+                            throw new NoSuchMethodException(
+                                'Method "' . $action . '" doesn\'t exist in "' . get_class($controller) . '"'
+                            );
+                        }
                     }
-                }
 
-                return $result;
+                    if ($controller->execute) {
+                        if (method_exists($controller, 'after')) {
+                            call_user_func([$controller, 'after'], $action, $params);
+                        }
+                    }
+
+                    return $result;
+                }
             }
+
+        } else {
+            throw new RuntimeException('Failed to find and execute the function');
         }
 
-        throw new RuntimeException('Failed to find and execute the function');
+        return null;
     }
 
     /**

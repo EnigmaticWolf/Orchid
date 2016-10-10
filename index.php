@@ -22,8 +22,7 @@ $app = AEngine\Orchid\App::getInstance();
 $app->router()
     ->get('/', function () {
         return 'Hello World';
-    })
-    ->middleware('Lerank');
+    });
 
 // trigger before route event
 //$app->event()->trigger('before');
