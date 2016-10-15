@@ -2,6 +2,7 @@
 
 namespace AEngine\Orchid\Http;
 
+use AEngine\Orchid\Interfaces\Http\HeadersInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
@@ -13,8 +14,8 @@ use Psr\Http\Message\StreamInterface;
  * the HTTP request and response, as defined in the PSR-7 MessageInterface.
  *
  * @link https://github.com/php-fig/http-message/blob/master/src/MessageInterface.php
- * @see  \AEngine\Orchid\Http\Request
- * @see  \AEngine\Orchid\Http\Response
+ * @see  Request
+ * @see  Response
  */
 abstract class Message implements MessageInterface
 {
@@ -39,14 +40,14 @@ abstract class Message implements MessageInterface
     /**
      * Headers
      *
-     * @var \AEngine\Orchid\Interfaces\Http\HeadersInterface
+     * @var HeadersInterface
      */
     protected $headers;
 
     /**
      * Body object
      *
-     * @var \Psr\Http\Message\StreamInterface
+     * @var StreamInterface
      */
     protected $body;
 
