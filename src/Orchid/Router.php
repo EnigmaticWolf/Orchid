@@ -3,9 +3,9 @@
 namespace AEngine\Orchid;
 
 use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
-use AEngine\Orchid\Http\Routing\MiddlewareInterface;
 use AEngine\Orchid\Http\Request;
 use Closure;
+use Psr\Http\Middleware\MiddlewareInterface;
 use RuntimeException;
 
 class Router
@@ -278,7 +278,6 @@ class Router
                     return $result;
                 }
             }
-
         } else {
             throw new RuntimeException('Failed to find and execute the function');
         }
