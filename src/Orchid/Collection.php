@@ -1,13 +1,12 @@
 <?php
 
-namespace AEngine\Orchid\Entity;
+namespace AEngine\Orchid;
 
+use AEngine\Orchid\Interfaces\CollectionInterface;
+use ArrayIterator;
 use Closure;
-use Countable;
-use Iterator;
-use SplFixedArray;
 
-abstract class Collection implements Countable, Iterator
+class Collection implements CollectionInterface
 {
     /**
      * Full path of the model class
@@ -19,46 +18,124 @@ abstract class Collection implements Countable, Iterator
     /**
      * Internal storage models
      *
-     * @var SplFixedArray
+     * @var array
      */
-    protected $data;
+    protected $data = [];
+
+    /**
+     * Iterator position
+     *
+     * @var int
+     */
+    protected $position = 0;
 
     final public function __construct(array $data = [])
     {
-        $this->data = SplFixedArray::fromArray($data);
+        $this->replace($data);
     }
 
     /**
      * Returns element that corresponds to the specified index
      *
-     * @param int $index
+     * @param int  $key
+     * @param null $default
      *
      * @return mixed
+     * @internal param int $index
+     *
      */
-    public function get($index = 0)
+    public function get($key, $default = null)
     {
-        if (static::$model) {
-            return new static::$model($this->data[$index]);
+        if (isset($this->data[$key])) {
+            if (static::$model) {
+                return new static::$model($this->data[$key]);
+            }
+
+            return $this->data[$key];
         }
 
-        return $this->data[$index];
+        return $default;
     }
 
     /**
      * Set value of the element
      *
-     * @param int         $index
-     * @param Model|array $data
+     * @param int         $key
+     * @param Model|array $value
      *
      * @return $this
      */
-    public function set($index, $data)
+    public function set($key, $value)
     {
-        if ($data instanceof Model) {
-            $this->data[$index] = $data->toArray();
+        if ($value instanceof Model) {
+            $this->data[$key] = $value->toArray();
         } else {
-            $this->data[$index] = $data;
+            $this->data[$key] = $value;
         }
+
+        return $this;
+    }
+
+    /**
+     * Add item to collection, replacing existing items with the same data key
+     *
+     * @param array $items Key-value array of data to append to this collection
+     *
+     * @return $this
+     */
+    public function replace(array $items)
+    {
+        foreach ($items as $key => $value) {
+            $this->set($key, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Does this collection have a given key?
+     *
+     * @param string $key The data key
+     *
+     * @return bool
+     */
+    public function has($key)
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
+     * Get all items in collection
+     *
+     * @return array The collection's source data
+     */
+    public function all()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Remove item from collection
+     *
+     * @param string $key The data key
+     *
+     * @return $this
+     */
+    public function remove($key)
+    {
+        unset($this->data[$key]);
+
+        return $this;
+    }
+
+    /**
+     * Remove all items from collection
+     *
+     * @return $this
+     */
+    public function clear()
+    {
+        $this->data = [];
 
         return $this;
     }
@@ -207,18 +284,10 @@ abstract class Collection implements Countable, Iterator
      */
     public function sort($param, $args = null)
     {
-        $success = false;
-        $data = $this->data->toArray(); // get all the models
-
         if (is_string($param)) {
-            $success = usort($data, $this->sortProperty($param));
+            usort($this->data, $this->sortProperty($param));
         } elseif (is_callable($param)) {
-            $success = usort($data, $this->sortCallable($param, $args));
-        }
-
-        // if successfully sorted, create a new object
-        if ($success) {
-            $this->data = SplFixedArray::fromArray($data);
+            usort($this->data, $this->sortCallable($param, $args));
         }
 
         return $this;
@@ -254,16 +323,6 @@ abstract class Collection implements Countable, Iterator
     }
 
     /**
-     * Returns collection as an array
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->data->toArray();
-    }
-
-    /**
      * Returns current element of the array
      *
      * @return mixed
@@ -271,10 +330,10 @@ abstract class Collection implements Countable, Iterator
     public function current()
     {
         if (static::$model) {
-            return new static::$model($this->data->current());
+            return new static::$model($this->data[$this->position]);
         }
 
-        return $this->data->current();
+        return $this->data[$this->position];
     }
 
     /**
@@ -284,7 +343,19 @@ abstract class Collection implements Countable, Iterator
      */
     public function next()
     {
-        $this->data->next();
+        $this->position++;
+
+        return $this;
+    }
+
+    /**
+     * Move forward to previously element
+     *
+     * @return $this
+     */
+    public function prev()
+    {
+        $this->position--;
 
         return $this;
     }
@@ -292,11 +363,11 @@ abstract class Collection implements Countable, Iterator
     /**
      * Returns current element key
      *
-     * @return mixed
+     * @return int
      */
     public function key()
     {
-        return $this->data->key();
+        return $this->position;
     }
 
     /**
@@ -306,17 +377,17 @@ abstract class Collection implements Countable, Iterator
      */
     public function valid()
     {
-        return $this->data->valid();
+        return isset($this->data[$this->position]);
     }
 
     /**
      * Set iterator to the first element
      *
-     * @return mixed
+     * @return $this
      */
     public function rewind()
     {
-        $this->data->rewind();
+        $this->position = 0;
 
         return $this;
     }
@@ -328,6 +399,61 @@ abstract class Collection implements Countable, Iterator
      */
     public function count()
     {
-        return $this->data->count();
+        return count($this->data);
+    }
+
+    /**
+     * Does this collection have a given key?
+     *
+     * @param  string $key The data key
+     *
+     * @return bool
+     */
+    public function offsetExists($key)
+    {
+        return $this->has($key);
+    }
+
+    /**
+     * Get collection item for key
+     *
+     * @param string $key The data key
+     *
+     * @return mixed The key's value, or the default value
+     */
+    public function offsetGet($key)
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Set collection item
+     *
+     * @param string $key   The data key
+     * @param mixed  $value The data value
+     */
+    public function offsetSet($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * Remove item from collection
+     *
+     * @param string $key The data key
+     */
+    public function offsetUnset($key)
+    {
+        $this->remove($key);
+    }
+
+    /**
+     * Get collection iterator
+     *
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->data);
     }
 }

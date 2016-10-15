@@ -6,12 +6,16 @@ namespace AEngine\Orchid {
 
     use AEngine\Orchid\Entity\Exception\FileNotFoundException;
     use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+    use AEngine\Orchid\Http\Environment;
+    use AEngine\Orchid\Http\Headers;
     use AEngine\Orchid\Http\Request;
     use AEngine\Orchid\Http\Response;
     use Closure;
     use DirectoryIterator;
+    use Exception;
+    use Psr\Http\Message\ResponseInterface;
+    use Psr\Http\Message\ServerRequestInterface;
     use RuntimeException;
-    use Throwable;
 
     class App
     {
@@ -81,6 +85,11 @@ namespace AEngine\Orchid {
                 $this->config['base_port'] = $_SERVER['SERVER_PORT'];
             }
 
+            // cli mode
+            if (PHP_SAPI == 'cli') {
+                $this->config['args'] = array_slice($_SERVER['argv'], 1);
+            }
+
             // register auto loader
             spl_autoload_register(function ($class) use ($self) {
                 foreach ($self->config['autoload'] as $dir) {
@@ -93,56 +102,6 @@ namespace AEngine\Orchid {
                     }
                 }
             });
-
-            // not cli mode
-            if (PHP_SAPI != 'cli') {
-                set_exception_handler(function (Throwable $ex) {
-                    @ob_end_clean();
-
-                    if ($this->isDebug()) {
-                        $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')\nFile: ' .
-                            $ex->getFile() . ' (at ' . $ex->getLine() .
-                            ' line)\nTrace:\n' . $ex->getTraceAsString();
-                    } else {
-                        $message = 'Internal Error';
-                    }
-
-                    $this->response()
-                         ->setStatus(Response::HTTP_INTERNAL_SERVER_ERROR)
-                         ->setHeader('Content-Type', 'text/plain')
-                         ->setContent($message);
-                });
-
-                // обработка заверщения работы
-                register_shutdown_function(function () {
-                    if (($error = error_get_last()) && error_reporting() & $error['type']) {
-                        @ob_end_clean();
-
-                        if ($this->isDebug()) {
-                            $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] .
-                                ')\nFile: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
-                        } else {
-                            $message = 'Internal Error';
-                        }
-
-                        $this->response()
-                             ->setStatus(Response::HTTP_INTERNAL_SERVER_ERROR)
-                             ->setHeader('Content-Type', 'text/plain')
-                             ->setContent($message);
-                    } else {
-                        if ($this->response()->isOk() && !$this->response()->getContent()) {
-                            $this->response()
-                                 ->setStatus(Response::HTTP_NOT_FOUND)
-                                 ->setContent('Path not found');
-                        }
-                    }
-
-                    $this->event()->trigger('shutdown');
-                    $this->response()->send();
-                });
-            } else {
-                $this->config['args'] = array_slice($_SERVER['argv'], 1);
-            }
         }
 
         /**
@@ -159,70 +118,6 @@ namespace AEngine\Orchid {
             }
 
             return static::$instance;
-        }
-
-        /**
-         * Return request
-         *
-         * @return Request
-         */
-        public function request()
-        {
-            static $request;
-
-            if (!$request) {
-                $request = new Request($_POST, $_FILES, $_COOKIE);
-            }
-
-            return $request;
-        }
-
-        /**
-         * Return response
-         *
-         * @return Response
-         */
-        public function response()
-        {
-            static $response;
-
-            if (!$response) {
-                $response = new Response();
-            }
-
-            return $response;
-        }
-
-        /**
-         * Return router
-         *
-         * @return Router
-         */
-        public function router()
-        {
-            static $router;
-
-            if (!$router) {
-                $router = new Router($this);
-            }
-
-            return $router;
-        }
-
-        /**
-         * Return event
-         *
-         * @return Event
-         */
-        public function event()
-        {
-            static $event;
-
-            if (!$event) {
-                $event = new Event();
-            }
-
-            return $event;
         }
 
         /**
@@ -248,6 +143,22 @@ namespace AEngine\Orchid {
         }
 
         /**
+         * Return event
+         *
+         * @return Event
+         */
+        public function event()
+        {
+            static $event;
+
+            if (!$event) {
+                $event = new Event();
+            }
+
+            return $event;
+        }
+
+        /**
          * Return memory
          *
          * @param array $configs
@@ -267,6 +178,56 @@ namespace AEngine\Orchid {
             }
 
             return $memory;
+        }
+
+        /**
+         * Return request
+         *
+         * @return Request
+         */
+        public function request()
+        {
+            static $request;
+
+            if (!$request) {
+                $env = new Environment($_SERVER);
+                $request = Request::createFromEnvironment($env);
+            }
+
+            return $request;
+        }
+
+        /**
+         * Return response
+         *
+         * @return Response
+         */
+        public function response()
+        {
+            static $response;
+
+            if (!$response) {
+                $headers = new Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+                $response = (new Response(200, $headers))->withProtocolVersion('1.1');
+            }
+
+            return $response;
+        }
+
+        /**
+         * Return router
+         *
+         * @return Router
+         */
+        public function router()
+        {
+            static $router;
+
+            if (!$router) {
+                $router = new Router();
+            }
+
+            return $router;
         }
 
         /**
@@ -574,6 +535,158 @@ namespace AEngine\Orchid {
             }
 
             return false;
+        }
+
+        /**
+         * Run Application
+         *
+         * This method traverses the application middleware stack and then sends the
+         * resultant Response object to the HTTP client.
+         *
+         * @param bool $silent
+         *
+         * @return ResponseInterface
+         */
+        public function run($silent = false)
+        {
+            $response = $this->process($this->request(), $this->response());
+
+            if (!$silent) {
+                $this->respond($response);
+            }
+
+            return $response;
+        }
+
+        /**
+         * Process a request
+         *
+         * This method traverses the application middleware stack and then returns the
+         * resultant Response object.
+         *
+         * @param ServerRequestInterface $request
+         * @param ResponseInterface      $response
+         *
+         * @return ResponseInterface
+         *
+         * @throws Exception
+         * @throws NoSuchMethodException
+         */
+        public function process(ServerRequestInterface $request, ResponseInterface $response)
+        {
+            $router = new Router();
+
+            return $response;
+        }
+
+        /**
+         * Send the response the client
+         *
+         * @param ResponseInterface $response
+         */
+        public function respond(ResponseInterface $response)
+        {
+            // Send response
+            if (!headers_sent()) {
+                // Status
+                header(sprintf(
+                    'HTTP/%s %s %s',
+                    $response->getProtocolVersion(),
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase()
+                ));
+                // Headers
+                foreach ($response->getHeaders() as $name => $values) {
+                    foreach ($values as $value) {
+                        header(sprintf('%s: %s', $name, $value), false);
+                    }
+                }
+            }
+
+            // Body
+            if (!$this->isEmptyResponse($response)) {
+                $body = $response->getBody();
+                if ($body->isSeekable()) {
+                    $body->rewind();
+                }
+                $chunkSize = 4096;
+                $contentLength = $response->getHeaderLine('Content-Length');
+                if (!$contentLength) {
+                    $contentLength = $body->getSize();
+                }
+                if (isset($contentLength)) {
+                    $amountToRead = $contentLength;
+                    while ($amountToRead > 0 && !$body->eof()) {
+                        $data = $body->read(min($chunkSize, $amountToRead));
+                        echo $data;
+
+                        $amountToRead -= strlen($data);
+
+                        if (connection_status() != CONNECTION_NORMAL) {
+                            break;
+                        }
+                    }
+                } else {
+                    while (!$body->eof()) {
+                        echo $body->read($chunkSize);
+                        if (connection_status() != CONNECTION_NORMAL) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Finalize response
+         *
+         * @param ResponseInterface $response
+         *
+         * @return ResponseInterface
+         */
+        protected function finalize(ResponseInterface $response)
+        {
+            // stop PHP sending a Content-Type automatically
+            ini_set('default_mimetype', '');
+
+            if ($this->isEmptyResponse($response)) {
+                return $response->withoutHeader('Content-Type')->withoutHeader('Content-Length');
+            }
+
+            // Add Content-Length header
+            if (true) { // TODO: add in settings
+                if (ob_get_length() > 0) {
+                    throw new RuntimeException(
+                        "Unexpected data in output buffer. "
+                        . "Maybe you have characters before an opening <?php tag?"
+                    );
+                }
+                $size = $response->getBody()->getSize();
+                if ($size !== null && !$response->hasHeader('Content-Length')) {
+                    $response = $response->withHeader('Content-Length', (string)$size);
+                }
+            }
+
+            return $response;
+        }
+
+        /**
+         * Helper method, which returns true if the provided response must not output a body and false
+         * if the response could have a body.
+         *
+         * @see https://tools.ietf.org/html/rfc7231
+         *
+         * @param ResponseInterface $response
+         *
+         * @return bool
+         */
+        protected function isEmptyResponse(ResponseInterface $response)
+        {
+            if (method_exists($response, 'isEmpty')) {
+                return $response->isEmpty();
+            }
+
+            return in_array($response->getStatusCode(), [204, 205, 304]);
         }
 
         /**

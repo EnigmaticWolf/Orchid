@@ -2,95 +2,49 @@
 
 namespace AEngine\Orchid\Http;
 
-use DateTime;
-use DateTimeZone;
+use AEngine\Orchid\Interfaces\Http\HeadersInterface;
 use InvalidArgumentException;
-use AEngine\Orchid\Entity\Exception\NullPointException;
-use UnexpectedValueException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
-class Response
+/**
+ * Response
+ *
+ * This class represents an HTTP response. It manages
+ * the response status, headers, and body
+ * according to the PSR-7 standard.
+ *
+ * @link https://github.com/php-fig/http-message/blob/master/src/MessageInterface.php
+ * @link https://github.com/php-fig/http-message/blob/master/src/ResponseInterface.php
+ */
+class Response extends Message implements ResponseInterface
 {
-    // informational 1xx
-    const HTTP_CONTINUE = 100;
-    const HTTP_SWITCHING_PROTOCOLS = 101;
-    const HTTP_PROCESSING = 102; // RFC2518
-
-    // successful 2xx
-    const HTTP_OK = 200;
-    const HTTP_CREATED = 201;
-    const HTTP_ACCEPTED = 202;
-    const HTTP_NON_AUTHORITATIVE_INFORMATION = 203;
-    const HTTP_NO_CONTENT = 204;
-    const HTTP_RESET_CONTENT = 205;
-    const HTTP_PARTIAL_CONTENT = 206;
-    const HTTP_MULTI_STATUS = 207; // RFC4918
-    const HTTP_ALREADY_REPORTED = 208; // RFC5842
-    const HTTP_IM_USED = 226; // RFC3229
-
-    // redirection 3xx
-    const HTTP_MULTIPLE_CHOICES = 300;
-    const HTTP_MOVED_PERMANENTLY = 301;
-    const HTTP_FOUND = 302;
-    const HTTP_SEE_OTHER = 303;
-    const HTTP_NOT_MODIFIED = 304;
-    const HTTP_USE_PROXY = 305;
-    const HTTP_RESERVED = 306;
-    const HTTP_TEMPORARY_REDIRECT = 307;
-    const HTTP_PERMANENTLY_REDIRECT = 308; // RFC7238
-
-    // client error 4xx
-    const HTTP_BAD_REQUEST = 400;
-    const HTTP_UNAUTHORIZED = 401;
-    const HTTP_PAYMENT_REQUIRED = 402;
-    const HTTP_FORBIDDEN = 403;
-    const HTTP_NOT_FOUND = 404;
-    const HTTP_METHOD_NOT_ALLOWED = 405;
-    const HTTP_NOT_ACCEPTABLE = 406;
-    const HTTP_PROXY_AUTHENTICATION_REQUIRED = 407;
-    const HTTP_REQUEST_TIMEOUT = 408;
-    const HTTP_CONFLICT = 409;
-    const HTTP_GONE = 410;
-    const HTTP_LENGTH_REQUIRED = 411;
-    const HTTP_PRECONDITION_FAILED = 412;
-    const HTTP_REQUEST_ENTITY_TOO_LARGE = 413;
-    const HTTP_REQUEST_URI_TOO_LONG = 414;
-    const HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
-    const HTTP_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
-    const HTTP_EXPECTATION_FAILED = 417;
-    const HTTP_I_AM_A_TEAPOT = 418; // RFC2324
-    const HTTP_MISDIRECTED_REQUEST = 421; // RFC7540
-    const HTTP_UNPROCESSABLE_ENTITY = 422; // RFC4918
-    const HTTP_LOCKED = 423;  // RFC4918
-    const HTTP_FAILED_DEPENDENCY = 424; // RFC4918
-    const HTTP_RESERVED_FOR_WEBDAV_ADVANCED_COLLECTIONS_EXPIRED_PROPOSAL = 425; // RFC2817
-    const HTTP_UPGRADE_REQUIRED = 426; // RFC2817
-    const HTTP_PRECONDITION_REQUIRED = 428; // RFC6585
-    const HTTP_TOO_MANY_REQUESTS = 429; // RFC6585
-    const HTTP_REQUEST_HEADER_FIELDS_TOO_LARGE = 431; // RFC6585
-    const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451;
-
-    // server error 5xx
-    const HTTP_INTERNAL_SERVER_ERROR = 500;
-    const HTTP_NOT_IMPLEMENTED = 501;
-    const HTTP_BAD_GATEWAY = 502;
-    const HTTP_SERVICE_UNAVAILABLE = 503;
-    const HTTP_GATEWAY_TIMEOUT = 504;
-    const HTTP_VERSION_NOT_SUPPORTED = 505;
-    const HTTP_VARIANT_ALSO_NEGOTIATES_EXPERIMENTAL = 506; // RFC2295
-    const HTTP_INSUFFICIENT_STORAGE = 507; // RFC4918
-    const HTTP_LOOP_DETECTED = 508; // RFC5842
-    const HTTP_NOT_EXTENDED = 510; // RFC2774
-    const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511; // RFC6585
+    /**
+     * Status code
+     *
+     * @var int
+     */
+    protected $status = 200;
 
     /**
-     * Status codes
+     * Reason phrase
+     *
+     * @var string
+     */
+    protected $reasonPhrase = '';
+
+    /**
+     * Status codes and reason phrases
      *
      * @var array
      */
-    public static $statusTexts = [
+    protected static $messages = [
+        //Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
+        //Successful 2xx
         200 => 'OK',
         201 => 'Created',
         202 => 'Accepted',
@@ -101,14 +55,17 @@ class Response
         207 => 'Multi-Status',
         208 => 'Already Reported',
         226 => 'IM Used',
+        //Redirection 3xx
         300 => 'Multiple Choices',
         301 => 'Moved Permanently',
         302 => 'Found',
         303 => 'See Other',
         304 => 'Not Modified',
         305 => 'Use Proxy',
+        306 => '(Unused)',
         307 => 'Temporary Redirect',
         308 => 'Permanent Redirect',
+        //Client Error 4xx
         400 => 'Bad Request',
         401 => 'Unauthorized',
         402 => 'Payment Required',
@@ -122,28 +79,28 @@ class Response
         410 => 'Gone',
         411 => 'Length Required',
         412 => 'Precondition Failed',
-        413 => 'Payload Too Large',
-        414 => 'URI Too Long',
+        413 => 'Request Entity Too Large',
+        414 => 'Request-URI Too Long',
         415 => 'Unsupported Media Type',
-        416 => 'Range Not Satisfiable',
+        416 => 'Requested Range Not Satisfiable',
         417 => 'Expectation Failed',
         418 => 'I\'m a teapot',
         422 => 'Unprocessable Entity',
         423 => 'Locked',
         424 => 'Failed Dependency',
-        425 => 'Reserved for WebDAV advanced collections expired proposal',
         426 => 'Upgrade Required',
         428 => 'Precondition Required',
         429 => 'Too Many Requests',
         431 => 'Request Header Fields Too Large',
         451 => 'Unavailable For Legal Reasons',
+        //Server Error 5xx
         500 => 'Internal Server Error',
         501 => 'Not Implemented',
         502 => 'Bad Gateway',
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
-        506 => 'Variant Also Negotiates (Experimental)',
+        506 => 'Variant Also Negotiates',
         507 => 'Insufficient Storage',
         508 => 'Loop Detected',
         510 => 'Not Extended',
@@ -151,592 +108,353 @@ class Response
     ];
 
     /**
-     * Headers for the response
+     * Create new HTTP response.
      *
-     * @var array
+     * @param int                   $status  The response status code.
+     * @param HeadersInterface|null $headers The response headers.
+     * @param StreamInterface|null  $body    The response body.
      */
-    protected $headers = [];
-
-    /**
-     * Response status code
-     *
-     * @var int
-     */
-    protected $statusCode;
-
-    /**
-     * Response status text
-     *
-     * @var string
-     */
-    protected $statusText;
-
-    /**
-     * Response charset
-     *
-     * @var string
-     */
-    protected $charset;
-
-    /**
-     * Response body
-     *
-     * @var string
-     */
-    protected $body;
-
-    /**
-     * Response constructor
-     *
-     * @param string $body
-     * @param int    $status
-     * @param array  $headers
-     */
-    public function __construct($body = null, $status = 200, array $headers = [])
+    public function __construct($status = 200, HeadersInterface $headers = null, StreamInterface $body = null)
     {
-        $this->setContent($body);
-        $this->setStatus($status);
-        $this->setCharset('UTF-8');
-
-        foreach ($headers as $key => $value) {
-            $this->setHeader($key, $value);
-        }
+        $this->status = $this->filterStatus($status);
+        $this->headers = $headers ? $headers : new Headers();
+        $this->body = $body ? $body : new Body(fopen('php://temp', 'r+'));
     }
 
     /**
-     * Set the content
-     *
-     * Valid types are strings, numbers, null, and objects that implement a __toString() method
-     *
-     * @param mixed $response
-     *
-     * @return $this
-     * @throws UnexpectedValueException
+     * This method is applied to the cloned object
+     * after PHP performs an initial shallow-copy. This
+     * method completes a deep-copy by creating new objects
+     * for the cloned object's internal reference pointers.
      */
-    public function setContent($response)
+    public function __clone()
     {
-        if (is_array($response)) {
-            $this->setHeader('Content-Type', 'application/json');
-            $response = json_encode($response, JSON_UNESCAPED_UNICODE);
-        }
-
-        if ($response === null ||
-            (
-                $response &&
-                (
-                    is_string($response) ||
-                    is_numeric($response)
-                )
-            ) ||
-            is_callable([$response, '__toString'])
-        ) {
-            $this->body = $response;
-
-            return $this;
-        }
-
-        throw new UnexpectedValueException(
-            'The Response content must be a string or object implementing __toString(), ' .
-            gettype($response) . ' given'
-        );
+        $this->headers = clone $this->headers;
     }
 
     /**
-     * Set header HTTP header
+     * Gets the response status code.
      *
-     * @param $key
-     * @param $value
+     * The status code is a 3-digit integer result code of the server's attempt
+     * to understand and satisfy the request.
      *
-     * @return $this
+     * @return int Status code.
      */
-    public function setHeader($key, $value)
+    public function getStatusCode()
     {
-        $this->headers[$key] = $value;
-
-        return $this;
+        return $this->status;
     }
 
     /**
-     * Set status code
+     * Return an instance with the specified status code and, optionally, reason phrase.
      *
-     * @param int $code
+     * If no reason phrase is specified, implementations MAY choose to default
+     * to the RFC 7231 or IANA recommended reason phrase for the response's
+     * status code.
      *
-     * @return $this
-     * @throws InvalidArgumentException
+     * This method MUST be implemented in such a way as to retain the
+     * immutability of the message, and MUST return an instance that has the
+     * updated status and reason phrase.
+     *
+     * @link http://tools.ietf.org/html/rfc7231#section-6
+     * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+     *
+     * @param int    $code         The 3-digit integer result code to set.
+     * @param string $reasonPhrase The reason phrase to use with the
+     *                             provided status code; if none is provided, implementations MAY
+     *                             use the defaults as suggested in the HTTP specification.
+     *
+     * @return self
+     * @throws \InvalidArgumentException For invalid status code arguments.
      */
-    public function setStatus($code)
+    public function withStatus($code, $reasonPhrase = '')
     {
-        if ($code >= 100 || $code < 600) {
-            $this->statusCode = $code;
-            $this->statusText = static::$statusTexts[$code] ?? 'unknown';
+        $code = $this->filterStatus($code);
 
-            return $this;
+        if (!is_string($reasonPhrase) && !method_exists($reasonPhrase, '__toString')) {
+            throw new InvalidArgumentException('ReasonPhrase must be a string');
         }
 
-        throw new InvalidArgumentException('The HTTP status code "' . $code . '" is not valid');
-    }
-
-    /**
-     * Create Response
-     *
-     * <code>
-     * return Response::create($body, 200)
-     *                  ->setHeaderCacheControl(10);
-     * </code>
-     *
-     * @param string $body
-     * @param int    $status
-     * @param array  $headers
-     *
-     * @return static
-     */
-    public static function create($body = null, $status = 200, array $headers = [])
-    {
-        return new static($body, $status, $headers);
-    }
-
-    /**
-     * Determines if the Response validators (ETag, Last-Modified) match
-     * a conditional value specified in the Request
-     *
-     * @param Request $request
-     *
-     * @return bool
-     */
-    public static function isNotModified(Request $request)
-    {
-        if (!$request->isMethod(Request::METHOD_GET) && !$request->isMethod(Request::METHOD_HEAD)) {
-            return false;
+        $clone = clone $this;
+        $clone->status = $code;
+        if ($reasonPhrase === '' && isset(static::$messages[$code])) {
+            $reasonPhrase = static::$messages[$code];
         }
 
-        $notModified = false;
-        $lastModified = static::getHeader('Last-Modified');
-        $modifiedSince = $request->getHeader('If-Modified-Since');
-
-        if ($etags = $request->getHeader('If-None-Match')) {
-            $notModified = static::getHeader('ETag') == $etags;
+        if ($reasonPhrase === '') {
+            throw new InvalidArgumentException('ReasonPhrase must be supplied for this code');
         }
 
-        if ($modifiedSince && $lastModified) {
-            $notModified = strtotime($modifiedSince) >= strtotime($lastModified) && (!$etags || $notModified);
-        }
+        $clone->reasonPhrase = $reasonPhrase;
 
-        if ($notModified) {
-            static::setHeaderNotModified();
-        }
-
-        return $notModified;
+        return $clone;
     }
 
     /**
-     * Return header by key or array of headers
+     * Filter HTTP status code.
      *
-     * @param string $key
-     *
-     * @return array|mixed
-     * @throws NullPointException
-     */
-    public function getHeader($key = '')
-    {
-        if ($key) {
-            if (isset($this->headers[$key])) {
-                return $this->headers[$key];
-            }
-
-            throw new NullPointException('Header with key "' . $key . '" not found');
-        }
-
-        return $this->headers;
-    }
-
-    /**
-     * Modifies the response so that it conforms to the rules defined for a 304 status code
-     *
-     * This sets the status, removes the body, and discards any headers
-     * that MUST NOT be included in 304 responses
-     *
-     * @return $this
-     */
-    public function setHeaderNotModified()
-    {
-        $this->setStatus(Response::HTTP_NOT_MODIFIED);
-        $this->setContent(null);
-
-        // remove headers that MUST NOT be included with 304 Not Modified responses
-        $keys = [
-            'Allow',
-            'Content-Encoding',
-            'Content-Language',
-            'Content-Length',
-            'Content-MD5',
-            'Content-Type',
-            'Last-Modified',
-        ];
-
-        foreach ($keys as $header) {
-            $this->deleteHeader($header);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Remove a header
-     *
-     * @param $key
-     *
-     * @return $this
-     */
-    public function deleteHeader($key)
-    {
-        unset($this->headers[$key]);
-
-        return $this;
-    }
-
-    /**
-     * Set the Expires HTTP header with a DateTime instance
-     *
-     * @param DateTime $date
-     *
-     * @return $this
-     */
-    public function setHeaderExpires(DateTime $date)
-    {
-        $date->setTimezone(new DateTimeZone('UTC'));
-        $this->setHeader('Expires', $date->format('D, d M Y H:i:s') . ' GMT');
-
-        return $this;
-    }
-
-    /**
-     * Set the Cache-Control HTTP header
-     *
-     * To set value requires sum of the weights necessary arguments
-     * Weight and values:
-     *  2   - public
-     *  4   - private
-     *  8   - no-cache
-     *  16  - no-store
-     *  32  - must-revalidate
-     *  64  - proxy-revalidate
-     *  128 - no-transform
-     *  256 - max-age=3600 (by default)
-     *  512 - s-maxage=600 (by default)
-     *
-     * @param int $bitWeight
-     * @param int $maxAge       TTL Cache-Control/max-age
-     * @param int $sharedMaxAge TTL Cache-Control/s-maxage
-     *
-     * @return $this
-     */
-    public function setHeaderCacheControl($bitWeight = 0, $maxAge = 3600, $sharedMaxAge = 600)
-    {
-        $valuesByWeight = [
-            2   => 'public',
-            4   => 'private',
-            8   => 'no-cache',
-            16  => 'no-store',
-            32  => 'must-revalidate',
-            64  => 'proxy-revalidate',
-            128 => 'no-transform',
-            256 => 'max-age=' . $maxAge,
-            512 => 's-maxage=' . $sharedMaxAge,
-        ];
-
-        $header = [];
-        foreach ($valuesByWeight as $weight => $attr) {
-            if ($weight & $bitWeight) {
-                $header[] = $attr;
-            }
-        }
-
-        $this->setHeader('Cache-Control', implode(' ', array_reverse($header)));
-
-        return $this;
-    }
-
-    /**
-     * Return status code
+     * @param  int $status HTTP status code.
      *
      * @return int
+     * @throws \InvalidArgumentException If an invalid HTTP status code is provided.
      */
-    public function getStatus()
+    protected function filterStatus($status)
     {
-        return $this->statusCode;
+        if (!is_integer($status) || $status < 100 || $status > 599) {
+            throw new InvalidArgumentException('Invalid HTTP status code');
+        }
+
+        return $status;
     }
 
     /**
-     * Return charset
+     * Gets the response reason phrase associated with the status code.
      *
-     * @return string
+     * Because a reason phrase is not a required element in a response
+     * status line, the reason phrase value MAY be null. Implementations MAY
+     * choose to return the default RFC 7231 recommended reason phrase (or those
+     * listed in the IANA HTTP Status Code Registry) for the response's
+     * status code.
+     *
+     * @link http://tools.ietf.org/html/rfc7231#section-6
+     * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+     * @return string Reason phrase; must return an empty string if none present.
      */
-    public function getCharset()
+    public function getReasonPhrase()
     {
-        return $this->charset;
+        if ($this->reasonPhrase) {
+            return $this->reasonPhrase;
+        }
+        if (isset(static::$messages[$this->status])) {
+            return static::$messages[$this->status];
+        }
+
+        return '';
     }
 
     /**
-     * Set charset
+     * Write data to the response body.
      *
-     * @param $charset
+     * Note: This method is not part of the PSR-7 standard.
      *
-     * @return $this
+     * Proxies to the underlying stream and writes the provided data to it.
+     *
+     * @param string $data
+     *
+     * @return self
      */
-    public function setCharset($charset)
+    public function write($data)
     {
-        $this->charset = $charset;
+        $this->getBody()->write($data);
 
         return $this;
     }
 
-    /**
-     * Is response successful?
-     *
-     * @return bool
-     */
-    public function isSuccessful()
-    {
-        return $this->statusCode >= 200 && $this->statusCode < 300;
-    }
 
     /**
-     * Is there a client error?
+     * Redirect.
      *
-     * @return bool
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * This method prepares the response object to return an HTTP Redirect
+     * response to the client.
+     *
+     * @param  string|UriInterface $url    The redirect destination.
+     * @param  int|null            $status The redirect HTTP status code.
+     *
+     * @return self
      */
-    public function isClientError()
+    public function withRedirect($url, $status = null)
     {
-        return $this->statusCode >= 400 && $this->statusCode < 500;
-    }
+        $responseWithRedirect = $this->withHeader('Location', (string)$url);
 
-    /**
-     * Was there a server side error?
-     *
-     * @return bool
-     */
-    public function isServerError()
-    {
-        return $this->statusCode >= 500 && $this->statusCode < 600;
-    }
-
-    /**
-     * Is the response OK?
-     *
-     * @return bool
-     */
-    public function isOk()
-    {
-        return 200 === $this->statusCode;
-    }
-
-    /**
-     * Is the response forbidden?
-     *
-     * @return bool
-     */
-    public function isForbidden()
-    {
-        return 403 === $this->statusCode;
-    }
-
-    /**
-     * Is the response a not found error?
-     *
-     * @return bool
-     */
-    public function isNotFound()
-    {
-        return 404 === $this->statusCode;
-    }
-
-    /**
-     * Is the response a redirect of some form?
-     *
-     * @param string $location
-     *
-     * @return bool
-     */
-    public function isRedirect($location = null)
-    {
-        return in_array(
-            $this->statusCode,
-            [201, 301, 302, 303, 307, 308]
-        ) && (null === $location ? : $location == $this->headers['Location']);
-    }
-
-    /**
-     * Send data to client
-     *
-     * @return $this
-     */
-    public function send()
-    {
-        if (!headers_sent()) {
-            static::sendHeaders();
-            static::sendContent();
+        if (is_null($status) && $this->getStatusCode() === 200) {
+            $status = 302;
         }
 
-        return $this;
-    }
-
-    /**
-     * Sends HTTP headers
-     */
-    protected function sendHeaders()
-    {
-        // headers already sent
-        if (headers_sent()) {
-            return;
+        if (!is_null($status)) {
+            return $responseWithRedirect->withStatus($status);
         }
 
-        // date
-        if (!$this->hasHeader('Date')) {
-            $this->setHeaderDate(DateTime::createFromFormat('U', time()));
+        return $responseWithRedirect;
+    }
+
+    /**
+     * Json.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * This method prepares the response object to return an HTTP Json
+     * response to the client.
+     *
+     * @param  mixed $data            The data
+     * @param  int   $status          The HTTP status code.
+     * @param  int   $encodingOptions Json encoding options
+     *
+     * @throws \RuntimeException
+     * @return self
+     */
+    public function withJson($data, $status = null, $encodingOptions = 0)
+    {
+        $response = $this->withBody(new Body(fopen('php://temp', 'r+')));
+        $response->body->write($json = json_encode($data, $encodingOptions));
+
+        // Ensure that the json encoding passed successfully
+        if ($json === false) {
+            throw new \RuntimeException(json_last_error_msg(), json_last_error());
         }
 
-        // headers
-        foreach ($this->headers as $key => $value) {
-            header($key . ': ' . $value, false, $this->statusCode);
+        $responseWithJson = $response->withHeader('Content-Type', 'application/json;charset=utf-8');
+        if (isset($status)) {
+            return $responseWithJson->withStatus($status);
         }
 
-        // status
-        header('HTTP/1.1 ' . $this->statusCode . ' ' . $this->statusText, true, $this->statusCode);
+        return $responseWithJson;
     }
 
     /**
-     * Return true if header is defined
+     * Is this response empty?
      *
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function hasHeader($key)
-    {
-        return $this->headers[$key] ?? false;
-    }
-
-    /**
-     * Set the Date HTTP header with a DateTime instance
-     *
-     * @param DateTime $date
-     *
-     * @return $this
-     */
-    public function setHeaderDate(DateTime $date)
-    {
-        $date->setTimezone(new DateTimeZone('UTC'));
-        $this->setHeader('Date', $date->format('D, d M Y H:i:s') . ' GMT');
-
-        return $this;
-    }
-
-    /**
-     * Print body content
-     */
-    protected function sendContent()
-    {
-        echo $this->body;
-    }
-
-    /**
-     * Prepares Response before it is sent to the client
-     *
-     * @param Request $request
-     *
-     * @return $this
-     */
-    public function prepare(Request $request)
-    {
-        if ($this->isInformational() || $this->isRedirection() || $this->isEmpty()) {
-            $this->setContent(null);
-            $this->deleteHeader('Content-Type');
-            $this->deleteHeader('Content-Length');
-        } else {
-            // content-type based on the Request
-            if (!$this->hasHeader('Content-Type')) {
-                $mime = $request->getFormat();
-
-                if (null !== $mime) {
-                    $this->setHeader('Content-Type', $mime . '; charset=' . $this->charset);
-                }
-            }
-
-            // fix Content-Length
-            if ($this->hasHeader('Transfer-Encoding')) {
-                $this->deleteHeader('Content-Length');
-            }
-
-            if ($request->isMethod(Request::METHOD_HEAD)) {
-                // RFC2616 14.13
-                $length = $this->hasHeader('Content-Length');
-                $this->setContent(null);
-                if ($length) {
-                    $this->setHeader('Content-Length', $length);
-                }
-            }
-        }
-
-        if ($this->hasHeader('Transfer-Encoding')) {
-            $this->deleteHeader('Content-Length');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Is response informative?
-     *
-     * @return bool
-     */
-    public function isInformational()
-    {
-        return $this->statusCode >= 100 && $this->statusCode < 200;
-    }
-
-    /**
-     * Is the response a redirect?
-     *
-     * @return bool
-     */
-    public function isRedirection()
-    {
-        return $this->statusCode >= 300 && $this->statusCode < 400;
-    }
-
-    /**
-     * Is the response empty?
+     * Note: This method is not part of the PSR-7 standard.
      *
      * @return bool
      */
     public function isEmpty()
     {
-        return in_array($this->statusCode, [204, 304]);
+        return in_array($this->getStatusCode(), [204, 205, 304]);
     }
 
     /**
-     * Return Response as an HTTP string
+     * Is this response informational?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isInformational()
+    {
+        return $this->getStatusCode() >= 100 && $this->getStatusCode() < 200;
+    }
+
+    /**
+     * Is this response OK?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isOk()
+    {
+        return $this->getStatusCode() === 200;
+    }
+
+    /**
+     * Is this response successful?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isSuccessful()
+    {
+        return $this->getStatusCode() >= 200 && $this->getStatusCode() < 300;
+    }
+
+    /**
+     * Is this response a redirect?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isRedirect()
+    {
+        return in_array($this->getStatusCode(), [301, 302, 303, 307]);
+    }
+
+    /**
+     * Is this response a redirection?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isRedirection()
+    {
+        return $this->getStatusCode() >= 300 && $this->getStatusCode() < 400;
+    }
+
+    /**
+     * Is this response forbidden?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     * @api
+     */
+    public function isForbidden()
+    {
+        return $this->getStatusCode() === 403;
+    }
+
+    /**
+     * Is this response not Found?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isNotFound()
+    {
+        return $this->getStatusCode() === 404;
+    }
+
+    /**
+     * Is this response a client error?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isClientError()
+    {
+        return $this->getStatusCode() >= 400 && $this->getStatusCode() < 500;
+    }
+
+    /**
+     * Is this response a server error?
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return bool
+     */
+    public function isServerError()
+    {
+        return $this->getStatusCode() >= 500 && $this->getStatusCode() < 600;
+    }
+
+    /**
+     * Convert response to string.
+     *
+     * Note: This method is not part of the PSR-7 standard.
      *
      * @return string
      */
     public function __toString()
     {
-        $ret = 'HTTP/1.1 ' . $this->statusCode . ' ' . $this->statusText . '\r\n';
-
-        foreach ($this->headers as $key => $value) {
-            $ret .= $key . ': ' . $value . '\r\n';
+        $output = sprintf(
+            'HTTP/%s %s %s',
+            $this->getProtocolVersion(),
+            $this->getStatusCode(),
+            $this->getReasonPhrase()
+        );
+        $output .= PHP_EOL;
+        foreach ($this->getHeaders() as $name => $values) {
+            $output .= sprintf('%s: %s', $name, $this->getHeaderLine($name)) . PHP_EOL;
         }
+        $output .= PHP_EOL;
+        $output .= (string)$this->getBody();
 
-        return $ret . '\r\n' . $this->getContent();
-    }
-
-    /**
-     * Return current content
-     *
-     * @return string Content
-     */
-    public function getContent()
-    {
-        return $this->body;
+        return $output;
     }
 }

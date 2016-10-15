@@ -1,8 +1,10 @@
 <?php
 
-namespace AEngine\Orchid\Entity;
+namespace AEngine\Orchid;
 
-abstract class Model
+use Orchid\Interfaces\ModelInterface;
+
+abstract class Model implements ModelInterface
 {
     /**
      * Array of fields describing the model
@@ -20,40 +22,7 @@ abstract class Model
 
     final public function __construct(array $data = [])
     {
-        $this->setAll(array_merge(static::$field, $data));
-    }
-
-    /**
-     * Set values for all keys
-     *
-     * @param array $data
-     *
-     * @return $this
-     */
-    public function setAll(array $data)
-    {
-        foreach ($data as $key => $value) {
-            $this->set($key, $value);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set value for a key
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return $this
-     */
-    public function set($key, $value = null)
-    {
-        if (array_key_exists($key, static::$field)) {
-            $this->data[$key] = $value;
-        }
-
-        return $this;
+        $this->replace(array_merge(static::$field, $data));
     }
 
     /**
@@ -69,13 +38,46 @@ abstract class Model
     }
 
     /**
-     * Checks for key exists
+     * Set value for a key
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return $this
+     */
+    public function set($key, $value)
+    {
+        if (array_key_exists($key, static::$field)) {
+            $this->data[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set values for all keys
+     *
+     * @param array $data
+     *
+     * @return $this
+     */
+    public function replace(array $data)
+    {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Checks has key
      *
      * @param string $key
      *
      * @return bool
      */
-    public function exist($key)
+    public function has($key)
     {
         return $this->data[$key] ?? false;
     }
