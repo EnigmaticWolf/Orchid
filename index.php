@@ -8,7 +8,7 @@ const ORCHID = __DIR__;
 
 spl_autoload_register(function ($class) {
     $class_path = ORCHID . '/src/' . str_replace(['\\', '_'], '/', $class) . '.php';
-    $class_path = str_replace('AEngine/Orchid/', '', $class_path);
+    $class_path = str_replace('AEngine/', '', $class_path);
 
     if (file_exists($class_path)) {
         require_once($class_path);
