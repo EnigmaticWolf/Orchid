@@ -288,7 +288,6 @@ abstract class Message implements MessageInterface
      */
     public function withBody(StreamInterface $body)
     {
-        // TODO: Test for invalid body?
         $clone = clone $this;
         $clone->body = $body;
 

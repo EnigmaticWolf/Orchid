@@ -6,16 +6,16 @@ namespace AEngine\Orchid {
 
     use AEngine\Orchid\Entity\Exception\FileNotFoundException;
     use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+    use AEngine\Orchid\Http\Body;
     use AEngine\Orchid\Http\Environment;
     use AEngine\Orchid\Http\Headers;
     use AEngine\Orchid\Http\Request;
     use AEngine\Orchid\Http\Response;
     use Closure;
     use DirectoryIterator;
-    use Exception;
     use Psr\Http\Message\ResponseInterface;
-    use Psr\Http\Message\ServerRequestInterface;
     use RuntimeException;
+    use Throwable;
 
     class App
     {
@@ -88,6 +88,27 @@ namespace AEngine\Orchid {
             // cli mode
             if (PHP_SAPI == 'cli') {
                 $this->config['args'] = array_slice($_SERVER['argv'], 1);
+            } else {
+                set_exception_handler(function (Throwable $ex) {
+                    @ob_end_clean();
+                    if ($this->isDebug()) {
+                        $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')' . "\n"
+                            . 'File: ' . $ex->getFile() . ' (at ' . $ex->getLine() . ' line)' . "\n"
+                            . "Trace:\n" . $ex->getTraceAsString();
+                    } else {
+                        $message = "Internal Error";
+                    }
+
+                    $body = new Body(fopen('php://temp', 'r+'));
+                    $body->write($message);
+
+                    $response = $this->response()
+                                     ->withStatus(500)
+                                     ->withHeader('Content-Type', 'text/plain')
+                                     ->withBody($body);
+
+                    $this->respond($response);
+                });
             }
 
             // register auto loader
@@ -543,38 +564,54 @@ namespace AEngine\Orchid {
          * This method traverses the application middleware stack and then sends the
          * resultant Response object to the HTTP client.
          *
-         * @param bool $silent
+         * @param bool|false $silent
          *
          * @return ResponseInterface
          */
         public function run($silent = false)
         {
-            $response = $this->process($this->request(), $this->response());
+            @ob_start('ob_gzhandler');
+            @ob_implicit_flush(0);
+            @ini_set('default_mimetype', '');
+
+            $request = $this->request();
+
+            // trigger before route event
+            $this->event()->trigger('before');
+
+            // dispatch route
+            $response = $this->router()
+                             ->dispatch($request)
+                             ->callMiddlewareStack($request, $this->response());
+
+            // trigger after route event
+            $this->event()->trigger('after');
+
+            // if error
+            if (($error = error_get_last()) && error_reporting() & $error['type']) {
+                @ob_end_clean();
+                if ($this->isDebug()) {
+                    $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] . ')' . "\n"
+                        . 'File: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
+                } else {
+                    $message = 'Internal Error';
+                }
+
+                $body = new Body(fopen('php://temp', 'r+'));
+                $body->write($message);
+
+                $response = $response
+                    ->withStatus(500)
+                    ->withHeader('Content-type', 'text/plain')
+                    ->withBody($body);
+            }
+
+            // trigger shutdown event
+            $this->event()->trigger('shutdown');
 
             if (!$silent) {
                 $this->respond($response);
             }
-
-            return $response;
-        }
-
-        /**
-         * Process a request
-         *
-         * This method traverses the application middleware stack and then returns the
-         * resultant Response object.
-         *
-         * @param ServerRequestInterface $request
-         * @param ResponseInterface      $response
-         *
-         * @return ResponseInterface
-         *
-         * @throws Exception
-         * @throws NoSuchMethodException
-         */
-        public function process(ServerRequestInterface $request, ResponseInterface $response)
-        {
-            $router = new Router();
 
             return $response;
         }
@@ -635,39 +672,6 @@ namespace AEngine\Orchid {
                     }
                 }
             }
-        }
-
-        /**
-         * Finalize response
-         *
-         * @param ResponseInterface $response
-         *
-         * @return ResponseInterface
-         */
-        protected function finalize(ResponseInterface $response)
-        {
-            // stop PHP sending a Content-Type automatically
-            ini_set('default_mimetype', '');
-
-            if ($this->isEmptyResponse($response)) {
-                return $response->withoutHeader('Content-Type')->withoutHeader('Content-Length');
-            }
-
-            // Add Content-Length header
-            if (true) { // TODO: add in settings
-                if (ob_get_length() > 0) {
-                    throw new RuntimeException(
-                        "Unexpected data in output buffer. "
-                        . "Maybe you have characters before an opening <?php tag?"
-                    );
-                }
-                $size = $response->getBody()->getSize();
-                if ($size !== null && !$response->hasHeader('Content-Length')) {
-                    $response = $response->withHeader('Content-Length', (string)$size);
-                }
-            }
-
-            return $response;
         }
 
         /**
