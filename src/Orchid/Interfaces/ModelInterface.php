@@ -1,6 +1,6 @@
 <?php
 
-namespace Orchid\Interfaces;
+namespace AEngine\Orchid\Interfaces;
 
 interface ModelInterface
 {

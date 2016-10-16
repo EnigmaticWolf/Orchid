@@ -7,7 +7,9 @@ use AEngine\Orchid\Interfaces\RouteGroupInterface;
 /**
  * RouteGroup
  */
-class RouteGroup extends Routable implements RouteGroupInterface
+class RouteGroup implements RouteGroupInterface
 {
+    use MiddlewareTrait;
 
+    // TODO: implement later
 }
