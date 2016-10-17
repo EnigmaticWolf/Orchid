@@ -2,6 +2,9 @@
 
 namespace AEngine\Orchid\Interfaces;
 
+/**
+ * Model interface
+ */
 interface ModelInterface
 {
     public function get($key);
