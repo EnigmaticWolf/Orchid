@@ -158,17 +158,12 @@ class Router implements RouterInterface
         // According to RFC methods are defined in uppercase (See RFC 7231)
         $methods = array_map('strtoupper', $methods);
 
-        $route = $this->createRoute($methods, $pattern, $callable, $priority);
+        $route = new Route($methods, $pattern, $callable, $priority, $this->routeGroups, $this->routeCounter);
 
         $this->routes[$route->getIdentifier()] = $route;
         $this->routeCounter++;
 
         return $route;
-    }
-
-    protected function createRoute($methods, $pattern, $callable, $priority) : RouteInterface
-    {
-        return new Route($methods, $pattern, $callable, $priority, $this->routeGroups, $this->routeCounter);
     }
 
     /**
@@ -189,10 +184,13 @@ class Router implements RouterInterface
      *
      * @return RouteGroupInterface
      */
-    public function addGroup($pattern, $callable)
+    public function group($pattern, $callable)
     {
         $group = new RouteGroup($pattern, $callable);
+
         array_push($this->routeGroups, $group);
+        $group();
+        array_pop($this->routeGroups);
 
         return $group;
     }
@@ -204,7 +202,7 @@ class Router implements RouterInterface
      */
     protected function processGroups()
     {
-        $pattern = "";
+        $pattern = '';
         foreach ($this->routeGroups as $group) {
             $pattern .= $group->getPattern();
         }

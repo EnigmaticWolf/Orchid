@@ -2,6 +2,8 @@
 
 namespace AEngine\Orchid;
 
+use AEngine\Orchid\Entity\Controller;
+use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
 use AEngine\Orchid\Interfaces\RouteInterface;
 use Closure;
 use Exception;
@@ -73,19 +75,19 @@ class Route implements RouteInterface
      *
      * @var boolean|string
      */
-    protected $outputBuffering = 'append';
+    protected $outputBuffering = 'prepend';
 
     /**
      * Create new route
      *
      * @param string|string[] $methods    The route HTTP methods
      * @param string          $pattern    The route pattern
-     * @param string|Closure  $callable   The route callable
+     * @param array|Closure   $callable   The route callable
      * @param int             $priority   The route priority
      * @param RouteGroup[]    $groups     The parent route groups
      * @param int             $identifier The route identifier
      */
-    public function __construct($methods, $pattern, Closure $callable, $priority = 0, $groups = [], $identifier = 0)
+    public function __construct($methods, $pattern, $callable, $priority = 0, $groups = [], $identifier = 0)
     {
         $this->methods = is_string($methods) ? [$methods] : $methods;
         $this->pattern = $pattern;
@@ -258,17 +260,60 @@ class Route implements RouteInterface
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
-        // invoke route callable
         try {
             ob_start();
-            $newResponse = call_user_func_array($this->callable, [$request, $response, $this->getArgument()]);
-            $output = ob_get_clean();
 
-            if ($newResponse instanceof ResponseInterface === false) {
-                throw new UnexpectedValueException(
-                    'Middleware must return instance of \Psr\Http\Message\ResponseInterface'
-                );
+            if (is_object($this->callable)) {
+                $newResponse = call_user_func_array($this->callable, [$request, $response, $this->getArgument()]);
+            } else {
+                if (is_array($this->callable)) {
+                    $controller = !empty($this->callable[0]) ? $this->callable[0] : '';
+                    $action = !empty($this->callable[1]) ? $this->callable[1] : 'index';
+                } else {
+                    $controller = $this->callable;
+                    $action = 'index';
+                }
+
+                if ($controller && class_exists($controller)) {
+                    $newResponse = null;
+                    $obj = new $controller;
+
+                    if ($obj && is_a($obj, Controller::class)) {
+                        if (method_exists($obj, "before")) {
+                            call_user_func_array([$obj, "before"], [$request, $response]);
+                        }
+
+                        if ($obj->execute) {
+                            if (method_exists($obj, $action)) {
+                                $newResponse = call_user_func_array(
+                                    [$obj, $action],
+                                    [$request, $response, $this->getArgument()]
+                                );
+                            } else {
+                                throw new NoSuchMethodException(
+                                    'Method "' . $action . '" doesn\'t exist in controller "' . get_class($obj) . '"'
+                                );
+                            }
+                        }
+
+                        if ($obj->execute) {
+                            if (method_exists($obj, "after")) {
+                                call_user_func_array([$obj, "after"], [$request, $response]);
+                            }
+                        }
+                    } else {
+                        throw new UnexpectedValueException(
+                            'Controller must return extends of \AEngine\Orchid\Entity\Controller'
+                        );
+                    }
+                } else {
+                    throw new UnexpectedValueException(
+                        'Route callable must be defined as array or string or object'
+                    );
+                }
             }
+
+            $output = ob_get_clean();
         } catch (Exception $e) {
             ob_end_clean();
             throw $e;
@@ -277,10 +322,12 @@ class Route implements RouteInterface
         if ($newResponse instanceof ResponseInterface) {
             // if route callback returns a ResponseInterface, then use it
             $response = $newResponse;
-        } elseif (is_string($newResponse)) {
-            // if route callback returns a string, then append it to the response
-            if ($response->getBody()->isWritable()) {
-                $response->getBody()->write($newResponse);
+        } else {
+            if (is_string($newResponse)) {
+                // if route callback returns a string, then append it to the response
+                if ($response->getBody()->isWritable()) {
+                    $response->getBody()->write($newResponse);
+                }
             }
         }
 
