@@ -31,7 +31,7 @@ $router = $app->router();
  */
 $router
     ->get('/', function ($request, $response, $args) {
-        return $response->write('Welcome to Orchid!');
+        return $response->getBody()->write('Welcome to Orchid!');
     });
 
 /**
