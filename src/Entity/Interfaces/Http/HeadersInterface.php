@@ -2,6 +2,8 @@
 
 namespace AEngine\Orchid\Entity\Interfaces\Http;
 
+use AEngine\Orchid\Entity\Interfaces\CollectionInterface;
+
 /**
  * Headers Interface
  */
