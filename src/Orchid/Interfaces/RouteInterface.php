@@ -7,8 +7,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 interface RouteInterface
 {
-    public function __construct($methods, $pattern, $callable, $priority = 0, $groups = [], $identifier = 0);
-
     public function getCallable();
 
     public function setCallable($callable);
@@ -34,6 +32,4 @@ interface RouteInterface
     public function addMiddleware($callable);
 
     public function callMiddlewareStack(ServerRequestInterface $req, ResponseInterface $res);
-
-    public function __invoke();
 }
