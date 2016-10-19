@@ -23,7 +23,7 @@
   },
   "autoload": {
     "psr-4": {
-      "AEngine\\Orchid\\": "src/Orchid/"
+      "AEngine\\Orchid\\": "src/"
     }
   }
 }

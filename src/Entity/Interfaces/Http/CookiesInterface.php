@@ -1,6 +1,6 @@
 <?php
 
-namespace AEngine\Orchid\Interfaces\Http;
+namespace AEngine\Orchid\Entity\Interfaces\Http;
 
 /**
  * Cookies Interface
