@@ -257,7 +257,6 @@ class Route implements RouteInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \Exception  if the route callable throws an exception
      */
-
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
         try {
