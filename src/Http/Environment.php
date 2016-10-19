@@ -3,7 +3,7 @@
 namespace AEngine\Orchid\Http;
 
 use AEngine\Orchid\Collection;
-use AEngine\Orchid\Interfaces\Http\EnvironmentInterface;
+use AEngine\Orchid\Entity\Interfaces\Http\EnvironmentInterface;
 
 /**
  * Environment

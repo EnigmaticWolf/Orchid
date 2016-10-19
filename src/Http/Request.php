@@ -3,7 +3,7 @@
 namespace AEngine\Orchid\Http;
 
 use AEngine\Orchid\Collection;
-use AEngine\Orchid\Interfaces\Http\HeadersInterface;
+use AEngine\Orchid\Entity\Interfaces\Http\HeadersInterface;
 use Closure;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
