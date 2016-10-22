@@ -142,50 +142,6 @@ namespace AEngine\Orchid {
         }
 
         /**
-         * Return database
-         *
-         * @param array $configs
-         *
-         * @return Database
-         */
-        public function database(array $configs = [])
-        {
-            static $database;
-
-            if (!$database) {
-                if (!$configs) {
-                    $configs = $this->get('database', []);
-                }
-
-                $database = new Database($this, $configs);
-            }
-
-            return $database;
-        }
-
-        /**
-         * Return memory
-         *
-         * @param array $configs
-         *
-         * @return Memory
-         */
-        public function memory(array $configs = [])
-        {
-            static $memory;
-
-            if (!$memory) {
-                if (!$configs) {
-                    $configs = $this->get('memory', []);
-                }
-
-                $memory = new Memory($this, $configs);
-            }
-
-            return $memory;
-        }
-
-        /**
          * Return request
          *
          * @return Request
