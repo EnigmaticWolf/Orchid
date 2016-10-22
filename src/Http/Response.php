@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid\Http;
 
-use AEngine\Orchid\Entity\Interfaces\Http\HeadersInterface;
+use AEngine\Orchid\Interfaces\Http\HeadersInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
