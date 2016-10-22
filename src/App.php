@@ -164,22 +164,6 @@ namespace AEngine\Orchid {
         }
 
         /**
-         * Return event
-         *
-         * @return Event
-         */
-        public function event()
-        {
-            static $event;
-
-            if (!$event) {
-                $event = new Event();
-            }
-
-            return $event;
-        }
-
-        /**
          * Return memory
          *
          * @param array $configs
@@ -576,16 +560,10 @@ namespace AEngine\Orchid {
 
             $request = $this->request();
 
-            // trigger before route event
-            $this->event()->trigger('before');
-
             // dispatch route
             $response = $this->router()
                              ->dispatch($request)
                              ->callMiddlewareStack($request, $this->response());
-
-            // trigger after route event
-            $this->event()->trigger('after');
 
             // if error
             if (($error = error_get_last()) && error_reporting() & $error['type']) {
@@ -605,9 +583,6 @@ namespace AEngine\Orchid {
                     ->withHeader('Content-type', 'text/plain')
                     ->withBody($body);
             }
-
-            // trigger shutdown event
-            $this->event()->trigger('shutdown');
 
             if (!$silent) {
                 $this->respond($response);
