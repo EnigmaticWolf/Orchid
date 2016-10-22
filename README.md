@@ -11,8 +11,8 @@ Run the following command in the root directory of your web project:
 #### Extensions
 
 ##### Memory
-Work with Memcache
-> `composer require aengine/orchid-memcache`
+Work with Key-Value storage
+> `composer require aengine/orchid-memory`
 
 ##### Database
 Attach the database in the project by using a wrapper around the PDO
