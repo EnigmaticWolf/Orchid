@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace AEngine\Orchid {
 
-    use AEngine\Orchid\Entity\Exception\FileNotFoundException;
-    use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
+    use AEngine\Orchid\Exception\FileNotFoundException;
+    use AEngine\Orchid\Exception\NoSuchMethodException;
     use AEngine\Orchid\Http\Body;
     use AEngine\Orchid\Http\Environment;
     use AEngine\Orchid\Http\Headers;

@@ -3,7 +3,7 @@
 namespace AEngine\Orchid\Entity;
 
 use AEngine\Orchid\App;
-use AEngine\Orchid\Entity\Exception\FileNotFoundException;
+use AEngine\Orchid\Exception\FileNotFoundException;
 use RuntimeException;
 
 class Daemon

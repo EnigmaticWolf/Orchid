@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid\Http;
 
-use AEngine\Orchid\Entity\Interfaces\Http\CookiesInterface;
+use AEngine\Orchid\Interfaces\Http\CookiesInterface;
 use InvalidArgumentException;
 
 /**

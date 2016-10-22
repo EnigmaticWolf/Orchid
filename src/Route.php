@@ -3,8 +3,8 @@
 namespace AEngine\Orchid;
 
 use AEngine\Orchid\Entity\Controller;
-use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
-use AEngine\Orchid\Entity\Interfaces\RouteInterface;
+use AEngine\Orchid\Exception\NoSuchMethodException;
+use AEngine\Orchid\Interfaces\RouteInterface;
 use Closure;
 use Exception;
 use InvalidArgumentException;

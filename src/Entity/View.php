@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid\Entity;
 
-use AEngine\Orchid\Entity\Exception\FileNotFoundException;
+use AEngine\Orchid\Exception\FileNotFoundException;
 
 class View
 {

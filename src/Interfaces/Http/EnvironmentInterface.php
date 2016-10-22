@@ -1,6 +1,6 @@
 <?php
 
-namespace AEngine\Orchid\Entity\Interfaces\Http;
+namespace AEngine\Orchid\Interfaces\Http;
 
 /**
  * Environment Interface

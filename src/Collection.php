@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Entity\Interfaces\CollectionInterface;
+use AEngine\Orchid\Interfaces\CollectionInterface;
 use ArrayIterator;
 use Closure;
 

@@ -2,10 +2,10 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Entity\Exception\NoSuchMethodException;
-use AEngine\Orchid\Entity\Interfaces\RouteGroupInterface;
-use AEngine\Orchid\Entity\Interfaces\RouteInterface;
-use AEngine\Orchid\Entity\Interfaces\RouterInterface;
+use AEngine\Orchid\Exception\NoSuchMethodException;
+use AEngine\Orchid\Interfaces\RouteGroupInterface;
+use AEngine\Orchid\Interfaces\RouteInterface;
+use AEngine\Orchid\Interfaces\RouterInterface;
 use Closure;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;

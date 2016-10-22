@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid;
 
-use Orchid\Interfaces\ModelInterface;
+use AEngine\Orchid\Interfaces\ModelInterface;
 
 abstract class Model implements ModelInterface
 {

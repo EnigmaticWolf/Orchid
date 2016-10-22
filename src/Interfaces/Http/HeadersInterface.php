@@ -1,8 +1,8 @@
 <?php
 
-namespace AEngine\Orchid\Entity\Interfaces\Http;
+namespace AEngine\Orchid\Interfaces\Http;
 
-use AEngine\Orchid\Entity\Interfaces\CollectionInterface;
+use AEngine\Orchid\Interfaces\CollectionInterface;
 
 /**
  * Headers Interface

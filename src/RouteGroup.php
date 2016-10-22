@@ -2,7 +2,7 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Entity\Interfaces\RouteGroupInterface;
+use AEngine\Orchid\Interfaces\RouteGroupInterface;
 use Closure;
 
 /**

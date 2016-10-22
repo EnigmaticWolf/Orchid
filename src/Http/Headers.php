@@ -3,7 +3,7 @@
 namespace AEngine\Orchid\Http;
 
 use AEngine\Orchid\Collection;
-use AEngine\Orchid\Entity\Interfaces\Http\HeadersInterface;
+use AEngine\Orchid\Interfaces\Http\HeadersInterface;
 
 /**
  * Headers
@@ -26,12 +26,12 @@ class Headers extends Collection implements HeadersInterface
      * @var array
      */
     protected static $special = [
-        'CONTENT_TYPE' => 1,
-        'CONTENT_LENGTH' => 1,
-        'PHP_AUTH_USER' => 1,
-        'PHP_AUTH_PW' => 1,
+        'CONTENT_TYPE'    => 1,
+        'CONTENT_LENGTH'  => 1,
+        'PHP_AUTH_USER'   => 1,
+        'PHP_AUTH_PW'     => 1,
         'PHP_AUTH_DIGEST' => 1,
-        'AUTH_TYPE' => 1,
+        'AUTH_TYPE'       => 1,
     ];
 
     /**
@@ -50,7 +50,7 @@ class Headers extends Collection implements HeadersInterface
             $key = strtoupper($key);
             if (isset(static::$special[$key]) || strpos($key, 'HTTP_') === 0) {
                 if ($key !== 'HTTP_CONTENT_LENGTH') {
-                    $data[$key] =  $value;
+                    $data[$key] = $value;
                 }
             }
         }
@@ -117,8 +117,8 @@ class Headers extends Collection implements HeadersInterface
             $value = [$value];
         }
         parent::set($this->normalizeKey($key), [
-            'value' => $value,
-            'originalKey' => $key
+            'value'       => $value,
+            'originalKey' => $key,
         ]);
 
         return $this;
@@ -127,8 +127,8 @@ class Headers extends Collection implements HeadersInterface
     /**
      * Get HTTP header value
      *
-     * @param  string  $key     The case-insensitive header name
-     * @param  mixed   $default The default value if key does not exist
+     * @param  string $key     The case-insensitive header name
+     * @param  mixed  $default The default value if key does not exist
      *
      * @return string[]
      */
@@ -144,8 +144,8 @@ class Headers extends Collection implements HeadersInterface
     /**
      * Get HTTP header key as originally specified
      *
-     * @param  string   $key     The case-insensitive header name
-     * @param  mixed    $default The default value if key does not exist
+     * @param  string $key     The case-insensitive header name
+     * @param  mixed  $default The default value if key does not exist
      *
      * @return string
      */

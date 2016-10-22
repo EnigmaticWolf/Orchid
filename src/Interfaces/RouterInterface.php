@@ -1,6 +1,6 @@
 <?php
 
-namespace AEngine\Orchid\Entity\Interfaces;
+namespace AEngine\Orchid\Interfaces;
 
 use Psr\Http\Message\ServerRequestInterface;
 
