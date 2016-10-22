@@ -21,3 +21,7 @@ Attach the database in the project by using a wrapper around the PDO
 ##### Misc
 Functional add-ons
 > `composer require aengine/orchid-misc`
+
+##### Filter
+Validate incoming data
+> `composer require aengine/orchid-filter`
