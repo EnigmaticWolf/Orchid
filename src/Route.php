@@ -2,7 +2,6 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Entity\Controller;
 use AEngine\Orchid\Exception\NoSuchMethodException;
 use AEngine\Orchid\Interfaces\RouteInterface;
 use Closure;
@@ -302,7 +301,7 @@ class Route implements RouteInterface
                         }
                     } else {
                         throw new UnexpectedValueException(
-                            'Controller must return extends of \AEngine\Orchid\Entity\Controller'
+                            'Controller must return extends of \AEngine\Orchid\Controller'
                         );
                     }
                 } else {
