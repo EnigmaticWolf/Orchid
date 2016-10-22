@@ -17,3 +17,7 @@ Work with Memcache
 ##### Database
 Attach the database in the project by using a wrapper around the PDO
 > `composer require aengine/orchid-database`
+
+##### Misc
+Functional add-ons
+> `composer require aengine/orchid-misc`
