@@ -321,7 +321,7 @@ class Route implements RouteInterface
             // if route callback returns a ResponseInterface, then use it
             $response = $newResponse;
         } else {
-            if (is_string($newResponse)) {
+            if (is_string($newResponse) || method_exists($newResponse, '__toString')) {
                 // if route callback returns a string, then append it to the response
                 if ($response->getBody()->isWritable()) {
                     $response->getBody()->write($newResponse);
