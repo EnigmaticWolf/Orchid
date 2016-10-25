@@ -6,6 +6,7 @@ I am developing Orchid for two years and I believe that anyone except me appreci
 Some parts of the project were influenced by: Laravel, Slim and Symfony Framework's. Thank you!
 
 #### Contributing
+This library attempts to comply with PSR-1, PSR-2, and PSR-4. 
 I'll be very grateful for any contribution to the development of my project.
 
 #### Requirements
