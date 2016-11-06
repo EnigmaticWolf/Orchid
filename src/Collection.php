@@ -16,7 +16,7 @@ class Collection implements CollectionInterface
     protected static $model;
 
     /**
-     * Internal storage models
+     * Internal storage of models
      *
      * @var array
      */
@@ -144,36 +144,36 @@ class Collection implements CollectionInterface
      * Collects and returns the values as array
      *
      * Collect value of the specified field
-     * @usage $oc->collect('login')
+     * @usage $oc->where('login')
      *
      * Collect values of these fields
-     * @usage $oc->collect(['login', 'password'])
+     * @usage $oc->where(['login', 'password'])
      *
      * Collect value of the specified field
      * The key is 'id' field value
-     * @usage $oc->collect('id', 'login')
+     * @usage $oc->where('id', 'login')
      *
      * Collect values of these fields
      * The key is 'id' field value
-     * @usage $oc->collect('id', ['login', 'password'])
+     * @usage $oc->where('id', ['login', 'password'])
      *
      * @param string|array $field
      * @param string|array $value
      *
      * @return array
      */
-    public function collect($field, $value = null)
+    public function where($field, $value = null)
     {
         $data = [];
 
-        // $oc->collect('login')
+        // $oc->where('login')
         if (is_string($field) && is_null($value)) {
             foreach ($this->data as $model) {
                 $data[] = $model[$field];
             }
         }
 
-        // $oc->collect(['login', 'password'])
+        // $oc->where(['login', 'password'])
         if (is_array($field)) {
             foreach ($this->data as $model) {
                 $item = [];
@@ -184,14 +184,14 @@ class Collection implements CollectionInterface
             }
         }
 
-        // $oc->collect('id', 'login')
+        // $oc->where('id', 'login')
         if (is_string($field) && is_string($value)) {
             foreach ($this->data as $model) {
                 $data[$model[$field]] = $model[$value];
             }
         }
 
-        // $oc->collect('id', ['login', 'password'])
+        // $oc->where('id', ['login', 'password'])
         if (is_string($field) && is_array($value)) {
             foreach ($this->data as $model) {
                 $item = [];
@@ -455,5 +455,15 @@ class Collection implements CollectionInterface
     public function getIterator()
     {
         return new ArrayIterator($this->data);
+    }
+
+    /**
+     * Return collection as string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->data, JSON_UNESCAPED_UNICODE);
     }
 }

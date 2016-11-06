@@ -71,7 +71,7 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Checks has key
+     * Check has key
      *
      * @param string $key
      *
@@ -83,7 +83,7 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Checks whether the model is empty
+     * Check whether the model is empty
      *
      * @return bool
      */
@@ -93,7 +93,7 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Restores default value for key
+     * Restore default value for key
      *
      * @param string $key
      *
@@ -107,7 +107,7 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Restores default model data
+     * Restore default model data
      *
      * @return $this
      */
@@ -119,12 +119,22 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Returns model as array
+     * Return model as array
      *
      * @return array
      */
     public function toArray()
     {
         return $this->data;
+    }
+
+    /**
+     * Return model as string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->data, JSON_UNESCAPED_UNICODE);
     }
 }
