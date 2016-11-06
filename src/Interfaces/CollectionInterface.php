@@ -20,4 +20,6 @@ interface CollectionInterface extends \ArrayAccess, \Countable, \IteratorAggrega
     public function remove($key);
 
     public function clear();
+
+    public function __toString();
 }

@@ -22,4 +22,6 @@ interface ModelInterface
     public function clear();
 
     public function toArray();
+
+    public function __toString();
 }
