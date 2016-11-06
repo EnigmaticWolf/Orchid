@@ -10,15 +10,15 @@ Orchid repository.
 - Add support PRS-4
 - Add support PSR-7
 - Add Middleware functional
-- Add `Route` and `RouteGroup` classes
+- Add Route and RouteGroup classes
 - Add many interfaces of entity
-- Add method `__toString` in `Collection` and `Model` classes
-- Fix class `Router`
-- Fix `ob_implicit_flush() expects parameter 1 to be integer, boolean given`
-- Rename `Collection` method `collect` to `where`
-- Implements `Collection` interfaces ArrayAccess, Countable, IteratorAggregate
+- Add method __toString in Collection and Model classes
+- Fix class Router
+- Fix ob_implicit_flush() expects parameter 1 to be integer, boolean given
+- Rename Collection method collect to where
+- Implements Collection interfaces ArrayAccess, Countable, IteratorAggregate
 - Changed namespace
-- Changed classes `Request`, `Response` (now in `Http` package)
+- Changed classes Request, Response (now in Http package)
 - Removed support of Daemon
 - Removed support Events
 - Removed support Database (now in other sub-project Orchid-Database)
