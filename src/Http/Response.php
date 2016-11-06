@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
 
 /**
  * Response
@@ -165,7 +166,7 @@ class Response extends Message implements ResponseInterface
      *                             use the defaults as suggested in the HTTP specification.
      *
      * @return self
-     * @throws \InvalidArgumentException For invalid status code arguments.
+     * @throws InvalidArgumentException For invalid status code arguments.
      */
     public function withStatus($code, $reasonPhrase = '')
     {
@@ -196,7 +197,7 @@ class Response extends Message implements ResponseInterface
      * @param  int $status HTTP status code.
      *
      * @return int
-     * @throws \InvalidArgumentException If an invalid HTTP status code is provided.
+     * @throws InvalidArgumentException If an invalid HTTP status code is provided.
      */
     protected function filterStatus($status)
     {
@@ -291,7 +292,7 @@ class Response extends Message implements ResponseInterface
      * @param  int   $status          The HTTP status code.
      * @param  int   $encodingOptions Json encoding options
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      * @return self
      */
     public function withJson($data, $status = null, $encodingOptions = 0)
@@ -301,7 +302,7 @@ class Response extends Message implements ResponseInterface
 
         // Ensure that the json encoding passed successfully
         if ($json === false) {
-            throw new \RuntimeException(json_last_error_msg(), json_last_error());
+            throw new RuntimeException(json_last_error_msg(), json_last_error());
         }
 
         $responseWithJson = $response->withHeader('Content-Type', 'application/json;charset=utf-8');

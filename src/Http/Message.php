@@ -206,7 +206,7 @@ abstract class Message implements MessageInterface
      * @param string|string[] $value Header value(s).
      *
      * @return static
-     * @throws \InvalidArgumentException for invalid header names or values.
+     * @throws InvalidArgumentException for invalid header names or values.
      */
     public function withHeader($name, $value)
     {
@@ -231,7 +231,7 @@ abstract class Message implements MessageInterface
      * @param string|string[] $value Header value(s).
      *
      * @return static
-     * @throws \InvalidArgumentException for invalid header names or values.
+     * @throws InvalidArgumentException for invalid header names or values.
      */
     public function withAddedHeader($name, $value)
     {
@@ -284,7 +284,7 @@ abstract class Message implements MessageInterface
      * @param StreamInterface $body Body.
      *
      * @return static
-     * @throws \InvalidArgumentException When the body is not valid.
+     * @throws InvalidArgumentException When the body is not valid.
      */
     public function withBody(StreamInterface $body)
     {

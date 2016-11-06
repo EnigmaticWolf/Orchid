@@ -285,7 +285,7 @@ class Request extends Message implements ServerRequestInterface
      * @param string $method Case-sensitive method.
      *
      * @return self
-     * @throws \InvalidArgumentException for invalid HTTP methods.
+     * @throws InvalidArgumentException for invalid HTTP methods.
      */
     public function withMethod($method)
     {
@@ -303,7 +303,7 @@ class Request extends Message implements ServerRequestInterface
      * @param  null|string $method
      *
      * @return null|string
-     * @throws \InvalidArgumentException on invalid HTTP method.
+     * @throws InvalidArgumentException on invalid HTTP method.
      */
     protected function filterMethod($method)
     {
@@ -808,7 +808,7 @@ class Request extends Message implements ServerRequestInterface
      * @param array $uploadedFiles An array tree of UploadedFileInterface instances.
      *
      * @return self
-     * @throws \InvalidArgumentException if an invalid structure is provided.
+     * @throws InvalidArgumentException if an invalid structure is provided.
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
@@ -1037,7 +1037,7 @@ class Request extends Message implements ServerRequestInterface
      *                                typically be in an array or object.
      *
      * @return self
-     * @throws \InvalidArgumentException if an unsupported argument type is
+     * @throws InvalidArgumentException if an unsupported argument type is
      *     provided.
      */
     public function withParsedBody($data)

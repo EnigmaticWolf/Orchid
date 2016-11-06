@@ -260,7 +260,7 @@ class Uri implements UriInterface
      * @param string $scheme The scheme to use with the new instance.
      *
      * @return self A new instance with the specified scheme.
-     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     * @throws InvalidArgumentException for invalid or unsupported schemes.
      */
     public function withScheme($scheme)
     {
@@ -399,7 +399,7 @@ class Uri implements UriInterface
      * @param string $host The hostname to use with the new instance.
      *
      * @return self A new instance with the specified host.
-     * @throws \InvalidArgumentException for invalid hostnames.
+     * @throws InvalidArgumentException for invalid hostnames.
      */
     public function withHost($host)
     {
@@ -445,7 +445,7 @@ class Uri implements UriInterface
      *                       removes the port information.
      *
      * @return self A new instance with the specified port.
-     * @throws \InvalidArgumentException for invalid ports.
+     * @throws InvalidArgumentException for invalid ports.
      */
     public function withPort($port)
     {
@@ -535,7 +535,7 @@ class Uri implements UriInterface
      * @param string $path The path to use with the new instance.
      *
      * @return self A new instance with the specified path.
-     * @throws \InvalidArgumentException for invalid paths.
+     * @throws InvalidArgumentException for invalid paths.
      */
     public function withPath($path)
     {
@@ -658,7 +658,7 @@ class Uri implements UriInterface
      * @param string $query The query string to use with the new instance.
      *
      * @return self A new instance with the specified query string.
-     * @throws \InvalidArgumentException for invalid query strings.
+     * @throws InvalidArgumentException for invalid query strings.
      */
     public function withQuery($query)
     {
