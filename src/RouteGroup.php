@@ -10,8 +10,6 @@ use Closure;
  */
 class RouteGroup implements RouteGroupInterface
 {
-    use MiddlewareTrait;
-
     /**
      * The route URI pattern
      *

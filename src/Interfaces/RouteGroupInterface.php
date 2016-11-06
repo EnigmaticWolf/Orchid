@@ -9,6 +9,4 @@ interface RouteGroupInterface
     public function setCallable($callable);
 
     public function getPattern();
-
-    public function addMiddleware($callable);
 }

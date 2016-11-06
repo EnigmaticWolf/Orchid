@@ -16,8 +16,6 @@ use RuntimeException;
  */
 class Router implements RouterInterface
 {
-    use MiddlewareTrait;
-
     /**
      * Routes
      *
