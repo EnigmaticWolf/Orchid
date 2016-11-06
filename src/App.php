@@ -325,7 +325,7 @@ namespace AEngine\Orchid {
                         }
 
                         // check exists and parent class
-                        if (class_exists($class) && is_a($class, Module::class)) {
+                        if (class_exists($class) && is_subclass_of($class, Module::class)) {
                             // call initialize method
                             call_user_func([$class, 'initialize'], $this);
                         } else {
