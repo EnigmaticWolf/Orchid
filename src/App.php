@@ -330,7 +330,7 @@ namespace AEngine\Orchid {
                             call_user_func([$class, 'initialize'], $this);
                         } else {
                             throw new RuntimeException(
-                                'Class "' . $class . '" not found or is not a subclass of \Orchid\Module'
+                                'Class "' . $class . '" not found or is not a subclass of \Aengine\Orchid\Module'
                             );
                         }
 
