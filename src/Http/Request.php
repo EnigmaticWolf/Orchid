@@ -689,10 +689,9 @@ class Request extends Message implements ServerRequestInterface
      */
     public function getCookieParam($key, $default = null)
     {
-        $cookies = $this->getCookieParams();
         $result = $default;
-        if (isset($cookies[$key])) {
-            $result = $cookies[$key];
+        if (isset($this->cookies[$key])) {
+            $result = $this->cookies[$key];
         }
 
         return $result;
