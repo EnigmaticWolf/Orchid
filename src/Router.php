@@ -121,6 +121,20 @@ class Router implements RouterInterface
     }
 
     /**
+     * Add HEAD route
+     *
+     * @param  string         $pattern  The route URI pattern
+     * @param  string|Closure $callable The route callback routine
+     * @param  int            $priority The route priority
+     *
+     * @return RouteInterface
+     */
+    public function head($pattern, $callable, $priority = 0)
+    {
+        return $this->map(['HEAD'], $pattern, $callable, $priority);
+    }
+
+    /**
      * Add route for any HTTP method
      *
      * @param  string         $pattern  The route URI pattern
@@ -131,7 +145,7 @@ class Router implements RouterInterface
      */
     public function any($pattern, $callable, $priority = 0)
     {
-        return $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $pattern, $callable, $priority);
+        return $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'], $pattern, $callable, $priority);
     }
 
     /**
