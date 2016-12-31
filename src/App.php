@@ -510,9 +510,9 @@ namespace AEngine\Orchid {
          */
         public function run($silent = false)
         {
-            @ob_start('ob_gzhandler');
+            @ob_start();
             @ob_implicit_flush(0);
-            @ini_set('default_mimetype', '');
+            @ini_set('default_mimetype', 'text/plain');
 
             $request = $this->request();
 
