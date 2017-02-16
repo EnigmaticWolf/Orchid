@@ -12,18 +12,21 @@ class View
      * @var string
      */
     public static $layout;
+
     /**
      * Array of global data for global & current templates
      *
      * @var array
      */
     protected static $globalData = [];
+
     /**
      * Current template path
      *
      * @var string
      */
     protected $file;
+
     /**
      * Array of data for current template
      *
@@ -108,7 +111,7 @@ class View
      */
     public function render()
     {
-        if (!empty($this->file)) {
+        if ($this->file) {
             $this->data['content'] = View::fetch($this->file, $this->data);
         }
 
