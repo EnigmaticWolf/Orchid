@@ -90,7 +90,7 @@ namespace AEngine\Orchid {
                 $this->config['args'] = array_slice($_SERVER['argv'], 1);
             } else {
                 set_exception_handler(function (Throwable $ex) {
-                    @ob_end_clean();
+                    ob_end_clean();
                     if ($this->isDebug()) {
                         $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')' . "\n"
                             . 'File: ' . $ex->getFile() . ' (at ' . $ex->getLine() . ' line)' . "\n"
@@ -146,7 +146,7 @@ namespace AEngine\Orchid {
          *
          * @return Request
          */
-        public function request()
+        public function &request()
         {
             static $request;
 
@@ -163,7 +163,7 @@ namespace AEngine\Orchid {
          *
          * @return Response
          */
-        public function response()
+        public function &response()
         {
             static $response;
 
@@ -180,7 +180,7 @@ namespace AEngine\Orchid {
          *
          * @return Router
          */
-        public function router()
+        public function &router()
         {
             static $router;
 
@@ -510,9 +510,9 @@ namespace AEngine\Orchid {
          */
         public function run($silent = false)
         {
-            @ob_start();
-            @ob_implicit_flush(0);
-            @ini_set('default_mimetype', 'text/plain');
+            ob_start();
+            ob_implicit_flush(0);
+            ini_set('default_mimetype', '');
 
             $request = $this->request();
 
@@ -523,7 +523,7 @@ namespace AEngine\Orchid {
 
             // if error
             if (($error = error_get_last()) && error_reporting() & $error['type']) {
-                @ob_end_clean();
+                ob_end_clean();
                 if ($this->isDebug()) {
                     $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] . ')' . "\n"
                         . 'File: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
