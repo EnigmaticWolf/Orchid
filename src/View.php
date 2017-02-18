@@ -3,6 +3,8 @@
 namespace AEngine\Orchid;
 
 use AEngine\Orchid\Exception\FileNotFoundException;
+use Exception;
+use LogicException;
 
 class View
 {
@@ -86,11 +88,23 @@ class View
 
     /**
      * @return string
-     * @throws FileNotFoundException
      */
     public function __toString()
     {
-        return $this->render();
+        try {
+            $string = $this->render();
+
+            if (!is_string($string)) {
+                throw new LogicException('Something went wrong with "View->render" method');
+            }
+
+            return $string;
+        } catch (Exception $e) {
+            $previousHandler = set_exception_handler(function (){});
+            restore_error_handler();
+            call_user_func($previousHandler, $e);
+            die;
+        }
     }
 
     /**
@@ -107,15 +121,12 @@ class View
      * @see View::fetch
      *
      * @return string
-     * @throws FileNotFoundException
      */
     public function render()
     {
-        if ($this->file) {
-            $this->data['content'] = View::fetch($this->file, $this->data);
-        }
+        $this->data['content'] = View::fetch($this->file, $this->data);
 
-        return View::fetch(static::$layout, $this->data);
+        return View::fetch(static::$layout);
     }
 
     /**
@@ -144,7 +155,7 @@ class View
             extract(View::$globalData, EXTR_SKIP);
         }
 
-        if ($_file && file_exists($_file)) {
+        if (file_exists($_file)) {
             ob_start();
             require $_file;
 
