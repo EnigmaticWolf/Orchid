@@ -5,10 +5,10 @@ namespace AEngine\Orchid;
 use AEngine\Orchid\Exception\NoSuchMethodException;
 use AEngine\Orchid\Interfaces\RouteInterface;
 use Closure;
-use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 use UnexpectedValueException;
 
 /**
@@ -254,7 +254,7 @@ class Route implements RouteInterface
      * @param ResponseInterface      $response The current Response object
      *
      * @return \Psr\Http\Message\ResponseInterface
-     * @throws \Exception  if the route callable throws an exception
+     * @throws \Throwable  if the route callable throws an exception
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
@@ -262,7 +262,19 @@ class Route implements RouteInterface
             ob_start();
 
             if (is_object($this->callable)) {
-                $newResponse = call_user_func_array($this->callable, [$request, $response, $this->getArgument()]);
+                $result = call_user_func_array($this->callable, [$request, $response, $this->getArgument()]);
+
+                // if route callback returns a ResponseInterface, then use it
+                if ($result instanceof ResponseInterface) {
+                    $response = $result;
+                } else {
+                    // if route callback returns a string, then append it to the response
+                    if (is_string($result) || method_exists($result, '__toString')) {
+                        if ($response->getBody()->isWritable()) {
+                            $response->getBody()->write($result);
+                        }
+                    }
+                }
             } else {
                 if (is_array($this->callable)) {
                     $controller = !empty($this->callable[0]) ? $this->callable[0] : '';
@@ -272,73 +284,68 @@ class Route implements RouteInterface
                     $action = 'index';
                 }
 
-                if ($controller && class_exists($controller)) {
-                    $newResponse = null;
-                    $obj = new $controller;
-
-                    if ($obj && is_a($obj, Controller::class)) {
-                        if (method_exists($obj, "before")) {
-                            call_user_func_array([$obj, "before"], [$request, $response]);
-                        }
-
-                        if ($obj->execute) {
-                            if (method_exists($obj, $action)) {
-                                $newResponse = call_user_func_array(
-                                    [$obj, $action],
-                                    [$request, $response, $this->getArgument()]
-                                );
-                            } else {
-                                throw new NoSuchMethodException(
-                                    'Method "' . $action . '" doesn\'t exist in controller "' . get_class($obj) . '"'
-                                );
-                            }
-                        }
-
-                        if ($obj->execute) {
-                            if (method_exists($obj, "after")) {
-                                call_user_func_array([$obj, "after"], [$request, $response]);
-                            }
-                        }
-                    } else {
-                        throw new UnexpectedValueException(
-                            'Controller must return extends of \AEngine\Orchid\Controller'
-                        );
-                    }
-                } else {
+                // controller not found
+                if (!$controller || !class_exists($controller)) {
                     throw new UnexpectedValueException(
                         'Route callable must be defined as array or string or object'
                     );
                 }
+
+                $callback = new $controller;
+
+                // controller is not \AEngine\Orchid\Controller
+                if ($callback && !is_a($callback, Controller::class)) {
+                    throw new UnexpectedValueException(
+                        'Controller must extend of \AEngine\Orchid\Controller'
+                    );
+                }
+
+                foreach (['before', $action, 'after'] as $val) {
+                    if ($val == 'before' || $callback->execute) {
+                        if (method_exists($callback, $val)) {
+                            $result = call_user_func_array(
+                                [$callback, $val],
+                                [$request, $response, $this->getArgument()]
+                            );
+
+                            // if route callback returns a ResponseInterface, then use it
+                            if ($result instanceof ResponseInterface) {
+                                $response = $result;
+                            } else {
+                                // if route callback returns a string, then append it to the response
+                                if (is_string($result) || method_exists($result, '__toString')) {
+                                    if ($response->getBody()->isWritable()) {
+                                        $response->getBody()->write($result);
+                                    }
+                                }
+                            }
+                        } else {
+                            if ($val == $action) {
+                                throw new NoSuchMethodException(
+                                    'Method "' . $action . '" doesn\'t exist in controller "' . get_class($callback) . '"'
+                                );
+                            }
+                        }
+                    }
+                }
             }
 
             $output = ob_get_clean();
-        } catch (Exception $e) {
-            ob_end_clean();
-            throw $e;
-        }
 
-        if ($newResponse instanceof ResponseInterface) {
-            // if route callback returns a ResponseInterface, then use it
-            $response = $newResponse;
-        } else {
-            if (is_string($newResponse) || method_exists($newResponse, '__toString')) {
-                // if route callback returns a string, then append it to the response
-                if ($response->getBody()->isWritable()) {
-                    $response->getBody()->write($newResponse);
+            if (!empty($output) && $response->getBody()->isWritable()) {
+                if ($this->outputBuffering === 'prepend') {
+                    // prepend output buffer content
+                    $body = new Http\Body(fopen('php://temp', 'r+'));
+                    $body->write($output . $response->getBody());
+                    $response = $response->withBody($body);
+                } elseif ($this->outputBuffering === 'append') {
+                    // append output buffer content
+                    $response->getBody()->write($output);
                 }
             }
-        }
-
-        if (!empty($output) && $response->getBody()->isWritable()) {
-            if ($this->outputBuffering === 'prepend') {
-                // prepend output buffer content
-                $body = new Http\Body(fopen('php://temp', 'r+'));
-                $body->write($output . $response->getBody());
-                $response = $response->withBody($body);
-            } elseif ($this->outputBuffering === 'append') {
-                // append output buffer content
-                $response->getBody()->write($output);
-            }
+        } catch (Throwable $e) {
+            ob_end_clean();
+            throw $e;
         }
 
         return $response;
