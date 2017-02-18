@@ -126,7 +126,7 @@ class View
     {
         $this->data['content'] = View::fetch($this->file, $this->data);
 
-        return View::fetch(static::$layout);
+        return View::fetch(static::$layout, $this->data);
     }
 
     /**
