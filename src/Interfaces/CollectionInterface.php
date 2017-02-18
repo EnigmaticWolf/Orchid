@@ -5,7 +5,7 @@ namespace AEngine\Orchid\Interfaces;
 /**
  * Collection Interface
  */
-interface CollectionInterface extends \ArrayAccess, \Countable, \IteratorAggregate
+interface CollectionInterface extends \ArrayAccess, \Countable, \Iterator
 {
     public function get($key, $default = null);
 

@@ -329,11 +329,25 @@ class Collection implements CollectionInterface
      */
     public function current()
     {
-        if (static::$model) {
-            return new static::$model($this->data[$this->position]);
+        $buf = [];
+
+        // by id
+        if (isset($this->data[$this->position])) {
+            $buf = $this->data[$this->position];
+        } else {
+            // by key on id
+            $bufKeys = array_keys($this->data);
+
+            if ($bufKeys && isset($bufKeys[$this->position])) {
+                $buf = $this->data[$bufKeys[$this->position]];
+            }
         }
 
-        return $this->data[$this->position];
+        if (static::$model) {
+            return new static::$model($buf);
+        }
+
+        return $buf;
     }
 
     /**
@@ -377,7 +391,19 @@ class Collection implements CollectionInterface
      */
     public function valid()
     {
-        return isset($this->data[$this->position]);
+        // by id
+        if (isset($this->data[$this->position])) {
+            return true;
+        } else {
+            // by key on id
+            $bufKeys = array_keys($this->data);
+
+            if ($bufKeys && isset($bufKeys[$this->position])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
