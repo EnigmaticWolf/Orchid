@@ -381,7 +381,19 @@ class Collection implements CollectionInterface
      */
     public function key()
     {
-        return $this->position;
+        // by id
+        if (isset($this->data[$this->position])) {
+            return $this->position;
+        } else {
+            // by key on id
+            $bufKeys = array_keys($this->data);
+
+            if ($bufKeys && isset($bufKeys[$this->position])) {
+                return $bufKeys[$this->position];
+            }
+        }
+
+        return false;
     }
 
     /**
