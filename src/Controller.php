@@ -2,16 +2,8 @@
 
 namespace AEngine\Orchid;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-
 /**
  * Controller
- *
- * For example controller may determine methods:
- * @method void                     before(RequestInterface $request, ResponseInterface $response)
- * @method string|ResponseInterface index(RequestInterface $request, ResponseInterface $response)
- * @method void                     after(RequestInterface $request, ResponseInterface $response)
  */
 abstract class Controller
 {
@@ -22,4 +14,21 @@ abstract class Controller
      * @var bool
      */
     public $execute = true;
+
+    /*
+     * public function before($request, $response) : ResponseInterface
+     * {
+     *     return $response;
+     * }
+     *
+     * public function index($request, $response) : ResponseInterface
+     * {
+     *     return $response;
+     * }
+     *
+     * public function after($request, $response) : ResponseInterface
+     * {
+     *     return $response;
+     * }
+     */
 }
