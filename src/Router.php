@@ -39,9 +39,9 @@ class Router implements RouterInterface
     /**
      * Add GET route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -53,9 +53,9 @@ class Router implements RouterInterface
     /**
      * Add POST route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -67,9 +67,9 @@ class Router implements RouterInterface
     /**
      * Add PUT route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -81,9 +81,9 @@ class Router implements RouterInterface
     /**
      * Add PATCH route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -95,9 +95,9 @@ class Router implements RouterInterface
     /**
      * Add DELETE route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -109,9 +109,9 @@ class Router implements RouterInterface
     /**
      * Add OPTIONS route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -123,9 +123,9 @@ class Router implements RouterInterface
     /**
      * Add HEAD route
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -137,9 +137,9 @@ class Router implements RouterInterface
     /**
      * Add route for any HTTP method
      *
-     * @param  string         $pattern  The route URI pattern
-     * @param  string|Closure $callable The route callback routine
-     * @param  int            $priority The route priority
+     * @param  string $pattern The route URI pattern
+     * @param  string|array|Closure $callable The route callback routine
+     * @param  int $priority The route priority
      *
      * @return RouteInterface
      */
@@ -149,14 +149,14 @@ class Router implements RouterInterface
     }
 
     /**
-     * @param array          $methods
-     * @param string         $pattern
-     * @param string|Closure $callable
-     * @param int            $priority
+     * @param array $methods
+     * @param string $pattern
+     * @param string|array|Closure $callable
+     * @param int $priority
      *
      * @return RouteInterface
      */
-    public function map(array $methods, $pattern, $callable, $priority = 0) : RouteInterface
+    public function map(array $methods, $pattern, $callable, $priority = 0): RouteInterface
     {
         if (!is_string($pattern)) {
             throw new InvalidArgumentException('Route pattern must be a string');
@@ -191,7 +191,7 @@ class Router implements RouterInterface
     /**
      * Add a route group to the array
      *
-     * @param string   $pattern
+     * @param string $pattern
      * @param callable $callable
      *
      * @return RouteGroupInterface
@@ -234,13 +234,13 @@ class Router implements RouterInterface
     public function dispatch(ServerRequestInterface $request)
     {
         if (!$this->routes) {
-            throw new RuntimeException("Route list is empty");
+            throw new RuntimeException('Route list is empty');
         }
 
-        $method = $request->getMethod();
+        $method   = $request->getMethod();
         $pathname = '/' . ltrim($request->getUri()->getPath(), '/');
-        $found = null; // current route
-        $params = [];
+        $found    = null; // current route
+        $params   = [];
 
         usort($this->routes, [$this, 'compare']);
 
@@ -255,32 +255,32 @@ class Router implements RouterInterface
                 if (substr($route->getPattern(), 0, 1) == '#' && substr($route->getPattern(), -1) == '#') {
                     if (preg_match($route->getPattern(), $pathname, $match)) {
                         $params[':capture'] = array_slice($match, 1);
-                        $found = $route;
+                        $found              = $route;
                         break;
                     }
                 }
 
                 /* /example/* */
-                if (strpos($route->getPattern(), "*") !== false) {
+                if (strpos($route->getPattern(), '*') !== false) {
                     $pattern = '#^' . str_replace('\\*', '(.*)', preg_quote($route->getPattern(), '#')) . '#';
                     if (preg_match($pattern, $pathname, $match)) {
-                        $params[":arg"] = array_slice($match, 1);
-                        $found = $route;
+                        $params[':arg'] = array_slice($match, 1);
+                        $found          = $route;
                         break;
                     }
                 }
 
                 /* /example/:id */
                 if (strpos($route->getPattern(), ':') !== false) {
-                    $uri = explode("/", $pathname);
+                    $uri = explode('/', $pathname);
                     array_shift($uri);
-                    $parts = explode("/", $route->getPattern());
+                    $parts = explode('/', $route->getPattern());
                     array_shift($parts);
 
                     if (count($uri) == count($parts)) {
                         $matched = true;
                         foreach ($parts as $index => $part) {
-                            if (":" === substr($part, 0, 1)) {
+                            if (':' === substr($part, 0, 1)) {
                                 $params[substr($part, 1)] = $uri[$index];
                                 continue;
                             }
@@ -300,7 +300,7 @@ class Router implements RouterInterface
 
         // if not found route for url
         if (!$found) {
-            throw new RuntimeException("Failed to find and execute the function");
+            throw new RuntimeException('Failed to find and execute the function');
         }
 
         return $found->setArguments($params);
