@@ -1,10 +1,30 @@
-# Orchid changelog
-
+Orchid changelog
+====
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 0.3.0 (2016-11-30)
+## 0.3.5 (2017-07-01)
+- Add Dependency Injection Container (PSR-11)
 
+### 0.3.4 (2017-06-24)
+- Fix Router doc hint highlight
+
+### 0.3.3 (2017-02-18)
+- Fix displaying exceptions in the templates
+- Fix passing data to the template
+
+### 0.3.2 (2017-02-18)
+- Fix Controller comment
+- Fix Collection getting keys
+- Fix Collection iterator
+- Reworked logic Router `__invoke` method
+- Removed error absorption in App
+- Removed unnecessary check in View
+
+### 0.3.1 (2016-12-31)
+- Fix default_mimetype to text/plain
+
+### 0.3.0 (2016-11-30)
 - Add support PSR-2 (reformat all code)
 - Add composer support
 - Add support PRS-4

@@ -1,13 +1,9 @@
 Orchid
 ====
-Orchid is lightweight web application framework. 
-I am developing Orchid for two years and I believe that anyone except me appreciate it.
+Orchid is lightweight web application framework.
+This library attempts to comply with PSR-1, PSR-2, PSR-4 and PSR-11. 
 
 Some parts of the project were influenced by: Laravel, Slim and Symfony Framework's. Thank you!
-
-#### Contributing
-This library attempts to comply with PSR-1, PSR-2, and PSR-4. 
-I'll be very grateful for any contribution to the development of my project.
 
 #### Requirements
 * PHP >= 7.0
@@ -15,6 +11,31 @@ I'll be very grateful for any contribution to the development of my project.
 #### Installation
 Run the following command in the root directory of your web project:
 > `composer require aengine/orchid`
+
+####Usage
+Create an `index.php` file with the following contents:
+
+```php
+<?php
+
+require_once 'vendor/autoload.php';
+
+$app = AEngine\Orchid\App::getInstance();
+
+$app->router()->get('/hello/:name', function ($request, $response, $args) {
+    return $response->write("Hello, " . $args['name']);
+});
+
+$app->run();
+```
+
+Open your browser on page: `http://[hostname]/hello/World`
+
+#### Contributing
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+#### License
+The Orchid Framework is licensed under the MIT license. See [License File](LICENSE.md) for more information.
 
 #### Extensions
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AEngine\Orchid {
 
@@ -27,6 +27,25 @@ namespace AEngine\Orchid {
         protected static $instance;
 
         /**
+         * Default app settings
+         *
+         * @var array
+         */
+        protected $defaultConfig = [
+            'debug'       => true,
+            'app.name'    => 'public',
+            'app.list'    => [],
+            'module'      => [],
+            'autoload'    => [],
+            'module.list' => [],
+            'secret'      => 'orchid secret',
+            'args'        => [],
+            'base_dir'    => '',
+            'base_host'   => '',
+            'base_port'   => 0,
+        ];
+
+        /**
          * @var array
          */
         protected $config = [];
@@ -50,21 +69,7 @@ namespace AEngine\Orchid {
          */
         protected function __construct(array $config = [])
         {
-            $self = $this;
-
-            $this->config = array_replace_recursive([
-                'debug'       => true,
-                'app.name'    => 'public',
-                'app.list'    => [],
-                'module'      => [],
-                'autoload'    => [],
-                'module.list' => [],
-                'secret'      => 'orchid secret',
-                'args'        => [],
-                'base_dir'    => '',
-                'base_host'   => '',
-                'base_port'   => 0,
-            ], $config);
+            $this->config = array_replace_recursive($this->defaultConfig, $config);
 
             // set base dir
             if (!$this->config['base_dir']) {
@@ -103,13 +108,15 @@ namespace AEngine\Orchid {
                     $body->write($message);
 
                     $response = $this->response()
-                                     ->withStatus(500)
-                                     ->withHeader('Content-Type', 'text/plain')
-                                     ->withBody($body);
+                        ->withStatus(500)
+                        ->withHeader('Content-Type', 'text/plain')
+                        ->withBody($body);
 
                     $this->respond($response);
                 });
             }
+
+            $self = $this;
 
             // register auto loader
             spl_autoload_register(function ($class) use ($self) {
@@ -151,7 +158,7 @@ namespace AEngine\Orchid {
             static $request;
 
             if (!$request) {
-                $env = new Environment($_SERVER);
+                $env     = new Environment($_SERVER);
                 $request = Request::createFromEnvironment($env);
             }
 
@@ -168,7 +175,7 @@ namespace AEngine\Orchid {
             static $response;
 
             if (!$response) {
-                $headers = new Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+                $headers  = new Headers(['Content-Type' => 'text/html; charset=UTF-8']);
                 $response = (new Response(200, $headers))->withProtocolVersion('1.1');
             }
 
@@ -192,6 +199,22 @@ namespace AEngine\Orchid {
         }
 
         /**
+         * Return internal container storage
+         *
+         * @return Container
+         */
+        public function &container()
+        {
+            static $container;
+
+            if (!$container) {
+                $container = new Container();
+            }
+
+            return $container;
+        }
+
+        /**
          * Return debug flag
          *
          * @return bool
@@ -205,7 +228,7 @@ namespace AEngine\Orchid {
          * Return value from internal config
          *
          * @param string $key
-         * @param mixed  $default
+         * @param mixed $default
          *
          * @return mixed
          */
@@ -223,7 +246,7 @@ namespace AEngine\Orchid {
          * </code>
          *
          * @param string $key
-         * @param array  $element
+         * @param array $element
          *
          * @return App
          */
@@ -245,7 +268,7 @@ namespace AEngine\Orchid {
          * Set value for key
          *
          * @param string $key
-         * @param mixed  $value
+         * @param mixed $value
          *
          * @return App
          */
@@ -307,7 +330,7 @@ namespace AEngine\Orchid {
                             $element->isFile() && $element->getExtension() == 'php'
                         )
                     ) {
-                        $dir = $element->getRealPath();
+                        $dir  = $element->getRealPath();
                         $name = $class = $element->getBasename('.php');
 
                         if (!is_file($dir)) {
@@ -399,15 +422,15 @@ namespace AEngine\Orchid {
         public static function isAbsolutePath($path)
         {
             return $path && (
-                '/' == $path[0] ||
-                '\\' == $path[0] ||
-                (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ':' &&
-                    (
-                        '\\' == $path[2] ||
-                        '/' == $path[2]
+                    '/' == $path[0] ||
+                    '\\' == $path[0] ||
+                    (3 < mb_strlen($path) && ctype_alpha($path[0]) && $path[1] == ':' &&
+                        (
+                            '\\' == $path[2] ||
+                            '/' == $path[2]
+                        )
                     )
-                )
-            );
+                );
         }
 
         /**
@@ -518,8 +541,8 @@ namespace AEngine\Orchid {
 
             // dispatch route
             $response = $this->router()
-                             ->dispatch($request)
-                             ->callMiddlewareStack($request, $this->response());
+                ->dispatch($request)
+                ->callMiddlewareStack($request, $this->response());
 
             // if error
             if (($error = error_get_last()) && error_reporting() & $error['type']) {
@@ -577,7 +600,7 @@ namespace AEngine\Orchid {
                 if ($body->isSeekable()) {
                     $body->rewind();
                 }
-                $chunkSize = 4096;
+                $chunkSize     = 4096;
                 $contentLength = $response->getHeaderLine('Content-Length');
                 if (!$contentLength) {
                     $contentLength = $body->getSize();
@@ -627,7 +650,7 @@ namespace AEngine\Orchid {
         /**
          * Add closure
          *
-         * @param string  $name
+         * @param string $name
          * @param Closure $callable
          *
          * @return bool
@@ -656,7 +679,7 @@ namespace AEngine\Orchid {
          * Return the result of the work closure
          *
          * @param string $name
-         * @param array  ...$param
+         * @param array ...$param
          *
          * @return mixed
          * @throws RuntimeException
