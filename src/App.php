@@ -349,8 +349,11 @@ namespace AEngine\Orchid {
 
                         // check exists and parent class
                         if (class_exists($class) && is_subclass_of($class, Module::class)) {
-                            // call initialize method
-                            call_user_func([$class, 'initialize'], $this);
+                            // check method initialize exists
+                            if (method_exists($class, 'initialize')) {
+                                // call initialize method
+                                call_user_func([$class, 'initialize'], $this);
+                            }
                         } else {
                             throw new RuntimeException(
                                 'Class "' . $class . '" not found or is not a subclass of \Aengine\Orchid\Module'

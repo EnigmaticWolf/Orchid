@@ -3,7 +3,10 @@ Orchid changelog
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 0.3.5 (2017-07-01)
+## 0.3.6 (2017-07-25)
+- Reworked initialize method now is optional
+
+### 0.3.5 (2017-07-01)
 - Add Dependency Injection Container (PSR-11)
 
 ### 0.3.4 (2017-06-24)
