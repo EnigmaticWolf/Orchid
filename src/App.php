@@ -6,11 +6,11 @@ namespace AEngine\Orchid {
 
     use AEngine\Orchid\Exception\FileNotFoundException;
     use AEngine\Orchid\Exception\NoSuchMethodException;
-    use AEngine\Orchid\Http\Body;
-    use AEngine\Orchid\Http\Environment;
-    use AEngine\Orchid\Http\Headers;
-    use AEngine\Orchid\Http\Request;
-    use AEngine\Orchid\Http\Response;
+    use AEngine\Orchid\Message\Body;
+    use AEngine\Orchid\Message\Environment;
+    use AEngine\Orchid\Message\Headers;
+    use AEngine\Orchid\Message\Request;
+    use AEngine\Orchid\Message\Response;
     use Closure;
     use DirectoryIterator;
     use Psr\Http\Message\ResponseInterface;
