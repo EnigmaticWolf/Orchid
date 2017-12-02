@@ -3,7 +3,13 @@ Orchid changelog
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 0.3.6 (2017-07-25)
+## 1.0.0 (2017-07-25)
+- Update dependency
+
+### 1.0.0-RC1 (2017-07-25)
+- Separating part of the code from the current project
+
+### 0.3.6 (2017-07-25)
 - Reworked initialize method now is optional
 
 ### 0.3.5 (2017-07-01)
