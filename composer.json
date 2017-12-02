@@ -12,16 +12,11 @@
   "authors": [
     {
       "name": "Aleksey Ilyin",
-      "email": "alksily@aengine.ru",
-      "homepage": "http://aengine.ru/",
+      "email": "alksily@icloud.com",
+      "homepage": "http://aengine.team/",
       "role": "Developer"
     }
   ],
-  "extra": {
-    "branch-alias": {
-      "dev-develop": "0.3.x-dev"
-    }
-  },
   "require": {
     "php": ">=7.0",
     "pimple/pimple": "^3.0",
