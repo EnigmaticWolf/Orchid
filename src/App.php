@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace AEngine\Orchid {
 
+    use Closure;
+    use DirectoryIterator;
     use AEngine\Orchid\Exception\FileNotFoundException;
-    use AEngine\Orchid\Exception\NoSuchMethodException;
     use AEngine\Orchid\Message\Body;
     use AEngine\Orchid\Message\Environment;
     use AEngine\Orchid\Message\Headers;
     use AEngine\Orchid\Message\Request;
     use AEngine\Orchid\Message\Response;
-    use Closure;
-    use DirectoryIterator;
     use Psr\Http\Message\ResponseInterface;
     use RuntimeException;
     use Throwable;
@@ -35,7 +34,6 @@ namespace AEngine\Orchid {
             'debug'       => true,
             'app.name'    => 'public',
             'app.list'    => [],
-            'module'      => [],
             'autoload'    => [],
             'module.list' => [],
             'secret'      => 'orchid secret',
@@ -228,7 +226,7 @@ namespace AEngine\Orchid {
          * Return value from internal config
          *
          * @param string $key
-         * @param mixed $default
+         * @param mixed  $default
          *
          * @return mixed
          */
@@ -239,14 +237,13 @@ namespace AEngine\Orchid {
 
         /**
          * Add value for name (not necessary) in array with key
-         *
          * <code>
          * $app->add('array', 'bar'); // add index with value 'bar'
          * $app->add('array', 'foo', 'bar'); // add key 'foo' with value 'bar'
          * </code>
          *
          * @param string $key
-         * @param array $element
+         * @param array  $element
          *
          * @return App
          */
@@ -268,7 +265,7 @@ namespace AEngine\Orchid {
          * Set value for key
          *
          * @param string $key
-         * @param mixed $value
+         * @param mixed  $value
          *
          * @return App
          */
@@ -315,7 +312,6 @@ namespace AEngine\Orchid {
          *
          * @return App
          * @throws FileNotFoundException
-         * @throws NoSuchMethodException
          * @throws RuntimeException
          */
         public function loadModule(array $folders)
@@ -370,7 +366,6 @@ namespace AEngine\Orchid {
 
         /**
          * Path helper method
-         *
          * <code>
          * // set path shortcut
          * $app->path('cache', ORCHID . '/storage/cache');
@@ -526,7 +521,6 @@ namespace AEngine\Orchid {
 
         /**
          * Run Application
-         *
          * This method traverses the application middleware stack and then sends the
          * resultant Response object to the HTTP client.
          *
@@ -653,7 +647,7 @@ namespace AEngine\Orchid {
         /**
          * Add closure
          *
-         * @param string $name
+         * @param string  $name
          * @param Closure $callable
          *
          * @return bool
@@ -682,7 +676,7 @@ namespace AEngine\Orchid {
          * Return the result of the work closure
          *
          * @param string $name
-         * @param array ...$param
+         * @param array  ...$param
          *
          * @return mixed
          * @throws RuntimeException

@@ -2,9 +2,9 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Interfaces\CollectionInterface;
 use ArrayIterator;
 use Closure;
+use AEngine\Orchid\Interfaces\CollectionInterface;
 
 class Collection implements CollectionInterface
 {
@@ -42,7 +42,6 @@ class Collection implements CollectionInterface
      *
      * @return mixed
      * @internal param int $index
-     *
      */
     public function get($key, $default = null)
     {
@@ -467,7 +466,7 @@ class Collection implements CollectionInterface
     /**
      * Set collection item
      *
-     * @param string $key   The data key
+     * @param string $key The data key
      * @param mixed  $value The data value
      */
     public function offsetSet($key, $value)

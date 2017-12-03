@@ -100,7 +100,7 @@ class View
 
             return $string;
         } catch (Exception $e) {
-            $previousHandler = set_exception_handler(function (){});
+            $previousHandler = set_exception_handler(function () {});
             restore_error_handler();
             call_user_func($previousHandler, $e);
             die;
@@ -110,7 +110,6 @@ class View
     /**
      * Render the template, all dynamically set properties
      * will be available inside the view file as variables
-     *
      * <code>
      * View::$layout = 'path/to/file'; // global template
      * $view = new View('path/to/file');
@@ -119,11 +118,15 @@ class View
      * </code>
      *
      * @see View::fetch
-     *
      * @return string
+     * @throws FileNotFoundException
      */
     public function render()
     {
+        if (!static::$layout) {
+            throw new FileNotFoundException('Global template is not specified');
+        }
+
         $this->data['content'] = View::fetch($this->file, $this->data);
 
         return View::fetch(static::$layout, $this->data);
@@ -131,7 +134,6 @@ class View
 
     /**
      * Render the template
-     *
      * <code>
      * View::fetch(
      *  $this->path('path/to/file'), [

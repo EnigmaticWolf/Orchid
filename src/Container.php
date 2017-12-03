@@ -2,8 +2,8 @@
 
 namespace AEngine\Orchid;
 
-use aengine\orchid\src\Exception\ContainerException;
-use aengine\orchid\src\Exception\NotFoundException;
+use AEngine\Orchid\Exception\ContainerException;
+use AEngine\Orchid\Exception\NotFoundException;
 use Pimple\Container as PimpleContainer;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -16,10 +16,9 @@ class Container extends PimpleContainer implements ContainerInterface
      *
      * @param string $id Identifier of the entry to look for.
      *
+     * @return mixed Entry.
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @throws ContainerExceptionInterface Error while retrieving the entry.
-     *
-     * @return mixed Entry.
      */
     public function get($id)
     {
@@ -47,7 +46,6 @@ class Container extends PimpleContainer implements ContainerInterface
     /**
      * Returns true if the container can return an entry for the given identifier.
      * Returns false otherwise.
-     *
      * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
      * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
      *
@@ -62,6 +60,13 @@ class Container extends PimpleContainer implements ContainerInterface
 
     // Magic methods
 
+    /**
+     * @param $name
+     *
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function __get($name)
     {
         return $this->get($name);

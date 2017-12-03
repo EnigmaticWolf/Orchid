@@ -2,11 +2,12 @@
 
 namespace AEngine\Orchid;
 
+use Closure;
+use SplDoublyLinkedList;
+use SplStack;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
-use SplDoublyLinkedList;
-use SplStack;
 use UnexpectedValueException;
 
 trait MiddlewareTrait
@@ -43,16 +44,14 @@ trait MiddlewareTrait
 
     /**
      * Add middleware
-     *
      * This method prepends new middleware to the application middleware stack.
      *
-     * @param string             /Closure $callable Any callable that accepts three arguments:
-     *                           1. A Request object
-     *                           2. A Response object
-     *                           3. A "next" middleware callable
+     * @param Closure $callable Any callable that accepts three arguments:
+     *                          1. A Request object
+     *                          2. A Response object
+     *                          3. A "next" middleware callable
      *
      * @return $this
-     *
      * @throws RuntimeException         If middleware is added while the stack is dequeuing
      * @throws UnexpectedValueException If the middleware doesn't return a Psr\Http\Message\ResponseInterface
      */
@@ -65,7 +64,7 @@ trait MiddlewareTrait
             $this->seedMiddlewareStack();
         }
 
-        $next = $this->stack->top();
+        $next          = $this->stack->top();
         $this->stack[] = function (ServerRequestInterface $req, ResponseInterface $res) use ($callable, $next) {
             $result = call_user_func($callable, $req, $res, $next);
             if ($result instanceof ResponseInterface === false) {
@@ -97,9 +96,9 @@ trait MiddlewareTrait
         /**
          * @var callable $start
          */
-        $start = $this->stack->top();
+        $start                = $this->stack->top();
         $this->middlewareLock = true;
-        $resp = $start($req, $res);
+        $resp                 = $start($req, $res);
         $this->middlewareLock = false;
 
         return $resp;

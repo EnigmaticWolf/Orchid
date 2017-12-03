@@ -3,10 +3,16 @@ Orchid changelog
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 1.0.0 (2017-07-25)
+## 1.0.1 (2017-12-03)
+- Fix ContainerException, NotFoundException, OrchidException namespaces
+- Fix php-doc
+- Fix Message\Body call
+- Update code style
+
+## 1.0.0 (2017-12-02)
 - Update dependency
 
-### 1.0.0-RC1 (2017-07-25)
+### 1.0.0-RC1 (2017-12-02)
 - Separating part of the code from the current project
 
 ### 0.3.6 (2017-07-25)

@@ -2,13 +2,12 @@
 
 namespace AEngine\Orchid;
 
-use AEngine\Orchid\Exception\NoSuchMethodException;
+use Closure;
 use AEngine\Orchid\Interfaces\RouteGroupInterface;
 use AEngine\Orchid\Interfaces\RouteInterface;
 use AEngine\Orchid\Interfaces\RouterInterface;
-use Closure;
-use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -25,6 +24,7 @@ class Router implements RouterInterface
 
     /**
      * Route counter incrementer
+     *
      * @var int
      */
     protected $routeCounter = 0;
@@ -39,9 +39,9 @@ class Router implements RouterInterface
     /**
      * Add GET route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -53,9 +53,9 @@ class Router implements RouterInterface
     /**
      * Add POST route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -67,9 +67,9 @@ class Router implements RouterInterface
     /**
      * Add PUT route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -81,9 +81,9 @@ class Router implements RouterInterface
     /**
      * Add PATCH route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -95,9 +95,9 @@ class Router implements RouterInterface
     /**
      * Add DELETE route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -109,9 +109,9 @@ class Router implements RouterInterface
     /**
      * Add OPTIONS route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -123,9 +123,9 @@ class Router implements RouterInterface
     /**
      * Add HEAD route
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -137,9 +137,9 @@ class Router implements RouterInterface
     /**
      * Add route for any HTTP method
      *
-     * @param  string $pattern The route URI pattern
+     * @param  string               $pattern The route URI pattern
      * @param  string|array|Closure $callable The route callback routine
-     * @param  int $priority The route priority
+     * @param  int                  $priority The route priority
      *
      * @return RouteInterface
      */
@@ -149,10 +149,10 @@ class Router implements RouterInterface
     }
 
     /**
-     * @param array $methods
-     * @param string $pattern
+     * @param array                $methods
+     * @param string               $pattern
      * @param string|array|Closure $callable
-     * @param int $priority
+     * @param int                  $priority
      *
      * @return RouteInterface
      */
@@ -191,7 +191,7 @@ class Router implements RouterInterface
     /**
      * Add a route group to the array
      *
-     * @param string $pattern
+     * @param string   $pattern
      * @param callable $callable
      *
      * @return RouteGroupInterface
@@ -229,7 +229,6 @@ class Router implements RouterInterface
      *
      * @return RouteInterface
      * @throws RuntimeException
-     * @throws NoSuchMethodException
      */
     public function dispatch(ServerRequestInterface $request)
     {
