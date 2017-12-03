@@ -3,7 +3,11 @@ Orchid changelog
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 1.0.1 (2017-12-03)
+## 1.0.2 (2017-12-03)
+- View Throwable
+- Add lines to exception\error reporting
+
+### 1.0.1 (2017-12-03)
 - Fix ContainerException, NotFoundException, OrchidException namespaces
 - Fix php-doc
 - Fix Message\Body call

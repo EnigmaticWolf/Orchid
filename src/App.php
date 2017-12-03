@@ -95,11 +95,11 @@ namespace AEngine\Orchid {
                 set_exception_handler(function (Throwable $ex) {
                     ob_end_clean();
                     if ($this->isDebug()) {
-                        $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')' . "\n"
-                            . 'File: ' . $ex->getFile() . ' (at ' . $ex->getLine() . ' line)' . "\n"
-                            . "Trace:\n" . $ex->getTraceAsString();
+                        $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')' . "\n\n"
+                                 . 'File: ' . $ex->getFile() . ' (at ' . $ex->getLine() . ' line)' . "\n\n"
+                                 . "Trace:\n" . $ex->getTraceAsString();
                     } else {
-                        $message = "Internal Error";
+                        $message = 'Internal Error';
                     }
 
                     $body = new Body(fopen('php://temp', 'r+'));
@@ -545,8 +545,8 @@ namespace AEngine\Orchid {
             if (($error = error_get_last()) && error_reporting() & $error['type']) {
                 ob_end_clean();
                 if ($this->isDebug()) {
-                    $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] . ')' . "\n"
-                        . 'File: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
+                    $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] . ')' . "\n\n"
+                                     . 'File: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
                 } else {
                     $message = 'Internal Error';
                 }

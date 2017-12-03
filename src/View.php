@@ -5,6 +5,8 @@ namespace AEngine\Orchid;
 use AEngine\Orchid\Exception\FileNotFoundException;
 use Exception;
 use LogicException;
+use RuntimeException;
+use Throwable;
 
 class View
 {
@@ -88,6 +90,7 @@ class View
 
     /**
      * @return string
+     * @throws Throwable
      */
     public function __toString()
     {
@@ -120,6 +123,7 @@ class View
      * @see View::fetch
      * @return string
      * @throws FileNotFoundException
+     * @throws Throwable
      */
     public function render()
     {
@@ -152,16 +156,21 @@ class View
         if ($_data) {
             extract($_data, EXTR_SKIP);
         }
-
         if (View::$globalData) {
             extract(View::$globalData, EXTR_SKIP);
         }
 
         if (file_exists($_file)) {
-            ob_start();
-            require $_file;
+            try {
+                ob_start();
 
-            return ob_get_clean();
+                require $_file;
+
+                return ob_get_clean();
+            } catch (Throwable $ex) {
+                ob_end_clean();
+                throw new RuntimeException($ex);
+            }
         }
 
         throw new FileNotFoundException('Could not find the template file');

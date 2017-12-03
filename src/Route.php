@@ -5,6 +5,7 @@ namespace AEngine\Orchid;
 use Closure;
 use AEngine\Orchid\Interfaces\RouteInterface;
 use AEngine\Orchid\Exception\NoSuchMethodException;
+use AEngine\Orchid\Message\Body;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -332,7 +333,7 @@ class Route implements RouteInterface
             if (!empty($output) && $response->getBody()->isWritable()) {
                 if ($this->outputBuffering === 'prepend') {
                     // prepend output buffer content
-                    $body = new Message\Body(fopen('php://temp', 'r+'));
+                    $body = new Body(fopen('php://temp', 'r+'));
                     $body->write($output . $response->getBody());
                     $response = $response->withBody($body);
                 } elseif ($this->outputBuffering === 'append') {
