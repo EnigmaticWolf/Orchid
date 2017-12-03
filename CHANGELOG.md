@@ -9,7 +9,7 @@ Orchid repository.
 - Fix Message\Body call
 - Update code style
 
-## 1.0.0 (2017-12-02)
+### 1.0.0 (2017-12-02)
 - Update dependency
 
 ### 1.0.0-RC1 (2017-12-02)
