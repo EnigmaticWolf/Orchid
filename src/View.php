@@ -149,6 +149,7 @@ class View
      * @param array  $_data
      *
      * @return bool
+     * @throws RuntimeException
      * @throws FileNotFoundException
      */
     public static function fetch($_file, array $_data = [])
@@ -169,7 +170,7 @@ class View
                 return ob_get_clean();
             } catch (Throwable $ex) {
                 ob_end_clean();
-                throw new RuntimeException($ex);
+                throw new RuntimeException('Could not get view from template with specific data', $ex->getCode(), $ex);
             }
         }
 
