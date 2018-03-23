@@ -1,4 +1,4 @@
-This library attempts to comply with PSR-1, PSR-2, and PSR-4.
+This library attempts to comply with PSR-1, PSR-2, and PSR-4 and PSR-11.
 
 ##### Pull Requests
 1. Fork the Orchid repository
