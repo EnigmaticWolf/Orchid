@@ -12,6 +12,8 @@ namespace AEngine\Orchid {
     use AEngine\Orchid\Message\Headers;
     use AEngine\Orchid\Message\Request;
     use AEngine\Orchid\Message\Response;
+    use AEngine\Orchid\Handler\RenderError;
+    use AEngine\Orchid\Handler\RenderLegacyError;
     use Psr\Http\Message\ResponseInterface;
     use RuntimeException;
     use Throwable;
@@ -94,23 +96,8 @@ namespace AEngine\Orchid {
             } else {
                 set_exception_handler(function (Throwable $ex) {
                     ob_end_clean();
-                    if ($this->isDebug()) {
-                        $message = 'Exception: ' . $ex->getMessage() . ' (code ' . $ex->getCode() . ')' . "\n\n"
-                                 . 'File: ' . $ex->getFile() . ' (at ' . $ex->getLine() . ' line)' . "\n\n"
-                                 . "Trace:\n" . $ex->getTraceAsString();
-                    } else {
-                        $message = 'Internal Error';
-                    }
 
-                    $body = new Body(fopen('php://temp', 'r+'));
-                    $body->write($message);
-
-                    $response = $this->response()
-                        ->withStatus(500)
-                        ->withHeader('Content-Type', 'text/plain')
-                        ->withBody($body);
-
-                    $this->respond($response);
+                    $this->respond(RenderError::render($ex));
                 });
             }
 
@@ -535,29 +522,18 @@ namespace AEngine\Orchid {
             ini_set('default_mimetype', '');
 
             $request = $this->request();
+            $response = $this->response();
 
             // dispatch route
             $response = $this->router()
                 ->dispatch($request)
-                ->callMiddlewareStack($request, $this->response());
+                ->callMiddlewareStack($request, $response);
 
             // if error
             if (($error = error_get_last()) && error_reporting() & $error['type']) {
                 ob_end_clean();
-                if ($this->isDebug()) {
-                    $message = 'ERROR: ' . $error['message'] . ' (code ' . $error['type'] . ')' . "\n\n"
-                                     . 'File: ' . $error['file'] . ' (at ' . $error['line'] . ' line)';
-                } else {
-                    $message = 'Internal Error';
-                }
 
-                $body = new Body(fopen('php://temp', 'r+'));
-                $body->write($message);
-
-                $response = $response
-                    ->withStatus(500)
-                    ->withHeader('Content-type', 'text/plain')
-                    ->withBody($body);
+                $response = RenderLegacyError::render($error);
             }
 
             if (!$silent) {
