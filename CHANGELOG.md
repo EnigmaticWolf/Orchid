@@ -3,7 +3,12 @@ Orchid changelog
 The latest version of this file can be found at the master branch of the
 Orchid repository.
 
-## 1.0.2 (2017-12-03)
+## 1.1.0 (2018-03-23)
+- Add new error reporting screen
+- Fix collection work with primary id in key
+- Fix view throw exception
+
+### 1.0.2 (2017-12-03)
 - View Throwable
 - Add lines to exception\error reporting
 
