@@ -222,18 +222,16 @@ class Collection implements CollectionInterface
     {
         $data = [];
 
-        if (is_null($value)) {
-            // $oc->find('Location')
-            if (is_string($field)) {
+        if (is_string($field)) {
+            if (is_null($value)) {
+                // $oc->find('Location')
                 foreach ($this->data as $obj) {
                     if (!empty($obj[$field])) {
                         $data[] = $obj;
                     }
                 }
-            }
-        } else {
-            // $oc->find('Location', 'Lviv')
-            if (is_string($field)) {
+            } else {
+                // $oc->find('Location', 'Lviv')
                 foreach ($this->data as $obj) {
                     if ($obj[$field] == $value) {
                         $data[] = $obj;
@@ -328,19 +326,7 @@ class Collection implements CollectionInterface
      */
     public function current()
     {
-        $buf = [];
-
-        // by id
-        if (isset($this->data[$this->position])) {
-            $buf = $this->data[$this->position];
-        } else {
-            // by key on id
-            $bufKeys = array_keys($this->data);
-
-            if ($bufKeys && isset($bufKeys[$this->position])) {
-                $buf = $this->data[$bufKeys[$this->position]];
-            }
-        }
+        $buf = $this->data[$this->key()];
 
         if (static::$model) {
             return new static::$model($buf);
@@ -380,16 +366,10 @@ class Collection implements CollectionInterface
      */
     public function key()
     {
-        // by id
-        if (isset($this->data[$this->position])) {
-            return $this->position;
-        } else {
-            // by key on id
-            $bufKeys = array_keys($this->data);
+        $bufKeys = array_keys($this->data);
 
-            if ($bufKeys && isset($bufKeys[$this->position])) {
-                return $bufKeys[$this->position];
-            }
+        if ($bufKeys && isset($bufKeys[$this->position])) {
+            return $bufKeys[$this->position];
         }
 
         return false;
@@ -402,19 +382,7 @@ class Collection implements CollectionInterface
      */
     public function valid()
     {
-        // by id
-        if (isset($this->data[$this->position])) {
-            return true;
-        } else {
-            // by key on id
-            $bufKeys = array_keys($this->data);
-
-            if ($bufKeys && isset($bufKeys[$this->position])) {
-                return true;
-            }
-        }
-
-        return false;
+        return isset($this->data[$this->key()]);
     }
 
     /**
