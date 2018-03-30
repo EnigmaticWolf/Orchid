@@ -382,7 +382,7 @@ class Collection implements CollectionInterface
      */
     public function valid()
     {
-        return isset($this->data[$this->key()]);
+        return $this->key() !== false && isset($this->data[$this->key()]);
     }
 
     /**
